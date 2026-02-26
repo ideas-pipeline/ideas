@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI للمنشآت الصغيرة — عرض تقديمي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+body{font-family:'Cairo',sans-serif;background:#0a0a0f;color:#f8fafc;overflow-x:hidden}
+
+.slide{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 60px;position:relative;scroll-snap-align:start;overflow:hidden}
+
+/* Backgrounds */
+.slide-hero{background:linear-gradient(135deg,#0a0a1a 0%,#1a0a2e 50%,#0a1a2e 100%)}
+.slide-problem{background:linear-gradient(135deg,#1a0505 0%,#0a0a0f 100%)}
+.slide-cost{background:linear-gradient(135deg,#0a0a0f 0%,#1a1005 100%)}
+.slide-solution{background:linear-gradient(135deg,#0a1a0f 0%,#0a0a1a 100%)}
+.slide-how{background:linear-gradient(135deg,#0a0a1a 0%,#0a1520 100%)}
+.slide-case{background:linear-gradient(135deg,#0f0a1a 0%,#0a0a0f 100%)}
+.slide-roi{background:linear-gradient(135deg,#0a1a0f 0%,#051a0f 100%)}
+.slide-pricing{background:linear-gradient(135deg,#0a0a1a 0%,#1a0a2e 100%)}
+.slide-why{background:linear-gradient(135deg,#1a0a05 0%,#0a0a0f 100%)}
+.slide-cta{background:linear-gradient(135deg,#0a0a2e 0%,#1a0a3e 50%,#0a1a2e 100%)}
+
+.slide::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 30% 30%,rgba(139,92,246,.08) 0%,transparent 60%);pointer-events:none}
+
+/* Typography */
+h1{font-size:3.5rem;font-weight:900;line-height:1.2;margin-bottom:20px}
+h2{font-size:2.2rem;font-weight:800;margin-bottom:30px;position:relative}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:15px}
+.subtitle{font-size:1.2rem;color:#94a3b8;font-weight:400;margin-bottom:30px;max-width:700px;text-align:center;line-height:1.8}
+.accent{background:linear-gradient(135deg,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.accent-green{background:linear-gradient(135deg,#10b981,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.accent-red{background:linear-gradient(135deg,#ef4444,#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.accent-gold{background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tag{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.7rem;font-weight:700;margin-bottom:20px}
+.tag-purple{background:rgba(139,92,246,.15);color:#a78bfa}
+
+/* Cards */
+.cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;max-width:1100px;width:100%}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;flex:1;min-width:280px;max-width:340px;transition:all .3s}
+.card:hover{transform:translateY(-4px);border-color:rgba(139,92,246,.3);box-shadow:0 12px 40px rgba(139,92,246,.1)}
+.card-icon{font-size:2.2rem;margin-bottom:12px}
+.card h3{font-size:1rem;margin-bottom:8px}
+.card p{font-size:.82rem;color:#94a3b8;line-height:1.7}
+
+/* Stats */
+.stats{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;margin:30px 0}
+.stat{text-align:center;min-width:150px}
+.stat-val{font-size:2.8rem;font-weight:900;line-height:1}
+.stat-label{font-size:.75rem;color:#94a3b8;margin-top:6px}
+
+/* Table */
+.table-wrap{max-width:900px;width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:rgba(139,92,246,.1);padding:14px 18px;text-align:right;font-weight:700;border-bottom:2px solid rgba(139,92,246,.3)}
+td{padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.05)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.highlight-row td{background:rgba(16,185,129,.05);border-bottom:2px solid rgba(16,185,129,.2)}
+
+/* Timeline */
+.timeline{max-width:700px;width:100%}
+.tl-item{display:flex;gap:20px;margin-bottom:25px;align-items:flex-start}
+.tl-dot{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;font-weight:800}
+.tl-dot.d1{background:rgba(139,92,246,.15);color:#a78bfa}
+.tl-dot.d2{background:rgba(59,130,246,.15);color:#60a5fa}
+.tl-dot.d3{background:rgba(16,185,129,.15);color:#34d399}
+.tl-dot.d4{background:rgba(245,158,11,.15);color:#fbbf24}
+.tl-content h3{font-size:.95rem;margin-bottom:4px}
+.tl-content p{font-size:.78rem;color:#94a3b8;line-height:1.6}
+
+/* Comparison */
+.compare{display:flex;gap:20px;max-width:900px;width:100%;flex-wrap:wrap;justify-content:center}
+.compare-card{flex:1;min-width:300px;border-radius:16px;padding:28px;position:relative}
+.compare-before{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15)}
+.compare-after{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15)}
+.compare-card h3{font-size:1.1rem;margin-bottom:16px}
+.compare-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.82rem}
+.compare-item .icon{font-size:1.1rem}
+
+/* Pricing */
+.price-cards{display:flex;gap:20px;max-width:1000px;width:100%;flex-wrap:wrap;justify-content:center}
+.price-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:30px;flex:1;min-width:260px;max-width:300px;text-align:center;position:relative}
+.price-card.featured{border-color:rgba(139,92,246,.4);background:rgba(139,92,246,.05)}
+.price-card.featured::before{content:'⭐ الأكثر طلباً';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#8b5cf6,#ec4899);padding:4px 16px;border-radius:12px;font-size:.65rem;font-weight:700;white-space:nowrap}
+.price-amount{font-size:2.5rem;font-weight:900;margin:15px 0 5px}
+.price-period{font-size:.75rem;color:#94a3b8}
+.price-features{list-style:none;text-align:right;margin-top:18px}
+.price-features li{padding:6px 0;font-size:.78rem;color:#94a3b8;border-bottom:1px solid rgba(255,255,255,.03)}
+.price-features li::before{content:'✓ ';color:#34d399;font-weight:700}
+
+/* Case Study */
+.case-box{max-width:800px;width:100%;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:35px}
+.case-header{display:flex;align-items:center;gap:15px;margin-bottom:20px}
+.case-avatar{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.case-meta h3{font-size:1rem}.case-meta p{font-size:.75rem;color:#94a3b8}
+.case-stats{display:flex;gap:20px;margin-top:20px;flex-wrap:wrap}
+.case-stat{flex:1;min-width:120px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.1);border-radius:10px;padding:14px;text-align:center}
+.case-stat .val{font-size:1.6rem;font-weight:800;color:#34d399}
+.case-stat .lbl{font-size:.65rem;color:#94a3b8;margin-top:2px}
+
+/* CTA */
+.cta-btn{display:inline-block;padding:16px 40px;background:linear-gradient(135deg,#8b5cf6,#ec4899);border-radius:14px;font-size:1.1rem;font-weight:800;color:#fff;text-decoration:none;margin-top:20px;transition:all .3s;border:none;cursor:pointer}
+.cta-btn:hover{transform:scale(1.05);box-shadow:0 10px 40px rgba(139,92,246,.3)}
+
+/* Nav */
+.nav{position:fixed;left:20px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:8px}
+.nav-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.15);cursor:pointer;transition:all .3s}
+.nav-dot.active{background:#8b5cf6;transform:scale(1.3)}
+
+/* Footer */
+.slide-num{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);font-size:.7rem;color:#334155}
+
+@media(max-width:768px){
+  .slide{padding:30px 20px}
+  h1{font-size:2rem}
+  h2{font-size:1.5rem}
+  .cards{flex-direction:column;align-items:center}
+  .card{max-width:100%}
+  .stats{flex-direction:column;align-items:center}
+  .compare{flex-direction:column}
+  .price-cards{flex-direction:column;align-items:center}
+  .nav{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav" id="nav"></div>
+
+<!-- SLIDE 1: HERO -->
+<div class="slide slide-hero" id="s1">
+<span class="tag tag-purple">عرض تقديمي — 2026</span>
+<h1><span class="accent">ذكاء اصطناعي</span> لمنشأتك</h1>
+<p class="subtitle">كيف تقلّل تكاليفك 40% وتضاعف إنتاجيتك بدون توظيف فريق تقني — بأقل من راتب موظف واحد</p>
+<div class="stats">
+<div class="stat"><div class="stat-val accent-gold">73%</div><div class="stat-label">من المنشآت الصغيرة لم تبدأ مع AI</div></div>
+<div class="stat"><div class="stat-val accent-green">40%</div><div class="stat-label">توفير في التكاليف التشغيلية</div></div>
+<div class="stat"><div class="stat-val accent">3x</div><div class="stat-label">زيادة في سرعة الإنجاز</div></div>
+</div>
+<div class="slide-num">1 / 10</div>
+</div>
+
+<!-- SLIDE 2: PROBLEM -->
+<div class="slide slide-problem" id="s2">
+<h2>😤 المشكلة الحقيقية</h2>
+<p class="subtitle">صاحب المنشأة يقضي وقته في مهام يقدر الذكاء الاصطناعي يسويها في ثوانٍ</p>
+<div class="cards">
+<div class="card">
+<div class="card-icon">⏰</div>
+<h3>12 ساعة أسبوعياً</h3>
+<p>يضيعها الموظف في الرد على نفس الأسئلة المتكررة من العملاء عبر WhatsApp. "وش أسعاركم؟" "وين موقعكم؟" "فيه حجز متاح؟"</p>
+</div>
+<div class="card">
+<div class="card-icon">📊</div>
+<h3>قرارات بدون بيانات</h3>
+<p>وش أكثر منتج ينباع يوم الخميس؟ أي عميل ما رجع من 3 شهور؟ ما فيه إجابات — فيه إحساس بس.</p>
+</div>
+<div class="card">
+<div class="card-icon">💸</div>
+<h3>فرص ضائعة كل يوم</h3>
+<p>عميل أرسل رسالة الساعة 11 بالليل. ما أحد رد. راح لمنافسك. تتكرر 5-10 مرات بالشهر = آلاف الريالات.</p>
+</div>
+</div>
+<div class="slide-num">2 / 10</div>
+</div>
+
+<!-- SLIDE 3: COST OF DOING NOTHING -->
+<div class="slide slide-cost" id="s3">
+<h2>💰 تكلفة <span class="accent-red">عدم</span> التغيير</h2>
+<p class="subtitle">كل شهر بدون AI = خسارة محسوبة</p>
+<div class="table-wrap">
+<table>
+<tr><th>البند</th><th>بدون AI</th><th>مع AI</th><th>التوفير الشهري</th></tr>
+<tr><td>🧑‍💼 موظف خدمة عملاء (رد على الاستفسارات)</td><td>4,500 ر.س</td><td>200 ر.س (اشتراك chatbot)</td><td class="accent-green" style="font-weight:800">4,300 ر.س</td></tr>
+<tr><td>📋 إدخال بيانات يدوي (فواتير، طلبات)</td><td>8 ساعات/أسبوع</td><td>30 دقيقة/أسبوع</td><td class="accent-green" style="font-weight:800">30 ساعة/شهر</td></tr>
+<tr><td>📞 عملاء ضائعين (عدم الرد بعد الدوام)</td><td>~8 عملاء/شهر</td><td>0 (رد 24/7)</td><td class="accent-green" style="font-weight:800">~4,000 ر.س</td></tr>
+<tr><td>📊 تقارير يدوية (مبيعات، مخزون)</td><td>6 ساعات/شهر</td><td>تلقائي</td><td class="accent-green" style="font-weight:800">6 ساعات</td></tr>
+<tr class="highlight-row"><td><b>الإجمالي الشهري</b></td><td></td><td></td><td style="font-weight:900;font-size:1.1rem" class="accent-green">~8,300 ر.س + 36 ساعة</td></tr>
+</table>
+</div>
+<p style="margin-top:20px;font-size:.85rem;color:#94a3b8;text-align:center">💡 استثمار 5,000 ر.س مرة واحدة يوفّر لك 8,300 ر.س <b>كل شهر</b></p>
+<div class="slide-num">3 / 10</div>
+</div>
+
+<!-- SLIDE 4: SOLUTION -->
+<div class="slide slide-solution" id="s4">
+<h2>✅ الحل: <span class="accent-green">AI مصمم لمنشأتك</span></h2>
+<p class="subtitle">مو حل عام — حل مبني على احتياجك الفعلي</p>
+<div class="cards">
+<div class="card">
+<div class="card-icon">🤖</div>
+<h3>مساعد ذكي على WhatsApp</h3>
+<p>يرد على العملاء 24/7 بلغتهم. يعرف أسعارك، خدماتك، مواعيدك. يحجز مواعيد ويرسل تأكيدات — بدون تدخل منك.</p>
+</div>
+<div class="card">
+<div class="card-icon">📈</div>
+<h3>تقارير ذكية تلقائية</h3>
+<p>كل صباح يوصلك تقرير: مبيعات أمس، أكثر منتج طلباً، عملاء يحتاجون متابعة. قرارات مبنية على أرقام مو أحاسيس.</p>
+</div>
+<div class="card">
+<div class="card-icon">⚡</div>
+<h3>أتمتة العمليات</h3>
+<p>فواتير تصدر تلقائي. تذكيرات دفع ترسل نفسها. جدول الموظفين ينتظم. أنت تركّز على البزنس مو الإدارة.</p>
+</div>
+</div>
+<div class="slide-num">4 / 10</div>
+</div>
+
+<!-- SLIDE 5: HOW IT WORKS -->
+<div class="slide slide-how" id="s5">
+<h2>🔄 كيف نشتغل؟</h2>
+<p class="subtitle">4 خطوات — من الصفر للنتيجة في أسبوعين</p>
+<div class="timeline">
+<div class="tl-item">
+<div class="tl-dot d1">1</div>
+<div class="tl-content">
+<h3>📋 التشخيص (يوم واحد)</h3>
+<p>نجلس معك ساعة. نفهم عملياتك اليومية. وين تضيع وقتك؟ وش المهام المتكررة؟ وين الفلوس تروح؟ نطلع بتقرير واضح فيه كل الفرص.</p>
+</div>
+</div>
+<div class="tl-item">
+<div class="tl-dot d2">2</div>
+<div class="tl-content">
+<h3>🎯 الخطة (يومين)</h3>
+<p>نصمم حل مخصص لمنشأتك. وش نسوي أول؟ وش العائد المتوقع؟ كم يكلّف؟ كل شي واضح قبل ما نبدأ — بدون مفاجآت.</p>
+</div>
+</div>
+<div class="tl-item">
+<div class="tl-dot d3">3</div>
+<div class="tl-content">
+<h3>🛠️ التطبيق (5-7 أيام)</h3>
+<p>نبني الحل، نربطه مع أنظمتك (WhatsApp، نقاط البيع، Excel). ندرّب فريقك. نجرّب كل شي قبل ما نطلقه.</p>
+</div>
+</div>
+<div class="tl-item">
+<div class="tl-dot d4">4</div>
+<div class="tl-content">
+<h3>📊 المتابعة (30 يوم)</h3>
+<p>نتابع الأداء معك. نعدّل ونحسّن. بعد شهر تشوف الأرقام: كم وفّرت؟ كم عميل كسبت؟ كم ساعة رجعت لك؟</p>
+</div>
+</div>
+</div>
+<div class="slide-num">5 / 10</div>
+</div>
+
+<!-- SLIDE 6: CASE STUDY 1 -->
+<div class="slide slide-case" id="s6">
+<h2>📌 مثال حقيقي: <span class="accent">مطعم</span></h2>
+<div class="case-box">
+<div class="case-header">
+<div class="case-avatar" style="background:rgba(245,158,11,.15)">🍽️</div>
+<div class="case-meta"><h3>مطعم عائلي — 3 فروع</h3><p>الرياض • 15 موظف • طلبات يومية: ~120</p></div>
+</div>
+
+<div class="compare">
+<div class="compare-card compare-before">
+<h3 class="accent-red">❌ قبل</h3>
+<div class="compare-item"><span class="icon">📱</span> 3 موظفين يردون على WhatsApp يدوياً</div>
+<div class="compare-item"><span class="icon">⏰</span> متوسط وقت الرد: 15 دقيقة</div>
+<div class="compare-item"><span class="icon">🌙</span> بعد الساعة 10: لا أحد يرد</div>
+<div class="compare-item"><span class="icon">📊</span> تقارير يدوية آخر الشهر فقط</div>
+<div class="compare-item"><span class="icon">💸</span> تكلفة شهرية: 13,500 ر.س (3 رواتب)</div>
+</div>
+<div class="compare-card compare-after">
+<h3 class="accent-green">✅ بعد</h3>
+<div class="compare-item"><span class="icon">🤖</span> Chatbot يرد فوري على 85% من الاستفسارات</div>
+<div class="compare-item"><span class="icon">⚡</span> وقت الرد: 3 ثوانٍ</div>
+<div class="compare-item"><span class="icon">🌙</span> رد 24/7 — حتى الساعة 3 الفجر</div>
+<div class="compare-item"><span class="icon">📊</span> تقرير يومي تلقائي كل صباح</div>
+<div class="compare-item"><span class="icon">💰</span> وفّر موظفين = 9,000 ر.س/شهر</div>
+</div>
+</div>
+
+<div class="case-stats">
+<div class="case-stat"><div class="val">9,000</div><div class="lbl">ر.س توفير شهري</div></div>
+<div class="case-stat"><div class="val">+23%</div><div class="lbl">زيادة في الطلبات</div></div>
+<div class="case-stat"><div class="val">3 ثوانٍ</div><div class="lbl">وقت الرد</div></div>
+<div class="case-stat"><div class="val">ROI 180%</div><div class="lbl">خلال أول شهر</div></div>
+</div>
+</div>
+<div class="slide-num">6 / 10</div>
+</div>
+
+<!-- SLIDE 7: CASE STUDY 2 -->
+<div class="slide slide-case" id="s7">
+<h2>📌 مثال حقيقي: <span class="accent">عيادة</span></h2>
+<div class="case-box">
+<div class="case-header">
+<div class="case-avatar" style="background:rgba(16,185,129,.15)">🏥</div>
+<div class="case-meta"><h3>عيادة أسنان — فرع واحد</h3><p>جدة • 8 موظفين • مواعيد يومية: ~25</p></div>
+</div>
+
+<div class="compare">
+<div class="compare-card compare-before">
+<h3 class="accent-red">❌ قبل</h3>
+<div class="compare-item"><span class="icon">📞</span> موظفة استقبال تحجز يدوياً</div>
+<div class="compare-item"><span class="icon">😡</span> 30% من المرضى ما يحضرون (no-show)</div>
+<div class="compare-item"><span class="icon">📱</span> المريض يتصل 3 مرات عشان يحجز</div>
+<div class="compare-item"><span class="icon">💸</span> خسارة no-show: ~7,500 ر.س/شهر</div>
+</div>
+<div class="compare-card compare-after">
+<h3 class="accent-green">✅ بعد</h3>
+<div class="compare-item"><span class="icon">🤖</span> حجز تلقائي عبر WhatsApp</div>
+<div class="compare-item"><span class="icon">🔔</span> تذكير تلقائي قبل 24 ساعة + ساعة</div>
+<div class="compare-item"><span class="icon">📉</span> No-show انخفض لـ 8%</div>
+<div class="compare-item"><span class="icon">💰</span> استرجع ~5,500 ر.س/شهر</div>
+</div>
+</div>
+
+<div class="case-stats">
+<div class="case-stat"><div class="val">5,500</div><div class="lbl">ر.س استرجاع شهري</div></div>
+<div class="case-stat"><div class="val">-73%</div><div class="lbl">انخفاض no-show</div></div>
+<div class="case-stat"><div class="val">24/7</div><div class="lbl">حجز متاح دائماً</div></div>
+<div class="case-stat"><div class="val">ROI 110%</div><div class="lbl">خلال أول شهر</div></div>
+</div>
+</div>
+<div class="slide-num">7 / 10</div>
+</div>
+
+<!-- SLIDE 8: ROI -->
+<div class="slide slide-roi" id="s8">
+<h2>📊 العائد على <span class="accent-green">الاستثمار</span></h2>
+<p class="subtitle">استثمارك يرجع لك خلال أول شهر — والباقي ربح صافي</p>
+<div class="table-wrap">
+<table>
+<tr><th>الشهر</th><th>الاستثمار</th><th>التوفير / الربح الإضافي</th><th>الصافي التراكمي</th></tr>
+<tr><td>الأول</td><td>5,000 ر.س (إعداد)</td><td>+8,300 ر.س</td><td class="accent-green" style="font-weight:800">+3,300 ر.س</td></tr>
+<tr><td>الثاني</td><td>500 ر.س (اشتراك)</td><td>+8,300 ر.س</td><td class="accent-green" style="font-weight:800">+11,100 ر.س</td></tr>
+<tr><td>الثالث</td><td>500 ر.س</td><td>+8,300 ر.س</td><td class="accent-green" style="font-weight:800">+18,900 ر.س</td></tr>
+<tr><td>السادس</td><td>500 ر.س</td><td>+8,300 ر.س</td><td class="accent-green" style="font-weight:800">+42,300 ر.س</td></tr>
+<tr class="highlight-row"><td><b>السنة الأولى</b></td><td><b>10,500 ر.س</b></td><td><b>+99,600 ر.س</b></td><td style="font-weight:900;font-size:1.2rem" class="accent-green">+89,100 ر.س</td></tr>
+</table>
+</div>
+<div class="stats" style="margin-top:30px">
+<div class="stat"><div class="stat-val accent-green">849%</div><div class="stat-label">ROI في السنة الأولى</div></div>
+<div class="stat"><div class="stat-val accent-gold">شهر واحد</div><div class="stat-label">فترة الاسترداد</div></div>
+<div class="stat"><div class="stat-val accent">89,100</div><div class="stat-label">ر.س ربح صافي سنوياً</div></div>
+</div>
+<div class="slide-num">8 / 10</div>
+</div>
+
+<!-- SLIDE 9: PRICING -->
+<div class="slide slide-pricing" id="s9">
+<h2>💎 باقات <span class="accent">واضحة</span></h2>
+<p class="subtitle">بدون عقود طويلة — ادفع لمّا تشوف النتيجة</p>
+<div class="price-cards">
+<div class="price-card">
+<h3>🔍 التشخيص</h3>
+<div class="price-amount accent-gold">مجاني</div>
+<div class="price-period">بدون أي التزام</div>
+<ul class="price-features">
+<li>جلسة تحليل (ساعة)</li>
+<li>تقرير الفرص والتوصيات</li>
+<li>تقدير العائد المتوقع</li>
+<li>خارطة طريق مخصصة</li>
+</ul>
+</div>
+<div class="price-card featured">
+<h3>🚀 التطبيق</h3>
+<div class="price-amount accent">5,000</div>
+<div class="price-period">ر.س — مرة واحدة</div>
+<ul class="price-features">
+<li>كل شي في التشخيص +</li>
+<li>بناء الحل المخصص</li>
+<li>ربط مع أنظمتك</li>
+<li>تدريب الفريق</li>
+<li>30 يوم دعم ومتابعة</li>
+<li>ضمان النتيجة أو استرداد</li>
+</ul>
+</div>
+<div class="price-card">
+<h3>🛡️ الاشتراك</h3>
+<div class="price-amount accent-green">500</div>
+<div class="price-period">ر.س / شهرياً (اختياري)</div>
+<ul class="price-features">
+<li>صيانة وتحديثات</li>
+<li>تقارير أداء شهرية</li>
+<li>تحسينات مستمرة</li>
+<li>دعم فني أولوية</li>
+<li>إلغاء أي وقت</li>
+</ul>
+</div>
+</div>
+<p style="margin-top:25px;font-size:.8rem;color:#64748b;text-align:center">💡 5,000 ر.س = أقل من نصف راتب موظف واحد. والعائد يبدأ من أول أسبوع.</p>
+<div class="slide-num">9 / 10</div>
+</div>
+
+<!-- SLIDE 10: CTA -->
+<div class="slide slide-cta" id="s10">
+<span class="tag tag-purple">الخطوة الأولى — مجانية</span>
+<h1>جاهز تبدأ؟</h1>
+<p class="subtitle">احجز جلسة التشخيص المجانية. نحلل منشأتك، نوريك الفرص، ونعطيك خارطة طريق واضحة — بدون أي التزام.</p>
+<div class="stats">
+<div class="stat"><div class="stat-val">⏱️</div><div class="stat-label">ساعة واحدة فقط</div></div>
+<div class="stat"><div class="stat-val">🎯</div><div class="stat-label">تقرير مخصص لمنشأتك</div></div>
+<div class="stat"><div class="stat-val">💰</div><div class="stat-label">تعرف كم بتوفّر</div></div>
+</div>
+<a href="https://wa.me/966XXXXXXXXX?text=أبي%20أحجز%20جلسة%20تشخيص%20مجانية" class="cta-btn">📱 احجز جلسة مجانية</a>
+<p style="margin-top:15px;font-size:.75rem;color:#475569">أو تواصل معنا: info@example.com</p>
+<div class="slide-num">10 / 10</div>
+</div>
+
+<script>
+// Navigation dots
+const slides = document.querySelectorAll('.slide');
+const nav = document.getElementById('nav');
+slides.forEach((s, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => s.scrollIntoView({ behavior: 'smooth' });
+  nav.appendChild(dot);
+});
+
+// Update nav on scroll
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const idx = Array.from(slides).indexOf(e.target);
+      document.querySelectorAll('.nav-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === idx);
+      });
+    }
+  });
+}, { threshold: 0.5 });
+slides.forEach(s => observer.observe(s));
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  const current = Array.from(slides).findIndex(s => {
+    const r = s.getBoundingClientRect();
+    return r.top >= -100 && r.top <= 300;
+  });
+  if (e.key === 'ArrowDown' || e.key === ' ') {
+    e.preventDefault();
+    if (current < slides.length - 1) slides[current + 1].scrollIntoView({ behavior: 'smooth' });
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (current > 0) slides[current - 1].scrollIntoView({ behavior: 'smooth' });
+  }
+});
+</script>
+</body>
+</html>
