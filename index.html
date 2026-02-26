@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ideas Pipeline — Sultan's Innovation Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
@@ -18,6 +19,9 @@ header{position:relative;z-index:10;padding:14px 20px;display:flex;justify-conte
 .logo span{font-size:.65rem;color:#94a3b8;display:block}
 .hr{display:flex;align-items:center;gap:10px}
 .tm{padding:5px 10px;background:#12121a;border-radius:15px;font-size:.7rem;color:#94a3b8}
+.mode-badge{padding:4px 12px;border-radius:12px;font-size:.65rem;font-weight:700;cursor:pointer}
+.mode-badge.view{background:rgba(59,130,246,.15);color:#60a5fa}
+.mode-badge.edit{background:rgba(16,185,129,.15);color:#34d399}
 .live-dot{width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
@@ -32,14 +36,17 @@ header{position:relative;z-index:10;padding:14px 20px;display:flex;justify-conte
 .kpi:nth-child(6) .kv{color:#ef4444}
 
 .main{position:relative;z-index:1;display:flex;height:calc(100vh - 140px);padding:10px;gap:10px;overflow-x:auto}
-.col{flex:0 0 250px;background:#12121a;border-radius:12px;padding:12px;border:2px solid #1e293b;display:flex;flex-direction:column}
+.col{flex:0 0 250px;background:#12121a;border-radius:12px;padding:12px;border:2px solid #1e293b;display:flex;flex-direction:column;transition:border-color .3s}
+.col.drag-over{border-color:#8b5cf6}
 .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px}
 .ch .t{font-weight:700;font-size:.85rem}
 .ch .c{background:rgba(255,255,255,.08);padding:2px 8px;border-radius:8px;font-size:.65rem}
-.cs{flex:1;overflow-y:auto;padding:2px}
+.cs{flex:1;overflow-y:auto;padding:2px;min-height:60px}
 
 .card{border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #1e293b;transition:all .2s}
 .card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.4)}
+.card.draggable{cursor:grab}
+.card.draggable:active{cursor:grabbing}
 .card h3{font-weight:600;font-size:.8rem;margin-bottom:4px}
 .card p{font-size:.68rem;color:#94a3b8;line-height:1.4;margin-bottom:6px}
 .card.tag-skill{background:#1a1030;border-right:3px solid #8b5cf6}
@@ -50,11 +57,38 @@ header{position:relative;z-index:10;padding:14px 20px;display:flex;justify-conte
 .ct.tech{background:rgba(59,130,246,.15);color:#60a5fa}
 .ct.business{background:rgba(16,185,129,.15);color:#34d399}
 .empty-msg{text-align:center;padding:25px 10px;color:#334155;font-size:.72rem;font-style:italic}
+.sortable-ghost{opacity:.3}
+.sortable-chosen{box-shadow:0 10px 30px rgba(139,92,246,.4)!important;transform:rotate(-1deg)}
+
+/* Sync bar */
+.sync-bar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1a1030,#0a1520);border-top:2px solid #8b5cf6;padding:12px 20px;display:none;align-items:center;justify-content:space-between;z-index:50;animation:slideUp .3s}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sync-bar .changes{font-size:.75rem;color:#94a3b8}
+.sync-bar .changes b{color:#f8fafc}
+.sync-btn{background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:transform .2s}
+.sync-btn:hover{transform:scale(1.05)}
+.sync-btn:active{transform:scale(.95)}
+.undo-btn{background:rgba(255,255,255,.08);color:#94a3b8;border:1px solid #1e293b;padding:8px 16px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:.75rem;cursor:pointer;transition:all .2s}
+.undo-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100}
+.modal{background:#12121a;border:2px solid #1e293b;border-radius:16px;padding:30px;width:320px;text-align:center}
+.modal h2{font-size:1rem;margin-bottom:6px}
+.modal p{font-size:.7rem;color:#94a3b8;margin-bottom:16px}
+.modal input{width:100%;padding:10px;background:#0a0a0f;border:1px solid #1e293b;border-radius:8px;color:#f8fafc;font-family:'Cairo',sans-serif;font-size:.85rem;text-align:center;outline:none}
+.modal input:focus{border-color:#8b5cf6}
+.modal .err{color:#f87171;font-size:.65rem;margin-top:6px;min-height:16px}
+.modal button{margin-top:12px;width:100%;padding:10px;background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;border:none;border-radius:8px;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer}
 
 .footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:6px;font-size:.6rem;color:#334155;background:rgba(10,10,15,.8);z-index:10}
+.footer.hidden{display:none}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1e293b;color:#f8fafc;padding:10px 24px;border-radius:10px;font-size:.75rem;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid #334155}
+.toast.show{opacity:1}
 
 @media(max-width:768px){
-  .main{flex-direction:column;overflow-y:auto;overflow-x:hidden;height:auto;padding-bottom:40px}
+  .main{flex-direction:column;overflow-y:auto;overflow-x:hidden;height:auto;padding-bottom:80px}
   .col{flex:none;width:100%}
   html,body{overflow:auto}
 }
@@ -62,20 +96,44 @@ header{position:relative;z-index:10;padding:14px 20px;display:flex;justify-conte
 </head>
 <body>
 <div class="bg"></div>
+
 <header>
 <div class="logo"><div class="li">💡</div><div><h1>Ideas Pipeline</h1><span>Sultan's Innovation Hub</span></div></div>
 <div class="hr">
 <span class="live-dot"></span>
+<div class="mode-badge view" id="mode-badge" onclick="toggleMode()">👁️ عرض</div>
 <div class="tm" id="update-time">--</div>
 </div>
 </header>
+
 <div class="kpis" id="kpis"></div>
 <div class="main" id="board"></div>
-<div class="footer">Powered by Hadi 🤖 — Auto-updated via OpenClaw</div>
+
+<div class="sync-bar" id="sync-bar">
+<div class="changes" id="changes-text">📝 <b>0</b> تغييرات</div>
+<div style="display:flex;gap:8px;align-items:center">
+<button class="undo-btn" onclick="undoAll()">↩️ تراجع</button>
+<button class="sync-btn" onclick="syncToTelegram()">📤 مزامنة مع هادي</button>
+</div>
+</div>
+
+<div class="footer" id="footer">Powered by Hadi 🤖 — Auto-updated via OpenClaw</div>
+
+<div class="modal-overlay" id="modal">
+<div class="modal">
+<h2>🔐 وضع التعديل</h2>
+<p>ادخل كلمة المرور لتفعيل السحب والإفلات</p>
+<input type="password" id="pw" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter')checkPw()">
+<div class="err" id="pw-err"></div>
+<button onclick="checkPw()">دخول</button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const DATA = {
-  "lastUpdated": "2026-02-26T18:42:02Z",
+  "lastUpdated": "2026-02-26T18:51:26Z",
   "columns": {
     "inbox": {
       "name": "📥 Inbox",
@@ -215,6 +273,9 @@ const DATA = {
   }
 };
 
+const PW_HASH = '91aa8660e4ef49f25e6efeffc48463ce486f13aff1746f349ac51ce6c0ac156c';
+const TELEGRAM_BOT = 'sami977_bot';
+
 const COLS = [
   { id: 'inbox',    name: '📥 Inbox',    color: '#f59e0b' },
   { id: 'skills',   name: '🔧 Skills',   color: '#3b82f6' },
@@ -223,12 +284,154 @@ const COLS = [
   { id: 'done',     name: '✅ Done',     color: '#ef4444' }
 ];
 
+const COL_NAMES = {};
+COLS.forEach(c => COL_NAMES[c.id] = c.name);
+
+let editMode = false;
+let changes = []; // [{title, from, to}]
+let originalState = JSON.parse(JSON.stringify(DATA));
+let sortables = [];
+
+// Simple hash
+async function hashPw(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function toggleMode() {
+  if (editMode) {
+    editMode = false;
+    changes = [];
+    updateModeUI();
+    render();
+  } else {
+    document.getElementById('modal').style.display = 'flex';
+    document.getElementById('pw').focus();
+  }
+}
+
+async function checkPw() {
+  const pw = document.getElementById('pw').value;
+  const hash = await hashPw(pw);
+  if (hash === PW_HASH) {
+    editMode = true;
+    document.getElementById('modal').style.display = 'none';
+    document.getElementById('pw').value = '';
+    document.getElementById('pw-err').textContent = '';
+    updateModeUI();
+    render();
+    showToast('✅ وضع التعديل مفعّل — اسحب وأفلت!');
+  } else {
+    document.getElementById('pw-err').textContent = '❌ كلمة مرور خاطئة';
+  }
+}
+
+function updateModeUI() {
+  const badge = document.getElementById('mode-badge');
+  if (editMode) {
+    badge.className = 'mode-badge edit';
+    badge.textContent = '✏️ تعديل';
+  } else {
+    badge.className = 'mode-badge view';
+    badge.textContent = '👁️ عرض';
+  }
+  document.getElementById('sync-bar').style.display = (editMode && changes.length > 0) ? 'flex' : 'none';
+  document.getElementById('footer').className = (editMode && changes.length > 0) ? 'footer hidden' : 'footer';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function getCurrentState() {
+  const state = {};
+  for (const col of COLS) {
+    const container = document.getElementById('col-' + col.id);
+    if (!container) continue;
+    state[col.id] = [];
+    container.querySelectorAll('.card').forEach(card => {
+      state[col.id].push({
+        title: card.dataset.title,
+        desc: card.dataset.desc,
+        tag: card.dataset.tag
+      });
+    });
+  }
+  return state;
+}
+
+function onDragEnd() {
+  const current = getCurrentState();
+  // Compare with original to find changes
+  changes = [];
+  for (const col of COLS) {
+    const origItems = (originalState.columns[col.id] || {}).items || [];
+    const origTitles = origItems.map(i => i.title);
+    const curItems = current[col.id] || [];
+    for (const item of curItems) {
+      if (!origTitles.includes(item.title)) {
+        // This item was moved here from somewhere else
+        let fromCol = null;
+        for (const oc of COLS) {
+          const oi = (originalState.columns[oc.id] || {}).items || [];
+          if (oi.find(i => i.title === item.title)) { fromCol = oc.id; break; }
+        }
+        if (fromCol && fromCol !== col.id) {
+          changes.push({ title: item.title, from: fromCol, to: col.id });
+        }
+      }
+    }
+  }
+  document.getElementById('changes-text').innerHTML = '📝 <b>' + changes.length + '</b> تغيير' + (changes.length > 1 ? 'ات' : '');
+  updateModeUI();
+  updateKPIs(current);
+}
+
+function updateKPIs(current) {
+  if (!current) current = getCurrentState();
+  let total = 0;
+  for (const col of COLS) {
+    const n = (current[col.id] || []).length;
+    total += n;
+    const kpi = document.getElementById('k-' + col.id);
+    if (kpi) kpi.textContent = n;
+    const cnt = document.getElementById('cnt-' + col.id);
+    if (cnt) cnt.textContent = n;
+  }
+  document.getElementById('kt').textContent = total;
+}
+
+function undoAll() {
+  changes = [];
+  render();
+  showToast('↩️ تم التراجع');
+}
+
+function syncToTelegram() {
+  if (changes.length === 0) return;
+  let msg = 'حدّث الأفكار:\n';
+  for (const c of changes) {
+    msg += '- انقل "' + c.title + '" من ' + COL_NAMES[c.from] + ' إلى ' + COL_NAMES[c.to] + '\n';
+  }
+  const encoded = encodeURIComponent(msg);
+  const url = 'https://t.me/' + TELEGRAM_BOT + '?text=' + encoded;
+  window.open(url, '_blank');
+  showToast('📤 فتح Telegram...');
+}
+
 function render() {
   const board = document.getElementById('board');
   const kpisEl = document.getElementById('kpis');
   board.innerHTML = '';
   let total = 0;
   const counts = {};
+
+  // Clean up old sortables
+  sortables.forEach(s => s.destroy());
+  sortables = [];
 
   for (const col of COLS) {
     const items = (DATA.columns[col.id] || {}).items || [];
@@ -243,7 +446,10 @@ function render() {
     } else {
       for (const item of items) {
         const tag = item.tag || 'tech';
-        cardsHTML += '<div class="card tag-' + tag + '">' +
+        cardsHTML += '<div class="card tag-' + tag + (editMode ? ' draggable' : '') + '" ' +
+          'data-title="' + item.title.replace(/"/g,'&quot;') + '" ' +
+          'data-desc="' + (item.desc || '').replace(/"/g,'&quot;') + '" ' +
+          'data-tag="' + tag + '">' +
           '<h3>' + item.title + '</h3>' +
           '<p>' + (item.desc || '') + '</p>' +
           '<span class="ct ' + tag + '">' + tag + '</span>' +
@@ -253,23 +459,41 @@ function render() {
     colEl.innerHTML =
       '<div class="ch" style="border-bottom:2px solid ' + col.color + '">' +
         '<div class="t">' + col.name + '</div>' +
-        '<div class="c">' + items.length + '</div>' +
+        '<div class="c" id="cnt-' + col.id + '">' + items.length + '</div>' +
       '</div>' +
-      '<div class="cs">' + cardsHTML + '</div>';
+      '<div class="cs" id="col-' + col.id + '">' + cardsHTML + '</div>';
     board.appendChild(colEl);
+
+    if (editMode) {
+      const cs = colEl.querySelector('.cs');
+      const s = new Sortable(cs, {
+        group: 'ideas',
+        animation: 200,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        disabled: false,
+        onEnd: function() {
+          document.querySelectorAll('.empty-msg').forEach(e => e.remove());
+          onDragEnd();
+        }
+      });
+      sortables.push(s);
+    }
   }
 
   // KPIs
   kpisEl.innerHTML =
-    '<div class="kpi"><div class="kv">' + total + '</div><div class="kl">إجمالي</div></div>' +
+    '<div class="kpi"><div class="kv" id="kt">' + total + '</div><div class="kl">إجمالي</div></div>' +
     COLS.map(c =>
-      '<div class="kpi"><div class="kv">' + (counts[c.id] || 0) + '</div><div class="kl">' + c.name + '</div></div>'
+      '<div class="kpi"><div class="kv" id="k-' + c.id + '">' + (counts[c.id] || 0) + '</div><div class="kl">' + c.name + '</div></div>'
     ).join('');
 
   // Update time
   const d = new Date(DATA.lastUpdated);
   document.getElementById('update-time').textContent =
     d.toLocaleDateString('ar-SA') + ' ' + d.toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+
+  updateModeUI();
 }
 
 render();
