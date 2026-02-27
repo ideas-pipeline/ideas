@@ -133,7 +133,7 @@ header{position:relative;z-index:10;padding:14px 20px;display:flex;justify-conte
 
 <script>
 const DATA = {
-  "lastUpdated": "2026-02-27T11:02:43Z",
+  "lastUpdated": "2026-02-27T15:41:59Z",
   "columns": {
     "inbox": {
       "name": "📥 Inbox",
@@ -213,11 +213,6 @@ const DATA = {
           "title": "Near-Miss Digest",
           "desc": "تقرير أسبوعي عن الـ near-misses و retried actions - يحافظ على realistic confidence",
           "tag": "tech"
-        },
-        {
-          "title": "Gastrovascular Memory",
-          "desc": "نموذج ذاكرة دوري Constant volume بدلاً من append-only - يمنع تراكم الملفات",
-          "tag": "tech"
         }
       ]
     },
@@ -239,6 +234,81 @@ const DATA = {
           "title": "AI Consultant for SMEs",
           "desc": "استشارات ذكاء اصطناعي للمنشآت الصغيرة",
           "tag": "business"
+        },
+        {
+          "title": "Gastrovascular Memory",
+          "desc": "نموذج ذاكرة Circulatory بدلاً من append-only - يحاكي الجهاز الهضمي: امتصاص، هضم، وإخراج. يمنع تراكم الملفات.",
+          "tag": "tech",
+          "details": "## Gastrovascular Memory
+
+### المشكلة
+النظام الحالي للذاكرة في OpenClaw (وفي معظم agents) هو **append-only**: نضيف معلومات جديدة للملفات لكن لا نحذف أبداً. هذا يشبه ما يحدث في الأمعاء الغليظة عند البشر - تراكم مستمر بدون 'إخراج'.
+
+**النتائج:**
+- ملفات الذاكرة تنمو باستمرار (MEMORY.md تجاوز 10KB في أسابيع)
+- Context window يملؤه garbage
+- البحث البطيء مع نمو الـ vectors
+- Agent \"يتذكر\" أشياء قديمة غير ذات صلة
+
+### الحل: Gastrovascular Model
+
+الإلهام من **اللاسعات** (Jellyfish, Corals): لها جهاز هضمي مبسط يخدم أيضاً كم نظام دوري - food goes in, nutrients distributed, waste expelled.
+
+#### المكونات:
+1. **الامتصاص (Ingestion)**
+   - كل ذاكرة جديدة تمر بـ \"فحص تغذية\"
+   - يُقيَّم: relevance, uniqueness, age, access frequency
+   - يُمنح \"nutrition score\" من 0-100
+
+2. **الهضم (Digestion)**
+   - ذكريات قديمة تُدمج أو تُلخَّص
+   - Duplicate facts تُوحَّد
+   - Contradictions تُعلَّم
+
+3. **الإخراج (Expulsion)**
+   - ذكريات \"متحللة\" تُحذف
+   - Criteria: age > 30 days + low access + redundant
+   - مؤقتاً في \"سلة المهملات\" قبل الحذف النهائي
+
+4. **الدورة (Circulation)**
+   - كل 7 أيام: \"دورة دموية\" للذاكرة
+   - تحديث الـ nutrition scores
+   - تفعيل ذكريات مهملة عند الحاجة
+
+### التنفيذ المقترح:
+
+```yaml
+# memory.config
+circulatory:
+  ingestion_threshold: 30  # minimal nutrition score to store
+  digestion_cycle: 7d      # merge/summarize interval
+  expulsion_age: 30d       # when to consider deletion
+  circulation_cycle: 24h   # refresh scores
+  bucket_count: 5         # importance buckets
+
+# Memory Flow:
+# New → [Ingestion Check] → Bucket 1-5 (by score)
+#                         ↓
+# [Digestion] → Merge → Summarized → Back to Bucket
+#                         ↓
+# [Expulsion] → Trash (48h) → Delete
+```
+
+### Benefits:
+- حجم ذاكرة ثابت (constant volume)
+- ذكريات أكثر relevance
+- أداء أفضل للبحث
+- \"ذاكرة صحية\" بدلاً من \"إمساك رقمي\"
+
+### Risks:
+- فقدان معلومات مهمة إذا كان الـ threshold عالياً
+- صعوبة debugging \"لماذا نسيت هذه المعلومة\"
+- يحتاج monitoring دقيق
+
+### References:
+- Mammalian memory consolidation during sleep
+- Hopfield networks (content-addressable memory)
+- LRU cache eviction policies"
         }
       ]
     },
