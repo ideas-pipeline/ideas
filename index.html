@@ -133,7 +133,7 @@ header{position:relative;z-index:10;padding:14px 20px;display:flex;justify-conte
 
 <script>
 const DATA = {
-  "lastUpdated": "2026-02-27T17:30:58Z",
+  "lastUpdated": "2026-02-27T17:38:07Z",
   "columns": {
     "inbox": {
       "name": "📥 Inbox",
@@ -200,11 +200,6 @@ const DATA = {
           "tag": "tech"
         },
         {
-          "title": "Agent Self-Hash Verification",
-          "desc": "التحقق من سلامة ملفات التعليمات (SOUL.md, AGENTS.md) عند كل起動 - يمنع injection attack",
-          "tag": "security"
-        },
-        {
           "title": "Cron Job Security Audit",
           "desc": "تدقيق دوري للـ cron jobs - تتبع network calls و file accesses",
           "tag": "security"
@@ -240,6 +235,11 @@ const DATA = {
           "title": "AI Consultant for SMEs",
           "desc": "استشارات ذكاء اصطناعي للمنشآت الصغيرة",
           "tag": "business"
+        },
+        {
+          "title": "Agent Self-Hash Verification",
+          "desc": "التحقق من سلامة ملفات التعليمات (SOUL.md, AGENTS.md) عند كل تشغيل بمقارنة SHA-256 hash — يكشف التلاعب والـ injection attacks فوراً",
+          "tag": "security"
         }
       ]
     },
