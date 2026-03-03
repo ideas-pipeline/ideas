@@ -1,48 +1,104 @@
 {
-  "lastUpdated": "2026-03-04T00:30:00Z",
+  "lastUpdated": "2026-03-03T23:48:26Z",
   "agents": {
     "هادي أوبس": {
       "status": "active",
       "current": "مراقبة المشروع + مراجعة المخرجات",
       "history": [
-        {"task": "مراجعة وتوقيع مخرجات الفريق", "time": "00:30", "result": "✅"},
-        {"task": "إصلاح خطأ kpi-pending-suggestions", "time": "00:25", "result": "✅"},
-        {"task": "توزيع 9 مهام على الفريق", "time": "23:35", "result": "✅"}
+        {
+          "task": "مراجعة وتوقيع مخرجات الفريق",
+          "time": "00:30",
+          "result": "✅"
+        },
+        {
+          "task": "إصلاح خطأ kpi-pending-suggestions",
+          "time": "00:25",
+          "result": "✅"
+        },
+        {
+          "task": "توزيع 9 مهام على الفريق",
+          "time": "23:35",
+          "result": "✅"
+        }
       ]
     },
     "هادي سونيت": {
       "status": "active",
       "current": "تحسين شاشة الوكلاء",
       "history": [
-        {"task": "إزالة شرط التوكن للقراءة", "time": "00:20", "result": "✅"},
-        {"task": "تحديث روابط saif-sadeem.com + شريط علوي", "time": "00:21", "result": "✅"},
-        {"task": "بناء شاشة الوكلاء لايف (5 كروت)", "time": "23:48", "result": "✅"}
+        {
+          "task": "إزالة شرط التوكن للقراءة",
+          "time": "00:20",
+          "result": "✅"
+        },
+        {
+          "task": "تحديث روابط saif-sadeem.com + شريط علوي",
+          "time": "00:21",
+          "result": "✅"
+        },
+        {
+          "task": "بناء شاشة الوكلاء لايف (5 كروت)",
+          "time": "23:48",
+          "result": "✅"
+        }
       ]
     },
     "هادي جي بي": {
       "status": "active",
       "current": "متاح للمهام",
       "history": [
-        {"task": "رفع ideas.json للريبو", "time": "00:30", "result": "✅"},
-        {"task": "بناء Do It Watcher سكربت", "time": "00:19", "result": "✅"},
-        {"task": "إصلاح الكانبان (ترتيب + ترقيم + شيل dontdoit)", "time": "23:39", "result": "✅"}
+        {
+          "task": "رفع ideas.json للريبو",
+          "time": "00:30",
+          "result": "✅"
+        },
+        {
+          "task": "بناء Do It Watcher سكربت",
+          "time": "00:19",
+          "result": "✅"
+        },
+        {
+          "task": "إصلاح الكانبان (ترتيب + ترقيم + شيل dontdoit)",
+          "time": "23:39",
+          "result": "✅"
+        }
       ]
     },
     "هادي ميني": {
       "status": "active",
       "current": "متاح للمهام",
       "history": [
-        {"task": "إصلاح خطأ kpi textContent", "time": "00:32", "result": "✅"},
-        {"task": "إصلاح HOW-THINGS-WORK.md", "time": "00:20", "result": "✅"},
-        {"task": "CNAME + DNS setup لـ saif-sadeem.com", "time": "23:36", "result": "✅"}
+        {
+          "task": "إصلاح خطأ kpi textContent",
+          "time": "00:32",
+          "result": "✅"
+        },
+        {
+          "task": "إصلاح HOW-THINGS-WORK.md",
+          "time": "00:20",
+          "result": "✅"
+        },
+        {
+          "task": "CNAME + DNS setup لـ saif-sadeem.com",
+          "time": "23:36",
+          "result": "✅"
+        }
       ]
     },
     "الباحث": {
       "status": "active",
       "current": "بحث ويب للتقارير",
       "history": [
-        {"task": "بحث أخبار AI للتقرير التقني", "time": "12:00", "result": "✅"},
-        {"task": "بحث بيانات اقتصادية", "time": "08:15", "result": "✅"}
+        {
+          "task": "بحث أخبار AI للتقرير التقني",
+          "time": "12:00",
+          "result": "✅"
+        },
+        {
+          "task": "بحث بيانات اقتصادية",
+          "time": "08:15",
+          "result": "✅"
+        }
       ]
     }
   }
