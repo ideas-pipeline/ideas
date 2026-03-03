@@ -447,10 +447,11 @@ function getToken() {
 
 async function readFile(path) {
   const token = getToken();
-  if (!token) throw new Error('No token');
+  const headers = { 'Accept': 'application/vnd.github.v3+json' };
+  if (token) headers['Authorization'] = `token ${token}`;
   
   const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}?ref=${GITHUB_BRANCH}`, {
-    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    headers: headers
   });
   
   if (!res.ok) {
@@ -525,8 +526,6 @@ function saveToken() {
 
 // === DATA LOADING ===
 async function fetchIdeas() {
-  if (!checkToken()) return;
-  
   try {
     const { content, sha } = await readFile('ideas.json');
     ideasSha = sha;
@@ -553,8 +552,6 @@ async function fetchIdeas() {
 }
 
 async function fetchSuggestions() {
-  if (!checkToken()) return;
-  
   try {
     const { content, sha } = await readFile('suggestions.json');
     suggestionsSha = sha;
@@ -1025,10 +1022,8 @@ function init() {
   renderSystemCron();
   renderActivity();
   
-  if (checkToken()) {
-    fetchIdeas();
-    fetchSuggestions();
-  }
+  fetchIdeas();
+  fetchSuggestions();
 }
 
 init();
