@@ -28,6 +28,8 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 .sidebar .stats-mini { padding: 14px 20px; border-top: 1px solid var(--bg3); }
 .sidebar .stats-mini .stat { display: flex; justify-content: space-between; font-size: .82em; color: var(--text3); margin-bottom: 4px; }
 .sidebar .stats-mini .stat b { color: var(--green); }
+.sidebar .token-btn { margin: 10px 20px 0; padding: 8px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius2); cursor: pointer; font-size: .85em; font-weight: 600; font-family: 'Tajawal', sans-serif; }
+.sidebar .token-btn:hover { background: var(--accent2); }
 /* Main */
 .main { margin-right: 220px; flex: 1; padding: 24px 28px; min-height: 100vh; }
 .page { display: none; }
@@ -134,6 +136,18 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
   .cal-grid { grid-template-columns: repeat(7, 1fr); }
   .cal-event { font-size: .6em; }
 }
+/* Notification Toast */
+.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--bg2); border:1px solid var(--green); border-radius:var(--radius2); padding:12px 20px; color:var(--green2); font-weight:600; font-size:.9em; z-index:1000; opacity:0; transition:opacity .3s; box-shadow:0 4px 20px #0008; }
+.toast.show { opacity:1; }
+.toast.error { border-color: var(--red); color: var(--red); }
+/* Modal */
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0008; z-index:500; align-items:center; justify-content:center; }
+.modal.active { display:flex; }
+.modal-content { background:var(--bg2); border:1px solid var(--bg3); border-radius:var(--radius); padding:24px; max-width:500px; width:90%; }
+.modal-content h3 { margin-bottom:16px; color:var(--text); }
+.modal-content input, .modal-content textarea, .modal-content select { width:100%; padding:10px; margin-bottom:12px; background:var(--bg3); border:1px solid var(--bg4); border-radius:var(--radius2); color:var(--text); font-family:'Tajawal',sans-serif; font-size:.9em; }
+.modal-content textarea { min-height:80px; resize:vertical; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; }
 </style>
 </head>
 <body>
@@ -162,6 +176,7 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
     <div class="stat"><span>الجلسات</span><b id="mini-sessions">—</b></div>
     <div class="stat"><span>اقتراحات</span><b id="mini-suggestions">—</b></div>
   </div>
+  <button class="token-btn" onclick="showTokenModal()">🔑 تغيير Token</button>
 </aside>
 
 <main class="main">
@@ -172,7 +187,7 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
   <div class="kpi-grid" id="kpi-grid">
     <div class="kpi-card"><div class="kpi-value">$58.38</div><div class="kpi-label">تكلفة اليوم</div></div>
     <div class="kpi-card"><div class="kpi-value">$137.68</div><div class="kpi-label">تكلفة الشهر</div></div>
-    <div class="kpi-card"><div class="kpi-value">$1,293</div><div class="kpi-label">المتبقي من $1,800</div></div>
+    <div class="kpi-card" id="kpi-balance"><div class="kpi-value">$24.58</div><div class="kpi-label">الرصيد (Credits)</div></div>
     <div class="kpi-card"><div class="kpi-value">24</div><div class="kpi-label">جلسات نشطة</div></div>
     <div class="kpi-card"><div class="kpi-value">8</div><div class="kpi-label">Cron Jobs</div></div>
     <div class="kpi-card warn"><div class="kpi-value">93%</div><div class="kpi-label">نسبة Opus من التكلفة</div></div>
@@ -193,13 +208,13 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 
 <!-- ===== TASK BOARD ===== -->
 <div class="page" id="page-tasks">
-  <div class="page-title">📋 Task Board</div>
+  <div class="page-title">📋 Task Board <button class="btn" onclick="showAddIdeaModal()" style="font-size:.75em;padding:6px 12px;background:var(--accent);color:#fff;margin-right:auto">➕ إضافة فكرة</button></div>
   <div class="kanban" id="kanban-board"></div>
 </div>
 
 <!-- ===== SUGGESTIONS ===== -->
 <div class="page" id="page-suggestions">
-  <div class="page-title">💡 Suggestions</div>
+  <div class="page-title">💡 Suggestions <span id="suggestions-counter" style="font-size:.6em;color:var(--text3);margin-right:10px"></span></div>
   <div id="suggestions-list"></div>
 </div>
 
@@ -220,10 +235,11 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 <div class="page" id="page-costs">
   <div class="page-title">💰 Cost Dashboard</div>
   <div class="kpi-grid">
-    <div class="kpi-card"><div class="kpi-value">$471</div><div class="kpi-label">إجمالي الصرف</div></div>
-    <div class="kpi-card"><div class="kpi-value">$1,329</div><div class="kpi-label">المتبقي</div></div>
-    <div class="kpi-card"><div class="kpi-value">$22.28</div><div class="kpi-label">اليوم</div></div>
-    <div class="kpi-card"><div class="kpi-value">$77.40</div><div class="kpi-label">الأسبوع</div></div>
+    <div class="kpi-card" id="kpi-current-balance"><div class="kpi-value">$—</div><div class="kpi-label">الرصيد الحالي</div></div>
+    <div class="kpi-card" id="kpi-total-usage"><div class="kpi-value">$—</div><div class="kpi-label">إجمالي الصرف</div></div>
+    <div class="kpi-card" id="kpi-cost-day"><div class="kpi-value">$—</div><div class="kpi-label">اليوم</div></div>
+    <div class="kpi-card" id="kpi-cost-week"><div class="kpi-value">$—</div><div class="kpi-label">الأسبوع</div></div>
+    <div class="kpi-card" id="kpi-cost-month"><div class="kpi-value">$—</div><div class="kpi-label">الشهر</div></div>
   </div>
   <div class="card">
     <h3>📊 تفصيل التكلفة حسب النموذج</h3>
@@ -304,23 +320,50 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 
 </main>
 
-<script>
-// === CONFIG ===
-// Get token from URL
-const urlParams = new URLSearchParams(window.location.search);
-const API_TOKEN = urlParams.get('token') || '';
-const API_BASE = window.location.origin;
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
 
-// Add token to all fetch requests
-function apiFetch(path, opts = {}) {
-  const sep = path.includes('?') ? '&' : '?';
-  return fetch(API_BASE + path + sep + 'token=' + API_TOKEN, opts);
-}
+<!-- GitHub Token Modal -->
+<div class="modal" id="token-modal">
+  <div class="modal-content">
+    <h3>🔑 GitHub Personal Access Token</h3>
+    <p style="font-size:.85em;color:var(--text2);margin-bottom:12px">أدخل GitHub Token (repo scope) للوصول إلى ideas-pipeline/ideas</p>
+    <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx">
+    <div class="modal-actions">
+      <button class="btn btn-approve" onclick="saveToken()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Idea Modal -->
+<div class="modal" id="add-idea-modal">
+  <div class="modal-content">
+    <h3>➕ إضافة فكرة جديدة</h3>
+    <input type="text" id="new-idea-title" placeholder="العنوان">
+    <textarea id="new-idea-desc" placeholder="الوصف"></textarea>
+    <select id="new-idea-tag">
+      <option value="tech">Tech</option>
+      <option value="business">Business</option>
+      <option value="skill">Skill</option>
+      <option value="security">Security</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn" onclick="hideAddIdeaModal()" style="background:var(--text3)">إلغاء</button>
+      <button class="btn btn-approve" onclick="submitNewIdea()">إضافة</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// === GITHUB CONFIG ===
+const GITHUB_REPO = 'ideas-pipeline/ideas';
+const GITHUB_BRANCH = 'master';
 
 // === STATE ===
 let ideasData = {};
-let statsData = {};
-let suggestionsData = [{"id": "mmb0vpyd", "title": "4 AI Prompt Patterns You NEED To Know (in Genspark)", "desc": "Tech With Tim: 4 AI Prompt Patterns You NEED To Know (in Genspark) (Views: 5102)", "tag": "tech", "source": "Tech With Tim: 4 AI Prompt Patterns You NEED To Know (in Genspark) (Views: 5102)", "sourceUrl": "https://youtube.com/watch?v=mib1r_UuGEs", "createdAt": "2026-03-03T19:50:29.413Z", "status": "pending"}, {"id": "mmb0vqn2", "title": "they stole Claude’s brain 16 million times", "desc": "NetworkChuck: they stole Claude’s brain 16 million times (Views: 30150)", "tag": "tech", "source": "NetworkChuck: they stole Claude’s brain 16 million times (Views: 30150)", "sourceUrl": "https://youtube.com/watch?v=lO961HRQn5Q", "createdAt": "2026-03-03T19:50:30.302Z", "status": "pending"}, {"id": "mmb0vqnz", "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)", "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)", "tag": "tech", "source": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)", "sourceUrl": "https://youtube.com/watch?v=ocQ7ZKhHU5Q", "createdAt": "2026-03-03T19:50:30.335Z", "status": "pending"}, {"id": "mmb0vqow", "title": "become an AI HACKER (it's easier than you think)", "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)", "tag": "tech", "source": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)", "sourceUrl": "https://youtube.com/watch?v=_yfiUQSbdPY", "createdAt": "2026-03-03T19:50:30.368Z", "status": "pending"}, {"id": "mmb0vurf", "title": "Super Nested Claude Code Is Vibecoding On STEROIDS", "desc": "All About AI: Super Nested Claude Code Is Vibecoding On STEROIDS (Views: 3539)", "tag": "tech", "source": "All About AI: Super Nested Claude Code Is Vibecoding On STEROIDS (Views: 3539)", "sourceUrl": "https://youtube.com/watch?v=BlyJKhhbzwA", "createdAt": "2026-03-03T19:50:35.643Z", "status": "pending"}, {"id": "mmb0vus9", "title": "Claude Code AI Agent Controls Claude Code On Twitch", "desc": "All About AI: Claude Code AI Agent Controls Claude Code On Twitch (Views: 1400)", "tag": "tech", "source": "All About AI: Claude Code AI Agent Controls Claude Code On Twitch (Views: 1400)", "sourceUrl": "https://youtube.com/watch?v=rtTuXAvS2yw", "createdAt": "2026-03-03T19:50:35.673Z", "status": "pending"}, {"id": "mmb0vut4", "title": "I Let My AI Agent Run for 504 Hours Straight — Here's What Happened", "desc": "All About AI: I Let My AI Agent Run for 504 Hours Straight — Here's What Happened (Views: 7047)", "tag": "tech", "source": "All About AI: I Let My AI Agent Run for 504 Hours Straight — Here's What Happened (Views: 7047)", "sourceUrl": "https://youtube.com/watch?v=O_5vugzgoik", "createdAt": "2026-03-03T19:50:35.704Z", "status": "pending"}, {"id": "mmb0vvf2", "title": "AMA with StepFun AI - Ask Us Anything", "desc": "r/LocalLLaMA: AMA with StepFun AI - Ask Us Anything (Score: 126)", "tag": "tech", "source": "r/LocalLLaMA: AMA with StepFun AI - Ask Us Anything (Score: 126)", "sourceUrl": "https://reddit.com/r/LocalLLaMA/comments/1r8snay/ama_with_stepfun_ai_ask_us_anything/", "createdAt": "2026-03-03T19:50:36.494Z", "status": "pending"}, {"id": "mmb0w0mh", "title": "MacBook Air with M5", "desc": "HN: MacBook Air with M5 (Score: 269)", "tag": "tech", "source": "HN: MacBook Air with M5 (Score: 269)", "sourceUrl": "https://www.apple.com/newsroom/2026/03/apple-introduces-the-new-macbook-air-with-m5/", "createdAt": "2026-03-03T19:50:43.241Z", "status": "pending"}, {"id": "mmb0w0nc", "title": "Claude's Cycles [pdf]", "desc": "HN: Claude's Cycles [pdf] (Score: 300)", "tag": "tech", "source": "HN: Claude's Cycles [pdf] (Score: 300)", "sourceUrl": "https://www-cs-faculty.stanford.edu/~knuth/papers/claude-cycles.pdf", "createdAt": "2026-03-03T19:50:43.272Z", "status": "pending"}, {"id": "mmb0w0sa", "title": "GIF optimization tool using WebAssembly and Gifsicle", "desc": "Simon Willison: GIF optimization tool using WebAssembly and Gifsicle", "tag": "tech", "source": "Simon Willison: GIF optimization tool using WebAssembly and Gifsicle", "sourceUrl": "https://simonwillison.net/guides/agentic-engineering-patterns/gif-optimization/#atom-everything", "createdAt": "2026-03-03T19:50:43.450Z", "status": "pending"}, {"id": "mmb0w0t9", "title": "Quoting claude.com/import-memory", "desc": "Simon Willison: Quoting claude.com/import-memory", "tag": "tech", "source": "Simon Willison: Quoting claude.com/import-memory", "sourceUrl": "https://simonwillison.net/2026/Mar/1/claude-import-memory/#atom-everything", "createdAt": "2026-03-03T19:50:43.485Z", "status": "pending"}];
+let ideasSha = null;
+let suggestionsData = [];
+let suggestionsSha = null;
 
 // === DATA (fallback) ===
 const cronJobs = [
@@ -388,101 +431,270 @@ const activityFeed = [
   {time:"00:00",text:"🌙 بداية يوم جديد — 3 مارس 2026",color:"var(--text3)"},
 ];
 
-// === API FUNCTIONS ===
+// === GITHUB API HELPERS ===
+function getToken() {
+  return localStorage.getItem('gh_token');
+}
+
+async function readFile(path) {
+  const token = getToken();
+  if (!token) throw new Error('No token');
+  
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}?ref=${GITHUB_BRANCH}`, {
+    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`GitHub API error: ${res.status} ${err}`);
+  }
+  
+  const data = await res.json();
+  const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+  return { content, sha: data.sha };
+}
+
+async function writeFile(path, content, sha, message) {
+  const token = getToken();
+  if (!token) throw new Error('No token');
+  
+  const contentStr = JSON.stringify(content, null, 2);
+  const encoded = btoa(unescape(encodeURIComponent(contentStr)));
+  
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${token}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+    body: JSON.stringify({
+      message: message,
+      content: encoded,
+      sha: sha,
+      branch: GITHUB_BRANCH
+    })
+  });
+  
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`GitHub write error: ${res.status} ${err}`);
+  }
+  
+  return await res.json();
+}
+
+// === TOKEN MANAGEMENT ===
+function checkToken() {
+  if (!getToken()) {
+    showTokenModal();
+    return false;
+  }
+  return true;
+}
+
+function showTokenModal() {
+  document.getElementById('token-modal').classList.add('active');
+  document.getElementById('token-input').value = '';
+  document.getElementById('token-input').focus();
+}
+
+function saveToken() {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token) {
+    alert('الرجاء إدخال Token');
+    return;
+  }
+  
+  localStorage.setItem('gh_token', token);
+  document.getElementById('token-modal').classList.remove('active');
+  showToast('✅ تم حفظ Token');
+  
+  // Reload data
+  init();
+}
+
+// === DATA LOADING ===
 async function fetchIdeas() {
+  if (!checkToken()) return;
+  
   try {
-    const res = await apiFetch(`/api/ideas`);
-    if (!res.ok) throw new Error('Failed to fetch ideas');
-    const raw = await res.json();
-    // Transform: {columns: {inbox: {items: [...]}}} → {inbox: [...]}
-    if (raw.columns) {
+    const { content, sha } = await readFile('ideas.json');
+    ideasSha = sha;
+    
+    // Transform structure if needed
+    if (content.columns) {
       ideasData = {};
-      for (const [key, col] of Object.entries(raw.columns)) {
+      for (const [key, col] of Object.entries(content.columns)) {
         ideasData[key] = col.items || [];
       }
     } else {
-      ideasData = raw;
+      ideasData = content;
     }
+    
     renderKanban();
+    updateStats();
   } catch (err) {
     console.error('Error fetching ideas:', err);
-    // Use fallback data
-    ideasData = {"inbox":[],"doit":[],"explain":[{"title":"ClawRouter Setup","desc":"توفير 96% في تكلفة LLMs","tag":"tech"},{"title":"AI Ops Dashboard","desc":"داشبورد متكامل للعمليات اليومية مربوط بأنظمة أتمتة","tag":"tech"},{"title":"Cron Job Security Audit","desc":"تدقيق دوري للـ cron jobs — تتبع network calls و file accesses","tag":"security"},{"title":"No-code multi-agent automator","desc":"منصة drag & drop لإنشاء أوتوميشنات بدون كود","tag":"tech"},{"title":"Ideas Auto-Sync Cron","desc":"تحديث تلقائي للوحة الأفكار من التقارير","tag":"tech"}],"dontdoit":[{"title":"Video Gen Costs","desc":"مقارنة أسعار: Runway, Luma, HeyGen","tag":"tech"},{"title":"AI Agents Monitoring","desc":"تكامل مع New Relic لمتابعة أداء AI","tag":"tech"},{"title":"Near-Miss Digest","desc":"تقرير أسبوعي عن الـ near-misses","tag":"tech"},{"title":"Kimi/Moonshot","desc":"محركات بحث وفيديو جديدة","tag":"tech"},{"title":"Security Alert","desc":"+380 malicious skills على ClawHub","tag":"tech"},{"title":"aws-security-scanner","desc":"فحص أمان AWS","tag":"skill"},{"title":"AI CRM Sales Assistant","desc":"مساعد CRM للـ SMEs","tag":"business"},{"title":"Alexa CLI Bridge","desc":"ربط Alexa مع OpenClaw","tag":"skill"}],"done":[{"title":"OpenClaw Immutable","desc":"تحديث + security hardening","tag":"tech"},{"title":"MiniMax Setup","desc":"إضافة API key + default model","tag":"tech"},{"title":"Ideas Pipeline","desc":"لوحة Kanban على Gateway","tag":"tech"},{"title":"Memory Auto-Flush","desc":"تلقائي قبل compaction","tag":"tech"},{"title":"Self-Improving Merge","desc":"دمج في SOUL.md","tag":"tech"},{"title":"Dashboard Access Fix","desc":"allowedOrigins = [*]","tag":"tech"},{"title":"MiniMax Direct","desc":"إضافة مباشر كـ default","tag":"tech"},{"title":"Agent Self-Hash","desc":"SHA-256 integrity check","tag":"security"},{"title":"AI Video Gen","desc":"Sora 2 API — مفعّل","tag":"skill"}]};
+    showToast('❌ فشل تحميل الأفكار: ' + err.message, true);
+    // Use fallback
+    ideasData = {"inbox":[],"doit":[],"explain":[{"title":"ClawRouter Setup","desc":"توفير 96% في تكلفة LLMs","tag":"tech"}],"dontdoit":[],"done":[]};
     renderKanban();
-  }
-}
-
-async function fetchStats() {
-  try {
-    const res = await apiFetch(`/api/stats`);
-    if (!res.ok) throw new Error('Failed to fetch stats');
-    statsData = await res.json();
-    updateDashboard();
-  } catch (err) {
-    console.error('Error fetching stats:', err);
-    statsData = {inbox:0,doit:0,explain:5,dontdoit:8,done:9,pending_suggestions:12,total_suggestions:12};
   }
 }
 
 async function fetchSuggestions() {
+  if (!checkToken()) return;
+  
   try {
-    const res = await apiFetch(`/api/suggestions`);
-    if (!res.ok) throw new Error('Failed to fetch suggestions');
-    suggestionsData = await res.json();
+    const { content, sha } = await readFile('suggestions.json');
+    suggestionsSha = sha;
+    suggestionsData = content;
     renderSuggestions();
+    updateStats();
   } catch (err) {
     console.error('Error fetching suggestions:', err);
+    showToast('❌ فشل تحميل الاقتراحات: ' + err.message, true);
     suggestionsData = [];
     renderSuggestions();
   }
 }
 
+// === WRITE OPERATIONS ===
 async function moveIdea(title, from, to) {
+  if (!checkToken()) return;
+  
   try {
-    const res = await apiFetch(`/api/ideas/move`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({title, from, to})
-    });
-    if (!res.ok) throw new Error('Failed to move idea');
+    // Read fresh copy
+    const { content, sha } = await readFile('ideas.json');
+    
+    // Find and move item
+    let item = null;
+    if (content.columns && content.columns[from] && content.columns[from].items) {
+      const idx = content.columns[from].items.findIndex(i => i.title === title);
+      if (idx !== -1) {
+        item = content.columns[from].items.splice(idx, 1)[0];
+        if (!content.columns[to]) content.columns[to] = { items: [] };
+        if (!content.columns[to].items) content.columns[to].items = [];
+        content.columns[to].items.unshift(item);
+      }
+    }
+    
+    if (!item) {
+      throw new Error('Idea not found');
+    }
+    
+    // Write back
+    await writeFile('ideas.json', content, sha, `Move "${title}" from ${from} to ${to}`);
+    
+    showToast('✅ تم النقل');
     await fetchIdeas();
   } catch (err) {
     console.error('Error moving idea:', err);
-    alert('فشل نقل الفكرة');
+    showToast('❌ فشل النقل: ' + err.message, true);
+  }
+}
+
+async function addIdea(title, desc, tag) {
+  if (!checkToken()) return;
+  
+  try {
+    const { content, sha } = await readFile('ideas.json');
+    
+    const newItem = { title, desc, tag };
+    
+    if (!content.columns) content.columns = {};
+    if (!content.columns.inbox) content.columns.inbox = { items: [] };
+    if (!content.columns.inbox.items) content.columns.inbox.items = [];
+    
+    content.columns.inbox.items.unshift(newItem);
+    
+    await writeFile('ideas.json', content, sha, `Add new idea: ${title}`);
+    
+    showToast('✅ تمت الإضافة');
+    await fetchIdeas();
+  } catch (err) {
+    console.error('Error adding idea:', err);
+    showToast('❌ فشلت الإضافة: ' + err.message, true);
   }
 }
 
 async function approveSuggestion(id) {
+  if (!checkToken()) return;
+  
   try {
-    const res = await apiFetch(`/api/suggestions/approve`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({id})
+    // Read suggestions
+    const { content: suggestions, sha: suggSha } = await readFile('suggestions.json');
+    const suggestion = suggestions.find(s => s.id === id);
+    if (!suggestion) throw new Error('Suggestion not found');
+    
+    // Update status
+    suggestion.status = 'approved';
+    
+    // Write suggestions back
+    await writeFile('suggestions.json', suggestions, suggSha, `Approve suggestion: ${suggestion.title}`);
+    
+    // Add to ideas inbox
+    const { content: ideas, sha: ideasSha } = await readFile('ideas.json');
+    if (!ideas.columns) ideas.columns = {};
+    if (!ideas.columns.inbox) ideas.columns.inbox = { items: [] };
+    if (!ideas.columns.inbox.items) ideas.columns.inbox.items = [];
+    
+    ideas.columns.inbox.items.unshift({
+      title: suggestion.title,
+      desc: suggestion.desc || suggestion.description || '',
+      tag: suggestion.tag || 'tech'
     });
-    if (!res.ok) throw new Error('Failed to approve suggestion');
-    await fetchSuggestions().catch(() => renderSuggestions());
+    
+    await writeFile('ideas.json', ideas, ideasSha, `Add approved suggestion: ${suggestion.title}`);
+    
+    showToast('✅ تمت الموافقة');
+    await fetchSuggestions();
     await fetchIdeas();
-    await fetchStats();
   } catch (err) {
     console.error('Error approving suggestion:', err);
-    alert('فشل الموافقة على الاقتراح');
+    showToast('❌ فشلت الموافقة: ' + err.message, true);
   }
 }
 
 async function rejectSuggestion(id) {
+  if (!checkToken()) return;
+  
   try {
-    const res = await apiFetch(`/api/suggestions/reject`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({id})
-    });
-    if (!res.ok) throw new Error('Failed to reject suggestion');
-    await fetchSuggestions().catch(() => renderSuggestions());
-    await fetchStats();
+    const { content: suggestions, sha } = await readFile('suggestions.json');
+    const suggestion = suggestions.find(s => s.id === id);
+    if (!suggestion) throw new Error('Suggestion not found');
+    
+    suggestion.status = 'rejected';
+    
+    await writeFile('suggestions.json', suggestions, sha, `Reject suggestion: ${suggestion.title}`);
+    
+    showToast('✅ تم الرفض');
+    await fetchSuggestions();
   } catch (err) {
     console.error('Error rejecting suggestion:', err);
-    alert('فشل رفض الاقتراح');
+    showToast('❌ فشل الرفض: ' + err.message, true);
   }
+}
+
+// === STATS & UI ===
+function updateStats() {
+  // Count ideas per column
+  const counts = {};
+  for (const key in ideasData) {
+    counts[key] = (ideasData[key] || []).length;
+  }
+  
+  // Count pending suggestions
+  const pending = suggestionsData.filter(s => s.status === 'pending').length;
+  
+  // Update KPI
+  const kpiEl = document.getElementById('kpi-pending-suggestions');
+  if (kpiEl) kpiEl.querySelector('.kpi-value').textContent = pending;
+  
+  // Update sidebar
+  const miniEl = document.getElementById('mini-suggestions');
+  if (miniEl) miniEl.textContent = pending;
 }
 
 // === RENDERING ===
@@ -493,19 +705,8 @@ function showPage(id) {
   document.getElementById('nav-'+id).classList.add('active');
   document.querySelector('.sidebar').classList.remove('open');
   
-  // Load data when switching to specific pages
-  if (id === 'suggestions') fetchSuggestions().catch(() => renderSuggestions());
+  if (id === 'suggestions') fetchSuggestions();
   if (id === 'tasks') fetchIdeas();
-}
-
-function updateDashboard() {
-  // Update pending suggestions KPI
-  const kpiEl = document.getElementById('kpi-pending-suggestions');
-  if (kpiEl) kpiEl.textContent = statsData.pending_suggestions || 0;
-  
-  // Update sidebar mini stats
-  const miniEl = document.getElementById('mini-suggestions');
-  if (miniEl) miniEl.textContent = statsData.pending_suggestions || 0;
 }
 
 // Daily chart
@@ -604,24 +805,65 @@ function handleDrop(e) {
   return false;
 }
 
+// Toast notification
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.toggle('error', isError);
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// Add Idea Modal
+function showAddIdeaModal() {
+  if (!checkToken()) return;
+  document.getElementById('add-idea-modal').classList.add('active');
+  document.getElementById('new-idea-title').value = '';
+  document.getElementById('new-idea-desc').value = '';
+  document.getElementById('new-idea-tag').value = 'tech';
+}
+
+function hideAddIdeaModal() {
+  document.getElementById('add-idea-modal').classList.remove('active');
+}
+
+async function submitNewIdea() {
+  const title = document.getElementById('new-idea-title').value.trim();
+  const desc = document.getElementById('new-idea-desc').value.trim();
+  const tag = document.getElementById('new-idea-tag').value;
+  
+  if (!title) {
+    alert('الرجاء إدخال العنوان');
+    return;
+  }
+  
+  hideAddIdeaModal();
+  await addIdea(title, desc, tag);
+}
+
 // Suggestions
 function getSourceIcon(source) {
-  const icons = {
-    'youtube': '🎬',
-    'reddit': '🔴',
-    'hn': '🟧',
-    'blog': '📝',
-    'hackernews': '🟧'
-  };
-  return icons[source.toLowerCase()] || '🌐';
+  const s = (source || '').toLowerCase();
+  if (s.includes('youtube')) return '🎬';
+  if (s.includes('reddit')) return '🔴';
+  if (s.includes('hn') || s.includes('hackernews')) return '🟧';
+  if (s.includes('blog')) return '📝';
+  return '🌐';
 }
 
 function renderSuggestions() {
   const list = document.getElementById('suggestions-list');
+  const counter = document.getElementById('suggestions-counter');
   const pending = suggestionsData.filter(s => s.status === 'pending');
   
+  if (counter) {
+    counter.textContent = pending.length > 0 ? `(${pending.length} معلّق)` : '';
+  }
+  
   if (pending.length === 0) {
-    list.innerHTML = '<div class="card"><p style="text-align:center;color:var(--text3)">لا توجد اقتراحات معلقة 🎉</p></div>';
+    list.innerHTML = '<div class="card"><p style="text-align:center;color:var(--green2);font-size:1.1em">✅ لا توجد اقتراحات معلقة</p></div>';
     return;
   }
   
@@ -632,12 +874,12 @@ function renderSuggestions() {
           <div class="suggestion-title">${s.title}</div>
           <div class="suggestion-source">
             <span class="icon">${getSourceIcon(s.source)}</span>
-            <span>${s.source}</span>
-            ${s.source_url ? `<a href="${s.source_url}" target="_blank" style="color:var(--accent2);text-decoration:none">↗</a>` : ''}
+            <span>${s.source || 'Unknown'}</span>
+            ${s.sourceUrl ? `<a href="${s.sourceUrl}" target="_blank" style="color:var(--accent2);text-decoration:none;margin-right:6px" title="فتح المصدر">🔗</a>` : ''}
           </div>
         </div>
       </div>
-      <div class="suggestion-desc">${s.description || 'لا يوجد وصف'}</div>
+      <div class="suggestion-desc">${s.desc || s.description || 'لا يوجد وصف'}</div>
       <div class="suggestion-actions">
         <button class="btn btn-approve" onclick="handleApprove('${s.id}')">✅ موافقة</button>
         <button class="btn btn-reject" onclick="handleReject('${s.id}')">❌ رفض</button>
@@ -665,7 +907,6 @@ function renderCalendar() {
   const grid = document.getElementById('cal-grid');
   const days = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
   let html = days.map(d => `<div class="cal-header">${d}</div>`).join('');
-  // March 2026 starts on Sunday (day 0)
   const startDay = 0;
   for(let i=0;i<startDay;i++) html += '<div></div>';
   for(let d=1;d<=31;d++) {
@@ -743,21 +984,25 @@ function renderActivity() {
 }
 
 // === INIT ===
-renderDailyChart(); 
-renderModelChart(); 
-renderCalendar();
-renderCronTable(); 
-renderDailyCostTable(); 
-renderTeam(); 
-renderMemory();
-renderBuilds(); 
-renderSystemCron(); 
-renderActivity();
+function init() {
+  renderDailyChart();
+  renderModelChart();
+  renderCalendar();
+  renderCronTable();
+  renderDailyCostTable();
+  renderTeam();
+  renderMemory();
+  renderBuilds();
+  renderSystemCron();
+  renderActivity();
+  
+  if (checkToken()) {
+    fetchIdeas();
+    fetchSuggestions();
+  }
+}
 
-// Load live data on init
-fetchIdeas();
-fetchStats();
-fetchSuggestions().catch(() => renderSuggestions());
+init();
 </script>
 </body>
 </html>
