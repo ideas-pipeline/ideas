@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة كفالة — Kafalah Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .form-section {
+            padding: 25px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .currency {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 14px;
+            pointer-events: none;
+        }
+        
+        .input-group input[type="number"] {
+            padding-left: 60px;
+        }
+        
+        .btn-calculate {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-calculate:active {
+            transform: translateY(0);
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 16px;
+        }
+        
+        .results.show {
+            display: block;
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-item {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .result-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        .result-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+        
+        .result-value.highlight {
+            color: #27ae60;
+            font-size: 28px;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border-right: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #856404;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ حاسبة كفالة</h1>
+            <p>احسب تكلفة الضمانات والتوفير</p>
+        </div>
+        
+        <div class="form-section">
+            <div class="input-group">
+                <label for="contractValue">قيمة العقد</label>
+                <div class="input-wrapper">
+                    <input type="number" id="contractValue" placeholder="مثال: 1000000" min="0" step="1000">
+                    <span class="currency">ريال</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="guaranteePercent">نسبة الضمان</label>
+                <select id="guaranteePercent">
+                    <option value="5">5% (ضمان ابتدائي)</option>
+                    <option value="10" selected>10% (ضمان نهائي)</option>
+                    <option value="15">15% (ضمان تنفيذ)</option>
+                    <option value="20">20% (ضمان حسن أداء)</option>
+                    <option value="30">30% (ضمان دفعة مقدمة)</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="duration">مدة العقد (بالأشهر)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="duration" placeholder="مثال: 12" min="1" max="120" step="1">
+                    <span class="currency">شهر</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="kafalahFee">رسم كفالة السنوي</label>
+                <select id="kafalahFee">
+                    <option value="2.5">2.5% (تصنيف ممتاز)</option>
+                    <option value="3.5" selected>3.5% (تصنيف جيد)</option>
+                    <option value="5">5% (تصنيف متوسط)</option>
+                    <option value="7">7% (منشآت صغيرة)</option>
+                </select>
+            </div>
+            
+            <button class="btn-calculate" onclick="calculate()">احسب الآن</button>
+            
+            <div class="results" id="results">
+                <div class="result-item">
+                    <div class="result-label">قيمة الضمان المطلوب</div>
+                    <div class="result-value" id="guaranteeAmount">-</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">رسم كفالة الإجمالي</div>
+                    <div class="result-value" id="totalKafalahFee">-</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">القسط الشهري التقريبي</div>
+                    <div class="result-value" id="monthlyPayment">-</div>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <div class="result-item">
+                    <div class="result-label">💰 التوفير مقارنة بالضمان المباشر</div>
+                    <div class="result-value highlight" id="savings">-</div>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <strong>💡 نبذة عن كفالة:</strong><br>
+                برنامج كفالة يتيح للمنشآت الصغيرة والمتوسطة الحصول على ضمانات بنكية بدون تجميد كامل المبلغ. بدلاً من دفع 100% من قيمة الضمان، تدفع رسوم سنوية بسيطة (2.5%-7% حسب التصنيف).
+            </div>
+        </div>
+        
+        <div class="footer">
+            Built with 💜 by Hadi — Night Build 2026-03-03
+        </div>
+    </div>
+    
+    <script>
+        function formatNumber(num) {
+            return new Intl.NumberFormat('ar-SA').format(Math.round(num));
+        }
+        
+        function calculate() {
+            // Get values
+            const contractValue = parseFloat(document.getElementById('contractValue').value);
+            const guaranteePercent = parseFloat(document.getElementById('guaranteePercent').value);
+            const duration = parseFloat(document.getElementById('duration').value);
+            const kafalahFee = parseFloat(document.getElementById('kafalahFee').value);
+            
+            // Validate
+            if (!contractValue || !duration || contractValue <= 0 || duration <= 0) {
+                alert('⚠️ الرجاء إدخال قيمة العقد والمدة بشكل صحيح');
+                return;
+            }
+            
+            // Calculate
+            const guaranteeAmount = contractValue * (guaranteePercent / 100);
+            const durationYears = duration / 12;
+            const totalKafalahFee = guaranteeAmount * (kafalahFee / 100) * durationYears;
+            const monthlyPayment = totalKafalahFee / duration;
+            const directGuaranteeCost = guaranteeAmount; // تجميد كامل المبلغ
+            const savings = directGuaranteeCost - totalKafalahFee;
+            const savingsPercent = (savings / directGuaranteeCost) * 100;
+            
+            // Display results
+            document.getElementById('guaranteeAmount').textContent = formatNumber(guaranteeAmount) + ' ريال';
+            document.getElementById('totalKafalahFee').textContent = formatNumber(totalKafalahFee) + ' ريال';
+            document.getElementById('monthlyPayment').textContent = formatNumber(monthlyPayment) + ' ريال';
+            document.getElementById('savings').textContent = 
+                formatNumber(savings) + ' ريال' + ' (' + savingsPercent.toFixed(1) + '%)';
+            
+            // Show results
+            document.getElementById('results').classList.add('show');
+            
+            // Smooth scroll to results
+            setTimeout(() => {
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+        
+        // Allow Enter key to calculate
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                calculate();
+            }
+        });
+    </script>
+</body>
+</html>
