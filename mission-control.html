@@ -306,7 +306,16 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 
 <script>
 // === CONFIG ===
-const API_BASE = 'http://127.0.0.1:48100';
+// Get token from URL
+const urlParams = new URLSearchParams(window.location.search);
+const API_TOKEN = urlParams.get('token') || '';
+const API_BASE = window.location.origin;
+
+// Add token to all fetch requests
+function apiFetch(path, opts = {}) {
+  const sep = path.includes('?') ? '&' : '?';
+  return fetch(API_BASE + path + sep + 'token=' + API_TOKEN, opts);
+}
 
 // === STATE ===
 let ideasData = {};
@@ -382,7 +391,7 @@ const activityFeed = [
 // === API FUNCTIONS ===
 async function fetchIdeas() {
   try {
-    const res = await fetch(`${API_BASE}/api/ideas`);
+    const res = await apiFetch(`/api/ideas`);
     if (!res.ok) throw new Error('Failed to fetch ideas');
     ideasData = await res.json();
     renderKanban();
@@ -396,7 +405,7 @@ async function fetchIdeas() {
 
 async function fetchStats() {
   try {
-    const res = await fetch(`${API_BASE}/api/stats`);
+    const res = await apiFetch(`/api/stats`);
     if (!res.ok) throw new Error('Failed to fetch stats');
     statsData = await res.json();
     updateDashboard();
@@ -408,7 +417,7 @@ async function fetchStats() {
 
 async function fetchSuggestions() {
   try {
-    const res = await fetch(`${API_BASE}/api/suggestions`);
+    const res = await apiFetch(`/api/suggestions`);
     if (!res.ok) throw new Error('Failed to fetch suggestions');
     suggestionsData = await res.json();
     renderSuggestions();
@@ -421,7 +430,7 @@ async function fetchSuggestions() {
 
 async function moveIdea(title, from, to) {
   try {
-    const res = await fetch(`${API_BASE}/api/ideas/move`, {
+    const res = await apiFetch(`/api/ideas/move`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({title, from, to})
@@ -436,7 +445,7 @@ async function moveIdea(title, from, to) {
 
 async function approveSuggestion(id) {
   try {
-    const res = await fetch(`${API_BASE}/api/suggestions/approve`, {
+    const res = await apiFetch(`/api/suggestions/approve`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({id})
@@ -453,7 +462,7 @@ async function approveSuggestion(id) {
 
 async function rejectSuggestion(id) {
   try {
-    const res = await fetch(`${API_BASE}/api/suggestions/reject`, {
+    const res = await apiFetch(`/api/suggestions/reject`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({id})
