@@ -954,7 +954,7 @@ async function renderTeam() {
   let liveStatus = null;
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/agents-status.json?ref=${GITHUB_BRANCH}`, {
-      headers: { 'Accept': 'application/vnd.github.v3+json' }
+      headers: (()=>{ const h={'Accept':'application/vnd.github.v3+json'}; const t=getToken(); if(t) h['Authorization']='token '+t; return h; })()
     });
     if (res.ok) {
       const data = await res.json();
@@ -1040,7 +1040,7 @@ function renderActivity() {
 async function fetchDashboardData() {
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/dashboard-data.json?ref=${GITHUB_BRANCH}`, {
-      headers: { 'Accept': 'application/vnd.github.v3+json' }
+      headers: (()=>{ const h={'Accept':'application/vnd.github.v3+json'}; const t=getToken(); if(t) h['Authorization']='token '+t; return h; })()
     });
     if (!res.ok) return;
     const data = await res.json();
