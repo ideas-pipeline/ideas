@@ -393,7 +393,16 @@ async function fetchIdeas() {
   try {
     const res = await apiFetch(`/api/ideas`);
     if (!res.ok) throw new Error('Failed to fetch ideas');
-    ideasData = await res.json();
+    const raw = await res.json();
+    // Transform: {columns: {inbox: {items: [...]}}} → {inbox: [...]}
+    if (raw.columns) {
+      ideasData = {};
+      for (const [key, col] of Object.entries(raw.columns)) {
+        ideasData[key] = col.items || [];
+      }
+    } else {
+      ideasData = raw;
+    }
     renderKanban();
   } catch (err) {
     console.error('Error fetching ideas:', err);
