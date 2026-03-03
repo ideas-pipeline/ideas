@@ -52,13 +52,30 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 .kpi-card.warn .kpi-value { color: var(--orange); }
 /* Kanban */
 .kanban { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 12px; }
-.kanban-col { min-width: 260px; max-width: 300px; flex-shrink: 0; background: var(--bg2); border-radius: var(--radius); padding: 14px; border: 1px solid var(--bg3); }
+.kanban-col { min-width: 260px; max-width: 300px; flex-shrink: 0; background: var(--bg2); border-radius: var(--radius); padding: 14px; border: 1px solid var(--bg3); min-height: 300px; }
+.kanban-col.drag-over { background: var(--bg3); border-color: var(--accent); }
 .kanban-col-title { font-size: 1em; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--bg3); display: flex; align-items: center; justify-content: space-between; }
 .kanban-col-title .count { background: var(--bg3); color: var(--text3); font-size: .75em; padding: 2px 8px; border-radius: 10px; }
-.kanban-item { background: var(--bg3); border-radius: var(--radius2); padding: 12px; margin-bottom: 8px; cursor: grab; transition: transform .15s, box-shadow .15s; }
+.kanban-item { background: var(--bg3); border-radius: var(--radius2); padding: 12px; margin-bottom: 8px; cursor: grab; transition: transform .15s, box-shadow .15s, opacity .15s; }
 .kanban-item:hover { transform: translateY(-2px); box-shadow: 0 4px 15px #0004; }
+.kanban-item.dragging { opacity: 0.5; cursor: grabbing; }
 .kanban-item h4 { font-size: .92em; font-weight: 600; margin-bottom: 5px; color: var(--text); }
 .kanban-item p { font-size: .82em; color: var(--text2); line-height: 1.4; }
+/* Suggestions */
+.suggestion-card { background: var(--bg2); border: 1px solid var(--bg3); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; transition: border-color .2s; }
+.suggestion-card:hover { border-color: var(--accent); }
+.suggestion-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.suggestion-title { font-size: 1.05em; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.suggestion-source { display: flex; align-items: center; gap: 6px; font-size: .85em; color: var(--text3); }
+.suggestion-source .icon { font-size: 1.1em; }
+.suggestion-desc { color: var(--text2); font-size: .9em; line-height: 1.5; margin-bottom: 12px; }
+.suggestion-actions { display: flex; gap: 8px; }
+.btn { padding: 8px 16px; border: none; border-radius: var(--radius2); font-size: .88em; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'Tajawal', sans-serif; }
+.btn-approve { background: var(--green); color: #fff; }
+.btn-approve:hover { background: var(--green2); transform: translateY(-1px); }
+.btn-reject { background: var(--red); color: #fff; }
+.btn-reject:hover { background: #ff8787; transform: translateY(-1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 /* Calendar */
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
 .cal-header { text-align: center; font-size: .8em; color: var(--text3); font-weight: 600; padding: 6px; }
@@ -131,6 +148,7 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
   <nav>
     <a onclick="showPage('dashboard')" class="active" id="nav-dashboard"><span class="emoji">📊</span> Dashboard</a>
     <a onclick="showPage('tasks')" id="nav-tasks"><span class="emoji">📋</span> Task Board</a>
+    <a onclick="showPage('suggestions')" id="nav-suggestions"><span class="emoji">💡</span> Suggestions</a>
     <a onclick="showPage('calendar')" id="nav-calendar"><span class="emoji">📅</span> Calendar</a>
     <a onclick="showPage('costs')" id="nav-costs"><span class="emoji">💰</span> Costs</a>
     <a onclick="showPage('agents')" id="nav-agents"><span class="emoji">🤖</span> Agents & Team</a>
@@ -140,9 +158,9 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
     <a onclick="showPage('activity')" id="nav-activity"><span class="emoji">📜</span> Activity Feed</a>
   </nav>
   <div class="stats-mini">
-    <div class="stat"><span>المتبقي</span><b>$1,328</b></div>
-    <div class="stat"><span>الجلسات</span><b>24</b></div>
-    <div class="stat"><span>Cron Jobs</span><b>8</b></div>
+    <div class="stat"><span>المتبقي</span><b id="mini-budget">$—</b></div>
+    <div class="stat"><span>الجلسات</span><b id="mini-sessions">—</b></div>
+    <div class="stat"><span>اقتراحات</span><b id="mini-suggestions">—</b></div>
   </div>
 </aside>
 
@@ -151,15 +169,15 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 <!-- ===== DASHBOARD ===== -->
 <div class="page active" id="page-dashboard">
   <div class="page-title">📊 Dashboard</div>
-  <div class="kpi-grid">
-    <div class="kpi-card"><div class="kpi-value">$22.28</div><div class="kpi-label">تكلفة اليوم</div></div>
-    <div class="kpi-card"><div class="kpi-value">$101.58</div><div class="kpi-label">تكلفة الشهر</div></div>
-    <div class="kpi-card"><div class="kpi-value">$1,329</div><div class="kpi-label">المتبقي من $1,800</div></div>
-    <div class="kpi-card"><div class="kpi-value">24</div><div class="kpi-label">جلسات نشطة</div></div>
-    <div class="kpi-card"><div class="kpi-value">8</div><div class="kpi-label">Cron Jobs</div></div>
-    <div class="kpi-card warn"><div class="kpi-value">93%</div><div class="kpi-label">نسبة Opus من التكلفة</div></div>
-    <div class="kpi-card"><div class="kpi-value">3,338</div><div class="kpi-label">إجمالي الطلبات</div></div>
-    <div class="kpi-card"><div class="kpi-value">10</div><div class="kpi-label">أيام ذاكرة</div></div>
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card"><div class="kpi-value">$—</div><div class="kpi-label">تكلفة اليوم</div></div>
+    <div class="kpi-card"><div class="kpi-value">$—</div><div class="kpi-label">تكلفة الشهر</div></div>
+    <div class="kpi-card"><div class="kpi-value">$—</div><div class="kpi-label">المتبقي من $1,800</div></div>
+    <div class="kpi-card"><div class="kpi-value">—</div><div class="kpi-label">جلسات نشطة</div></div>
+    <div class="kpi-card"><div class="kpi-value">—</div><div class="kpi-label">Cron Jobs</div></div>
+    <div class="kpi-card warn"><div class="kpi-value">—%</div><div class="kpi-label">نسبة Opus من التكلفة</div></div>
+    <div class="kpi-card"><div class="kpi-value">—</div><div class="kpi-label">إجمالي الطلبات</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kpi-pending-suggestions">—</div><div class="kpi-label">اقتراحات معلقة</div></div>
   </div>
 
   <div class="card">
@@ -177,6 +195,12 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 <div class="page" id="page-tasks">
   <div class="page-title">📋 Task Board</div>
   <div class="kanban" id="kanban-board"></div>
+</div>
+
+<!-- ===== SUGGESTIONS ===== -->
+<div class="page" id="page-suggestions">
+  <div class="page-title">💡 Suggestions</div>
+  <div id="suggestions-list"></div>
 </div>
 
 <!-- ===== CALENDAR ===== -->
@@ -281,9 +305,15 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 </main>
 
 <script>
-// === DATA ===
-const ideas = {"inbox":[],"doit":[],"explain":[{"title":"ClawRouter Setup","desc":"توفير 96% في تكلفة LLMs","tag":"tech"},{"title":"AI Ops Dashboard","desc":"داشبورد متكامل للعمليات اليومية مربوط بأنظمة أتمتة","tag":"tech"},{"title":"Cron Job Security Audit","desc":"تدقيق دوري للـ cron jobs — تتبع network calls و file accesses","tag":"security"},{"title":"No-code multi-agent automator","desc":"منصة drag & drop لإنشاء أوتوميشنات بدون كود","tag":"tech"},{"title":"Ideas Auto-Sync Cron","desc":"تحديث تلقائي للوحة الأفكار من التقارير","tag":"tech"}],"dontdoit":[{"title":"Video Gen Costs","desc":"مقارنة أسعار: Runway, Luma, HeyGen","tag":"tech"},{"title":"AI Agents Monitoring","desc":"تكامل مع New Relic لمتابعة أداء AI","tag":"tech"},{"title":"Near-Miss Digest","desc":"تقرير أسبوعي عن الـ near-misses","tag":"tech"},{"title":"Kimi/Moonshot","desc":"محركات بحث وفيديو جديدة","tag":"tech"},{"title":"Security Alert","desc":"+380 malicious skills على ClawHub","tag":"tech"},{"title":"aws-security-scanner","desc":"فحص أمان AWS","tag":"skill"},{"title":"AI CRM Sales Assistant","desc":"مساعد CRM للـ SMEs","tag":"business"},{"title":"Alexa CLI Bridge","desc":"ربط Alexa مع OpenClaw","tag":"skill"}],"done":[{"title":"OpenClaw Immutable","desc":"تحديث + security hardening","tag":"tech"},{"title":"MiniMax Setup","desc":"إضافة API key + default model","tag":"tech"},{"title":"Ideas Pipeline","desc":"لوحة Kanban على Gateway","tag":"tech"},{"title":"Memory Auto-Flush","desc":"تلقائي قبل compaction","tag":"tech"},{"title":"Self-Improving Merge","desc":"دمج في SOUL.md","tag":"tech"},{"title":"Dashboard Access Fix","desc":"allowedOrigins = [*]","tag":"tech"},{"title":"MiniMax Direct","desc":"إضافة مباشر كـ default","tag":"tech"},{"title":"Agent Self-Hash","desc":"SHA-256 integrity check","tag":"security"},{"title":"AI Video Gen","desc":"Sora 2 API — مفعّل","tag":"skill"}]};
+// === CONFIG ===
+const API_BASE = 'http://127.0.0.1:48100';
 
+// === STATE ===
+let ideasData = {};
+let statsData = {};
+let suggestionsData = [];
+
+// === DATA (fallback) ===
 const cronJobs = [
   {name:"☀️ التقرير الصباحي",time:"07:30",model:"GPT-4.1",status:"ok"},
   {name:"📊 التقرير الاقتصادي",time:"08:15",model:"GPT-4.1",status:"ok"},
@@ -349,6 +379,94 @@ const activityFeed = [
   {time:"00:00",text:"🌙 بداية يوم جديد — 3 مارس 2026",color:"var(--text3)"},
 ];
 
+// === API FUNCTIONS ===
+async function fetchIdeas() {
+  try {
+    const res = await fetch(`${API_BASE}/api/ideas`);
+    if (!res.ok) throw new Error('Failed to fetch ideas');
+    ideasData = await res.json();
+    renderKanban();
+  } catch (err) {
+    console.error('Error fetching ideas:', err);
+    // Use fallback data
+    ideasData = {"inbox":[],"doit":[],"explain":[{"title":"ClawRouter Setup","desc":"توفير 96% في تكلفة LLMs","tag":"tech"},{"title":"AI Ops Dashboard","desc":"داشبورد متكامل للعمليات اليومية مربوط بأنظمة أتمتة","tag":"tech"},{"title":"Cron Job Security Audit","desc":"تدقيق دوري للـ cron jobs — تتبع network calls و file accesses","tag":"security"},{"title":"No-code multi-agent automator","desc":"منصة drag & drop لإنشاء أوتوميشنات بدون كود","tag":"tech"},{"title":"Ideas Auto-Sync Cron","desc":"تحديث تلقائي للوحة الأفكار من التقارير","tag":"tech"}],"dontdoit":[{"title":"Video Gen Costs","desc":"مقارنة أسعار: Runway, Luma, HeyGen","tag":"tech"},{"title":"AI Agents Monitoring","desc":"تكامل مع New Relic لمتابعة أداء AI","tag":"tech"},{"title":"Near-Miss Digest","desc":"تقرير أسبوعي عن الـ near-misses","tag":"tech"},{"title":"Kimi/Moonshot","desc":"محركات بحث وفيديو جديدة","tag":"tech"},{"title":"Security Alert","desc":"+380 malicious skills على ClawHub","tag":"tech"},{"title":"aws-security-scanner","desc":"فحص أمان AWS","tag":"skill"},{"title":"AI CRM Sales Assistant","desc":"مساعد CRM للـ SMEs","tag":"business"},{"title":"Alexa CLI Bridge","desc":"ربط Alexa مع OpenClaw","tag":"skill"}],"done":[{"title":"OpenClaw Immutable","desc":"تحديث + security hardening","tag":"tech"},{"title":"MiniMax Setup","desc":"إضافة API key + default model","tag":"tech"},{"title":"Ideas Pipeline","desc":"لوحة Kanban على Gateway","tag":"tech"},{"title":"Memory Auto-Flush","desc":"تلقائي قبل compaction","tag":"tech"},{"title":"Self-Improving Merge","desc":"دمج في SOUL.md","tag":"tech"},{"title":"Dashboard Access Fix","desc":"allowedOrigins = [*]","tag":"tech"},{"title":"MiniMax Direct","desc":"إضافة مباشر كـ default","tag":"tech"},{"title":"Agent Self-Hash","desc":"SHA-256 integrity check","tag":"security"},{"title":"AI Video Gen","desc":"Sora 2 API — مفعّل","tag":"skill"}]};
+    renderKanban();
+  }
+}
+
+async function fetchStats() {
+  try {
+    const res = await fetch(`${API_BASE}/api/stats`);
+    if (!res.ok) throw new Error('Failed to fetch stats');
+    statsData = await res.json();
+    updateDashboard();
+  } catch (err) {
+    console.error('Error fetching stats:', err);
+    statsData = {pending_suggestions: 0};
+  }
+}
+
+async function fetchSuggestions() {
+  try {
+    const res = await fetch(`${API_BASE}/api/suggestions`);
+    if (!res.ok) throw new Error('Failed to fetch suggestions');
+    suggestionsData = await res.json();
+    renderSuggestions();
+  } catch (err) {
+    console.error('Error fetching suggestions:', err);
+    suggestionsData = [];
+    renderSuggestions();
+  }
+}
+
+async function moveIdea(title, from, to) {
+  try {
+    const res = await fetch(`${API_BASE}/api/ideas/move`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({title, from, to})
+    });
+    if (!res.ok) throw new Error('Failed to move idea');
+    await fetchIdeas();
+  } catch (err) {
+    console.error('Error moving idea:', err);
+    alert('فشل نقل الفكرة');
+  }
+}
+
+async function approveSuggestion(id) {
+  try {
+    const res = await fetch(`${API_BASE}/api/suggestions/approve`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id})
+    });
+    if (!res.ok) throw new Error('Failed to approve suggestion');
+    await fetchSuggestions();
+    await fetchIdeas();
+    await fetchStats();
+  } catch (err) {
+    console.error('Error approving suggestion:', err);
+    alert('فشل الموافقة على الاقتراح');
+  }
+}
+
+async function rejectSuggestion(id) {
+  try {
+    const res = await fetch(`${API_BASE}/api/suggestions/reject`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id})
+    });
+    if (!res.ok) throw new Error('Failed to reject suggestion');
+    await fetchSuggestions();
+    await fetchStats();
+  } catch (err) {
+    console.error('Error rejecting suggestion:', err);
+    alert('فشل رفض الاقتراح');
+  }
+}
+
 // === RENDERING ===
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -356,6 +474,20 @@ function showPage(id) {
   document.getElementById('page-'+id).classList.add('active');
   document.getElementById('nav-'+id).classList.add('active');
   document.querySelector('.sidebar').classList.remove('open');
+  
+  // Load data when switching to specific pages
+  if (id === 'suggestions') fetchSuggestions();
+  if (id === 'tasks') fetchIdeas();
+}
+
+function updateDashboard() {
+  // Update pending suggestions KPI
+  const kpiEl = document.getElementById('kpi-pending-suggestions');
+  if (kpiEl) kpiEl.textContent = statsData.pending_suggestions || 0;
+  
+  // Update sidebar mini stats
+  const miniEl = document.getElementById('mini-suggestions');
+  if (miniEl) miniEl.textContent = statsData.pending_suggestions || 0;
 }
 
 // Daily chart
@@ -380,7 +512,7 @@ function renderModelChart() {
   }).join('');
 }
 
-// Kanban
+// Kanban with Drag & Drop
 function renderKanban() {
   const board = document.getElementById('kanban-board');
   const cols = [
@@ -390,10 +522,124 @@ function renderKanban() {
     {key:'done',name:'✅ Done',color:'var(--green)'},
     {key:'dontdoit',name:'🚫 Don\'t Do It',color:'var(--text3)'},
   ];
+  
   board.innerHTML = cols.map(col => {
-    const items = ideas[col.key] || [];
-    return `<div class="kanban-col"><div class="kanban-col-title" style="color:${col.color}">${col.name} <span class="count">${items.length}</span></div>${items.map(i => `<div class="kanban-item"><h4>${i.title}</h4><p>${i.desc}</p><span class="tag tag-${i.tag||'tech'}">${i.tag||''}</span></div>`).join('')}</div>`;
+    const items = ideasData[col.key] || [];
+    return `
+      <div class="kanban-col" data-column="${col.key}" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <div class="kanban-col-title" style="color:${col.color}">${col.name} <span class="count">${items.length}</span></div>
+        ${items.map(i => `
+          <div class="kanban-item" draggable="true" data-title="${i.title}" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
+            <h4>${i.title}</h4>
+            <p>${i.desc}</p>
+            <span class="tag tag-${i.tag||'tech'}">${i.tag||''}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
   }).join('');
+}
+
+// Drag & Drop handlers
+let draggedItem = null;
+let sourceColumn = null;
+
+function handleDragStart(e) {
+  draggedItem = e.target;
+  sourceColumn = e.target.closest('.kanban-col').dataset.column;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', e.target.innerHTML);
+}
+
+function handleDragEnd(e) {
+  e.target.classList.remove('dragging');
+}
+
+function handleDragOver(e) {
+  if (e.preventDefault) e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const col = e.target.closest('.kanban-col');
+  if (col) col.classList.add('drag-over');
+  return false;
+}
+
+function handleDragLeave(e) {
+  const col = e.target.closest('.kanban-col');
+  if (col) col.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  if (e.stopPropagation) e.stopPropagation();
+  const targetCol = e.target.closest('.kanban-col');
+  if (!targetCol) return false;
+  
+  targetCol.classList.remove('drag-over');
+  
+  const targetColumn = targetCol.dataset.column;
+  const title = draggedItem.dataset.title;
+  
+  if (sourceColumn !== targetColumn) {
+    moveIdea(title, sourceColumn, targetColumn);
+  }
+  
+  return false;
+}
+
+// Suggestions
+function getSourceIcon(source) {
+  const icons = {
+    'youtube': '🎬',
+    'reddit': '🔴',
+    'hn': '🟧',
+    'blog': '📝',
+    'hackernews': '🟧'
+  };
+  return icons[source.toLowerCase()] || '🌐';
+}
+
+function renderSuggestions() {
+  const list = document.getElementById('suggestions-list');
+  const pending = suggestionsData.filter(s => s.status === 'pending');
+  
+  if (pending.length === 0) {
+    list.innerHTML = '<div class="card"><p style="text-align:center;color:var(--text3)">لا توجد اقتراحات معلقة 🎉</p></div>';
+    return;
+  }
+  
+  list.innerHTML = pending.map(s => `
+    <div class="suggestion-card" id="suggestion-${s.id}">
+      <div class="suggestion-header">
+        <div>
+          <div class="suggestion-title">${s.title}</div>
+          <div class="suggestion-source">
+            <span class="icon">${getSourceIcon(s.source)}</span>
+            <span>${s.source}</span>
+            ${s.source_url ? `<a href="${s.source_url}" target="_blank" style="color:var(--accent2);text-decoration:none">↗</a>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="suggestion-desc">${s.description || 'لا يوجد وصف'}</div>
+      <div class="suggestion-actions">
+        <button class="btn btn-approve" onclick="handleApprove('${s.id}')">✅ موافقة</button>
+        <button class="btn btn-reject" onclick="handleReject('${s.id}')">❌ رفض</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function handleApprove(id) {
+  const card = document.getElementById(`suggestion-${id}`);
+  const btns = card.querySelectorAll('button');
+  btns.forEach(b => b.disabled = true);
+  await approveSuggestion(id);
+}
+
+async function handleReject(id) {
+  const card = document.getElementById(`suggestion-${id}`);
+  const btns = card.querySelectorAll('button');
+  btns.forEach(b => b.disabled = true);
+  await rejectSuggestion(id);
 }
 
 // Calendar
@@ -409,7 +655,7 @@ function renderCalendar() {
     const dayOfWeek = (startDay + d - 1) % 7;
     let events = '';
     cronJobs.forEach(c => {
-      if(c.days && (dayOfWeek === 5 || dayOfWeek === 6)) return; // skip weekends for stock
+      if(c.days && (dayOfWeek === 5 || dayOfWeek === 6)) return;
       if(c.name.includes('الجمعة') && dayOfWeek !== 5) return;
       if(!c.name.includes('الجمعة') || dayOfWeek === 5) {
         const cls = c.status === 'ok' ? 'ok' : 'error';
@@ -479,9 +725,21 @@ function renderActivity() {
 }
 
 // === INIT ===
-renderDailyChart(); renderModelChart(); renderKanban(); renderCalendar();
-renderCronTable(); renderDailyCostTable(); renderTeam(); renderMemory();
-renderBuilds(); renderSystemCron(); renderActivity();
+renderDailyChart(); 
+renderModelChart(); 
+renderCalendar();
+renderCronTable(); 
+renderDailyCostTable(); 
+renderTeam(); 
+renderMemory();
+renderBuilds(); 
+renderSystemCron(); 
+renderActivity();
+
+// Load live data on init
+fetchIdeas();
+fetchStats();
+fetchSuggestions();
 </script>
 </body>
 </html>
