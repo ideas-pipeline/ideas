@@ -1,0 +1,28 @@
+{
+  "lastUpdated": "2026-03-04T00:40:00Z",
+  "balance": 1184.08,
+  "totalUsage": 615.92,
+  "limit": 1800.00,
+  "costToday": 0,
+  "costMonth": 615.92,
+  "activeSessions": 9,
+  "cronJobs": 8,
+  "totalRequests": 3338,
+  "opusPercent": 68,
+  "models": [
+    {"name": "Claude Opus 4.6", "cost": 417.94, "requests": 1361},
+    {"name": "Claude Sonnet 4.5", "cost": 120.50, "requests": 450},
+    {"name": "GPT-4.1", "cost": 51.41, "requests": 577},
+    {"name": "Sonar Pro", "cost": 15.06, "requests": 570},
+    {"name": "MiniMax M2.5", "cost": 11.01, "requests": 1423}
+  ],
+  "dailyCosts": [
+    {"date": "2026-03-03", "total": 62.00},
+    {"date": "2026-03-02", "total": 55.14},
+    {"date": "2026-03-01", "total": 24.18},
+    {"date": "2026-02-28", "total": 102.37},
+    {"date": "2026-02-27", "total": 54.41},
+    {"date": "2026-02-26", "total": 23.88},
+    {"date": "2026-02-25", "total": 8.40}
+  ]
+}

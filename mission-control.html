@@ -193,14 +193,14 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 <div class="page active" id="page-dashboard">
   <div class="page-title">📊 Dashboard</div>
   <div class="kpi-grid" id="kpi-grid">
-    <div class="kpi-card"><div class="kpi-value">$58.38</div><div class="kpi-label">تكلفة اليوم</div></div>
-    <div class="kpi-card"><div class="kpi-value">$137.68</div><div class="kpi-label">تكلفة الشهر</div></div>
-    <div class="kpi-card" id="kpi-balance"><div class="kpi-value">$24.58</div><div class="kpi-label">الرصيد (Credits)</div></div>
-    <div class="kpi-card"><div class="kpi-value">24</div><div class="kpi-label">جلسات نشطة</div></div>
-    <div class="kpi-card"><div class="kpi-value">8</div><div class="kpi-label">Cron Jobs</div></div>
-    <div class="kpi-card warn"><div class="kpi-value">93%</div><div class="kpi-label">نسبة Opus من التكلفة</div></div>
-    <div class="kpi-card"><div class="kpi-value">3,338</div><div class="kpi-label">إجمالي الطلبات</div></div>
-    <div class="kpi-card"><div class="kpi-value" id="kpi-pending-suggestions">12</div><div class="kpi-label">اقتراحات معلقة</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kv-cost-today">—</div><div class="kpi-label">تكلفة اليوم</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kv-cost-month">—</div><div class="kpi-label">تكلفة الشهر</div></div>
+    <div class="kpi-card" id="kpi-balance"><div class="kpi-value" id="kv-balance">—</div><div class="kpi-label">الرصيد (Credits)</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kv-sessions">—</div><div class="kpi-label">جلسات نشطة</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kv-cron">—</div><div class="kpi-label">Cron Jobs</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kv-opus">—</div><div class="kpi-label">نسبة Opus من التكلفة</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kv-requests">—</div><div class="kpi-label">إجمالي الطلبات</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kpi-pending-suggestions">—</div><div class="kpi-label">اقتراحات معلقة</div></div>
   </div>
 
   <div class="card">
@@ -1036,6 +1036,57 @@ function renderActivity() {
   ).join('');
 }
 
+// === FETCH DASHBOARD DATA ===
+async function fetchDashboardData() {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/dashboard-data.json?ref=${GITHUB_BRANCH}`, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const d = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+    
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+    set('kv-balance', '$' + d.balance.toLocaleString());
+    set('kv-cost-today', '$' + (d.costToday || 0).toLocaleString());
+    set('kv-cost-month', '$' + d.costMonth.toLocaleString());
+    set('kv-sessions', d.activeSessions);
+    set('kv-cron', d.cronJobs);
+    set('kv-opus', d.opusPercent + '%');
+    set('kv-requests', d.totalRequests.toLocaleString());
+    
+    // Color balance
+    const balEl = document.getElementById('kv-balance');
+    if (balEl) balEl.style.color = d.balance > 100 ? 'var(--green2)' : d.balance > 20 ? 'var(--orange)' : 'var(--red)';
+    
+    // Warn if opus > 80%
+    const opusEl = document.getElementById('kv-opus');
+    if (opusEl) opusEl.style.color = d.opusPercent > 80 ? 'var(--red)' : d.opusPercent > 50 ? 'var(--orange)' : 'var(--green2)';
+    
+    // Update daily chart with live data
+    if (d.dailyCosts && d.dailyCosts.length > 0) {
+      const el = document.getElementById('daily-chart');
+      const max = Math.max(...d.dailyCosts.map(x=>x.total));
+      el.innerHTML = d.dailyCosts.map(x => {
+        const w = (x.total/max*100).toFixed(0);
+        const color = x.total > 80 ? 'var(--red)' : x.total > 40 ? 'var(--orange)' : 'var(--green)';
+        return `<div class="bar-row"><div class="bar-label">${x.date.slice(5)}</div><div class="bar-fill" style="width:${w}%;background:${color}">$${x.total.toFixed(0)}</div></div>`;
+      }).join('');
+    }
+    
+    // Update model chart
+    if (d.models && d.models.length > 0) {
+      const el = document.getElementById('model-chart');
+      const colors = ['var(--accent)','var(--pink)','var(--blue)','var(--green)','var(--orange)'];
+      const max = d.models[0].cost;
+      el.innerHTML = d.models.map((m,i) => {
+        const w = (m.cost/max*100).toFixed(0);
+        return `<div class="bar-row"><div class="bar-label">${m.name}</div><div class="bar-fill" style="width:${w}%;background:${colors[i%colors.length]}">$${m.cost.toFixed(0)}</div></div>`;
+      }).join('');
+    }
+  } catch(e) { console.error('Dashboard data error:', e); }
+}
+
 // === INIT ===
 function init() {
   renderDailyChart();
@@ -1051,6 +1102,7 @@ function init() {
   
   fetchIdeas();
   fetchSuggestions();
+  fetchDashboardData();
 }
 
 init();
