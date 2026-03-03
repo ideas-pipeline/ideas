@@ -54,7 +54,7 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 .kpi-card.warn .kpi-value { color: var(--orange); }
 /* Kanban */
 .kanban { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 12px; }
-.kanban-col { min-width: 260px; max-width: 300px; flex-shrink: 0; background: var(--bg2); border-radius: var(--radius); padding: 14px; border: 1px solid var(--bg3); min-height: 300px; }
+.kanban-col { min-width: 240px; flex: 1; max-width: 300px; flex-shrink: 0; background: var(--bg2); border-radius: var(--radius); padding: 14px; border: 1px solid var(--bg3); min-height: 300px; }
 .kanban-col.drag-over { background: var(--bg3); border-color: var(--accent); }
 .kanban-col-title { font-size: 1em; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--bg3); display: flex; align-items: center; justify-content: space-between; }
 .kanban-col-title .count { background: var(--bg3); color: var(--text3); font-size: .75em; padding: 2px 8px; border-radius: 10px; }
@@ -390,10 +390,11 @@ const dailyCosts = [
 ];
 
 const agents = [
-  {name:"هادي (Main)",model:"Claude Opus 4.6 / GPT-4.1",role:"الوكيل الرئيسي — يدير كل شي، يرد على سلطان، يراقب النظام",device:"VPS (Hostinger)",status:"active",tokens:"120,817"},
-  {name:"Cron Worker",model:"GPT-4.1",role:"ينفّذ كل التقارير الدورية (صباحي، اقتصادي، تقني، أسهم، مسائي)",device:"VPS (Hostinger)",status:"active",tokens:"295,537"},
-  {name:"Night Builder",model:"Claude Sonnet 4.5",role:"يبني منتج حقيقي كل ليلة (أدوات، داشبوردات، أوتوميشن)",device:"VPS (Hostinger)",status:"fixed",tokens:"—"},
-  {name:"Web Searcher",model:"Sonar Pro (Perplexity)",role:"بحث ويب لتغذية التقارير والأبحاث",device:"API",status:"active",tokens:"188,906"},
+  {name:"هادي أوبس",model:"Claude Opus 4.6",role:"المدير + QA — يراقب، يراجع، يوقّع على المخرجات",device:"VPS",status:"active",emoji:"👑"},
+  {name:"هادي سونيت",model:"Claude Sonnet 4.5",role:"البنّاء — Frontend + Night Build + أدوات تفاعلية",device:"VPS",status:"active",emoji:"🎨"},
+  {name:"هادي جي بي",model:"GPT-4.1",role:"Backend + Cron + تقارير يومية + أتمتة",device:"VPS",status:"active",emoji:"⚙️"},
+  {name:"هادي ميني",model:"MiniMax M2.5",role:"مهام خفيفة — DNS، بنية تحتية، مهام سريعة",device:"VPS",status:"active",emoji:"⚡"},
+  {name:"الباحث",model:"Sonar Pro (Perplexity)",role:"بحث ويب لتغذية التقارير والأبحاث",device:"API",status:"active",emoji:"🔍"},
 ];
 
 const memories = {
@@ -736,19 +737,18 @@ function renderKanban() {
   const board = document.getElementById('kanban-board');
   const cols = [
     {key:'inbox',name:'📥 Inbox',color:'var(--orange)'},
-    {key:'doit',name:'🚀 Do It',color:'var(--red)'},
     {key:'explain',name:'🔍 Explain',color:'var(--blue)'},
-    {key:'done',name:'✅ Done',color:'var(--green)'},
-    {key:'dontdoit',name:'🚫 Don\'t Do It',color:'var(--text3)'},
+    {key:'doit',name:'🚀 Do It',color:'var(--red)'},
+    {key:'done',name:'✅ Done',color:'var(--green)'}
   ];
-  
   board.innerHTML = cols.map(col => {
     const items = ideasData[col.key] || [];
     return `
       <div class="kanban-col" data-column="${col.key}" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
         <div class="kanban-col-title" style="color:${col.color}">${col.name} <span class="count">${items.length}</span></div>
-        ${items.map(i => `
+        ${items.map((i, idx) => `
           <div class="kanban-item" draggable="true" data-title="${i.title}" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
+            <span style="display:inline-block;background:var(--accent);color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:.75em;font-weight:800;margin-left:6px;float:left">${idx+1}</span>
             <h4>${i.title}</h4>
             <p>${i.desc}</p>
             <span class="tag tag-${i.tag||'tech'}">${i.tag||''}</span>
@@ -758,6 +758,7 @@ function renderKanban() {
     `;
   }).join('');
 }
+
 
 // Drag & Drop handlers
 let draggedItem = null;
@@ -942,9 +943,29 @@ function renderDailyCostTable() {
 
 // Team
 function renderTeam() {
-  document.getElementById('team-grid').innerHTML = agents.map(a =>
-    `<div class="agent-card"><div class="agent-name">${a.name}</div><div class="agent-model">${a.model}</div><div class="agent-role">${a.role}</div><div style="margin-top:8px;font-size:.8em;color:var(--text3)">📱 ${a.device} | Tokens: ${a.tokens}</div></div>`
-  ).join('');
+  document.getElementById('team-grid').innerHTML = agents.map(a => {
+    const statusColor = a.status==='active'?'var(--green2)':a.status==='busy'?'var(--orange)':'var(--text3)';
+    const statusText = a.status==='active'?'🟢 متاح':a.status==='busy'?'🟡 يشتغل':'⚫ واقف';
+    return `
+      <div class="agent-card" style="border-right:3px solid ${statusColor}">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-size:1.8em">${a.emoji}</span>
+          <div>
+            <div class="agent-name">${a.name}</div>
+            <div class="agent-model">${a.model}</div>
+          </div>
+        </div>
+        <div class="agent-role">${a.role}</div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bg3);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:.82em;color:${statusColor};font-weight:700">${statusText}</span>
+          <span style="font-size:.78em;color:var(--text3)">📱 ${a.device}</span>
+        </div>
+        <div style="margin-top:8px;font-size:.82em;color:var(--text2);background:var(--bg3);padding:8px;border-radius:var(--radius2)" id="agent-task-${a.name.replace(/\s/g,'-')}">
+          📋 آخر نشاط: —
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // Memory
