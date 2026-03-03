@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Mission Control — هادي</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117; --bg2: #1a1d2e; --bg3: #232741; --bg4: #2a2f4a;
+  --text: #e4e6f0; --text2: #9ca3bf; --text3: #6b7294;
+  --accent: #6c5ce7; --accent2: #a29bfe; --green: #00cec9; --green2: #55efc4;
+  --red: #ff6b6b; --orange: #fdcb6e; --blue: #74b9ff; --pink: #fd79a8;
+  --radius: 12px; --radius2: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; overflow-x: hidden; }
+/* Sidebar */
+.sidebar { width: 220px; background: var(--bg2); border-left: 1px solid var(--bg3); display: flex; flex-direction: column; padding: 20px 0; position: fixed; top: 0; right: 0; height: 100vh; z-index: 100; transition: transform .3s; }
+.sidebar .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--bg3); margin-bottom: 12px; }
+.sidebar .logo h2 { font-size: 1.15em; color: var(--accent2); margin: 0; }
+.sidebar .logo small { color: var(--text3); font-size: .85em; }
+.sidebar nav { flex: 1; overflow-y: auto; }
+.sidebar nav a { display: flex; align-items: center; gap: 10px; padding: 11px 20px; color: var(--text2); text-decoration: none; font-size: .95em; font-weight: 500; transition: all .15s; cursor: pointer; }
+.sidebar nav a:hover, .sidebar nav a.active { background: var(--bg3); color: var(--text); border-radius: 0; }
+.sidebar nav a .emoji { font-size: 1.15em; }
+.sidebar .stats-mini { padding: 14px 20px; border-top: 1px solid var(--bg3); }
+.sidebar .stats-mini .stat { display: flex; justify-content: space-between; font-size: .82em; color: var(--text3); margin-bottom: 4px; }
+.sidebar .stats-mini .stat b { color: var(--green); }
+/* Main */
+.main { margin-right: 220px; flex: 1; padding: 24px 28px; min-height: 100vh; }
+.page { display: none; }
+.page.active { display: block; }
+.page-title { font-size: 1.6em; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+/* Cards */
+.card { background: var(--bg2); border: 1px solid var(--bg3); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; transition: border-color .2s; }
+.card:hover { border-color: var(--accent); }
+.card h3 { font-size: 1.05em; font-weight: 700; margin-bottom: 6px; }
+.card p { color: var(--text2); font-size: .9em; line-height: 1.5; }
+.tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: .78em; font-weight: 600; }
+.tag-tech { background: #6c5ce720; color: var(--accent2); }
+.tag-security { background: #ff6b6b20; color: var(--red); }
+.tag-skill { background: #00cec920; color: var(--green); }
+.tag-business { background: #fdcb6e20; color: var(--orange); }
+/* KPI Grid */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.kpi-card { background: var(--bg2); border: 1px solid var(--bg3); border-radius: var(--radius); padding: 18px; text-align: center; }
+.kpi-card .kpi-value { font-size: 1.8em; font-weight: 800; color: var(--green2); }
+.kpi-card .kpi-label { color: var(--text3); font-size: .85em; margin-top: 4px; }
+.kpi-card.danger .kpi-value { color: var(--red); }
+.kpi-card.warn .kpi-value { color: var(--orange); }
+/* Kanban */
+.kanban { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 12px; }
+.kanban-col { min-width: 260px; max-width: 300px; flex-shrink: 0; background: var(--bg2); border-radius: var(--radius); padding: 14px; border: 1px solid var(--bg3); }
+.kanban-col-title { font-size: 1em; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--bg3); display: flex; align-items: center; justify-content: space-between; }
+.kanban-col-title .count { background: var(--bg3); color: var(--text3); font-size: .75em; padding: 2px 8px; border-radius: 10px; }
+.kanban-item { background: var(--bg3); border-radius: var(--radius2); padding: 12px; margin-bottom: 8px; cursor: grab; transition: transform .15s, box-shadow .15s; }
+.kanban-item:hover { transform: translateY(-2px); box-shadow: 0 4px 15px #0004; }
+.kanban-item h4 { font-size: .92em; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+.kanban-item p { font-size: .82em; color: var(--text2); line-height: 1.4; }
+/* Calendar */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
+.cal-header { text-align: center; font-size: .8em; color: var(--text3); font-weight: 600; padding: 6px; }
+.cal-day { background: var(--bg2); border-radius: var(--radius2); padding: 8px; min-height: 80px; border: 1px solid var(--bg3); }
+.cal-day .day-num { font-size: .85em; font-weight: 700; color: var(--text3); margin-bottom: 4px; }
+.cal-day.today { border-color: var(--accent); }
+.cal-event { font-size: .72em; padding: 2px 5px; border-radius: 4px; margin-bottom: 3px; color: #fff; }
+.cal-event.ok { background: #00b89440; color: var(--green2); }
+.cal-event.error { background: #ff6b6b30; color: var(--red); }
+/* Cron Table */
+.cron-table { width: 100%; border-collapse: collapse; }
+.cron-table th { text-align: right; padding: 10px 12px; background: var(--bg3); color: var(--text2); font-size: .85em; font-weight: 600; }
+.cron-table td { padding: 10px 12px; border-bottom: 1px solid var(--bg3); font-size: .9em; }
+.cron-table tr:hover { background: var(--bg3); }
+.status-ok { color: var(--green2); font-weight: 700; }
+.status-err { color: var(--red); font-weight: 700; }
+/* Chart bars */
+.bar-chart { margin: 16px 0; }
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.bar-label { width: 160px; font-size: .85em; color: var(--text2); text-align: left; }
+.bar-fill { height: 24px; border-radius: 4px; display: flex; align-items: center; padding-right: 8px; font-size: .75em; font-weight: 700; color: #fff; min-width: 30px; transition: width .5s; }
+/* Memory */
+.memory-day { margin-bottom: 16px; }
+.memory-day h3 { font-size: .95em; color: var(--accent2); margin-bottom: 6px; cursor: pointer; }
+.memory-day h3:hover { color: var(--text); }
+.memory-content { background: var(--bg2); border: 1px solid var(--bg3); border-radius: var(--radius2); padding: 14px; font-size: .88em; color: var(--text2); line-height: 1.6; white-space: pre-wrap; max-height: 300px; overflow-y: auto; display: none; }
+.memory-content.open { display: block; }
+/* Team */
+.team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.agent-card { background: var(--bg2); border: 1px solid var(--bg3); border-radius: var(--radius); padding: 18px; }
+.agent-card .agent-name { font-size: 1.1em; font-weight: 700; color: var(--green2); margin-bottom: 4px; }
+.agent-card .agent-model { font-size: .82em; color: var(--accent2); margin-bottom: 8px; }
+.agent-card .agent-role { font-size: .88em; color: var(--text2); }
+.mission-box { background: linear-gradient(135deg, var(--bg3), var(--bg4)); border: 1px solid var(--accent); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; }
+.mission-box h3 { color: var(--accent2); margin-bottom: 8px; }
+.mission-box p { color: var(--text); font-size: 1em; line-height: 1.6; }
+/* Activity Feed */
+.feed { max-height: 500px; overflow-y: auto; }
+.feed-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bg3); }
+.feed-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.feed-item .feed-text { font-size: .88em; color: var(--text2); }
+.feed-item .feed-time { font-size: .75em; color: var(--text3); }
+/* Search */
+.search-box { background: var(--bg2); border: 1px solid var(--bg3); border-radius: var(--radius2); padding: 10px 14px; width: 100%; font-size: .92em; color: var(--text); margin-bottom: 16px; outline: none; font-family: 'Tajawal', sans-serif; }
+.search-box:focus { border-color: var(--accent); }
+/* Mobile */
+.menu-toggle { display: none; position: fixed; top: 12px; right: 12px; z-index: 200; background: var(--accent); border: none; color: #fff; width: 40px; height: 40px; border-radius: 10px; font-size: 1.3em; cursor: pointer; }
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(100%); width: 260px; }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-right: 0; padding: 16px; }
+  .menu-toggle { display: block; }
+  .kanban { flex-direction: column; }
+  .kanban-col { min-width: 100%; max-width: 100%; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .cal-grid { grid-template-columns: repeat(7, 1fr); }
+  .cal-event { font-size: .6em; }
+}
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+
+<aside class="sidebar">
+  <div class="logo">
+    <h2>🎛️ Mission Control</h2>
+    <small>هادي — مساعد سلطان</small>
+  </div>
+  <nav>
+    <a onclick="showPage('dashboard')" class="active" id="nav-dashboard"><span class="emoji">📊</span> Dashboard</a>
+    <a onclick="showPage('tasks')" id="nav-tasks"><span class="emoji">📋</span> Task Board</a>
+    <a onclick="showPage('calendar')" id="nav-calendar"><span class="emoji">📅</span> Calendar</a>
+    <a onclick="showPage('costs')" id="nav-costs"><span class="emoji">💰</span> Costs</a>
+    <a onclick="showPage('agents')" id="nav-agents"><span class="emoji">🤖</span> Agents & Team</a>
+    <a onclick="showPage('memory')" id="nav-memory"><span class="emoji">🧠</span> Memory</a>
+    <a onclick="showPage('builds')" id="nav-builds"><span class="emoji">🏭</span> Night Builds</a>
+    <a onclick="showPage('system')" id="nav-system"><span class="emoji">⚙️</span> System Health</a>
+    <a onclick="showPage('activity')" id="nav-activity"><span class="emoji">📜</span> Activity Feed</a>
+  </nav>
+  <div class="stats-mini">
+    <div class="stat"><span>المتبقي</span><b>$1,328</b></div>
+    <div class="stat"><span>الجلسات</span><b>24</b></div>
+    <div class="stat"><span>Cron Jobs</span><b>8</b></div>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ===== DASHBOARD ===== -->
+<div class="page active" id="page-dashboard">
+  <div class="page-title">📊 Dashboard</div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-value">$22.28</div><div class="kpi-label">تكلفة اليوم</div></div>
+    <div class="kpi-card"><div class="kpi-value">$101.58</div><div class="kpi-label">تكلفة الشهر</div></div>
+    <div class="kpi-card"><div class="kpi-value">$1,329</div><div class="kpi-label">المتبقي من $1,800</div></div>
+    <div class="kpi-card"><div class="kpi-value">24</div><div class="kpi-label">جلسات نشطة</div></div>
+    <div class="kpi-card"><div class="kpi-value">8</div><div class="kpi-label">Cron Jobs</div></div>
+    <div class="kpi-card warn"><div class="kpi-value">93%</div><div class="kpi-label">نسبة Opus من التكلفة</div></div>
+    <div class="kpi-card"><div class="kpi-value">3,338</div><div class="kpi-label">إجمالي الطلبات</div></div>
+    <div class="kpi-card"><div class="kpi-value">10</div><div class="kpi-label">أيام ذاكرة</div></div>
+  </div>
+
+  <div class="card">
+    <h3>📈 التكلفة اليومية (آخر 9 أيام)</h3>
+    <div class="bar-chart" id="daily-chart"></div>
+  </div>
+
+  <div class="card">
+    <h3>🤖 توزيع التكلفة حسب النموذج</h3>
+    <div class="bar-chart" id="model-chart"></div>
+  </div>
+</div>
+
+<!-- ===== TASK BOARD ===== -->
+<div class="page" id="page-tasks">
+  <div class="page-title">📋 Task Board</div>
+  <div class="kanban" id="kanban-board"></div>
+</div>
+
+<!-- ===== CALENDAR ===== -->
+<div class="page" id="page-calendar">
+  <div class="page-title">📅 Cron Calendar — مارس 2026</div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="card" style="margin-top:16px">
+    <h3>⚡ جدول المهام الدورية</h3>
+    <table class="cron-table">
+      <thead><tr><th>المهمة</th><th>الوقت</th><th>النموذج</th><th>الحالة</th></tr></thead>
+      <tbody id="cron-table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== COSTS ===== -->
+<div class="page" id="page-costs">
+  <div class="page-title">💰 Cost Dashboard</div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-value">$471</div><div class="kpi-label">إجمالي الصرف</div></div>
+    <div class="kpi-card"><div class="kpi-value">$1,329</div><div class="kpi-label">المتبقي</div></div>
+    <div class="kpi-card"><div class="kpi-value">$22.28</div><div class="kpi-label">اليوم</div></div>
+    <div class="kpi-card"><div class="kpi-value">$77.40</div><div class="kpi-label">الأسبوع</div></div>
+  </div>
+  <div class="card">
+    <h3>📊 تفصيل التكلفة حسب النموذج</h3>
+    <table class="cron-table">
+      <thead><tr><th>النموذج</th><th>التكلفة</th><th>الطلبات</th><th>النسبة</th></tr></thead>
+      <tbody>
+        <tr><td>Claude Opus 4.6</td><td style="color:var(--red)">$417.94</td><td>1,361</td><td>93.1%</td></tr>
+        <tr><td>GPT-4.1</td><td style="color:var(--green)">$21.41</td><td>377</td><td>4.8%</td></tr>
+        <tr><td>Sonar Pro</td><td>$5.06</td><td>370</td><td>1.1%</td></tr>
+        <tr><td>MiniMax M2.5</td><td>$4.66</td><td>1,223</td><td>1.0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>📅 التكلفة اليومية</h3>
+    <table class="cron-table">
+      <thead><tr><th>التاريخ</th><th>المجموع</th><th>Opus</th><th>GPT-4.1</th><th>أخرى</th></tr></thead>
+      <tbody id="daily-cost-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== AGENTS & TEAM ===== -->
+<div class="page" id="page-agents">
+  <div class="page-title">🤖 Agents & Team</div>
+  <div class="mission-box">
+    <h3>🎯 Mission Statement</h3>
+    <p>بناء منظومة AI متكاملة تعمل 24/7 لسلطان — تراقب، تبني، تحلل، وتبادر. كل يوم أقوى من اللي قبله.</p>
+  </div>
+  <div class="team-grid" id="team-grid"></div>
+</div>
+
+<!-- ===== MEMORY ===== -->
+<div class="page" id="page-memory">
+  <div class="page-title">🧠 Memory Browser</div>
+  <input type="text" class="search-box" placeholder="🔍 ابحث في الذكريات..." oninput="filterMemory(this.value)">
+  <div id="memory-list"></div>
+</div>
+
+<!-- ===== NIGHT BUILDS ===== -->
+<div class="page" id="page-builds">
+  <div class="page-title">🏭 Night Builds</div>
+  <div id="builds-list"></div>
+</div>
+
+<!-- ===== SYSTEM HEALTH ===== -->
+<div class="page" id="page-system">
+  <div class="page-title">⚙️ System Health</div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-value" style="color:var(--green2)">🟢</div><div class="kpi-label">Gateway</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:var(--green2)">🟢</div><div class="kpi-label">Telegram Bot</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:var(--orange)">🟡</div><div class="kpi-label">Night Build</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:var(--red)">🔴</div><div class="kpi-label">Integrity Check</div></div>
+  </div>
+  <div class="card">
+    <h3>📋 حالة Cron Jobs</h3>
+    <table class="cron-table">
+      <thead><tr><th>المهمة</th><th>آخر حالة</th><th>النموذج</th><th>المدة</th><th>الخطأ</th></tr></thead>
+      <tbody id="system-cron-table"></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>⚠️ مشاكل تحتاج انتباه</h3>
+    <div style="padding:8px">
+      <div style="color:var(--red);margin-bottom:8px">🔴 integrity-check.sh مفقود — الفحص الأمني متوقف</div>
+      <div style="color:var(--orange);margin-bottom:8px">🟡 Night Build فشل (model not allowed) — تم الإصلاح</div>
+      <div style="color:var(--orange);margin-bottom:8px">🟡 تحديث OpenClaw متاح (2026.3.2)</div>
+      <div style="color:var(--red);margin-bottom:8px">🔴 Claude Opus يستهلك 93% من الميزانية</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ACTIVITY FEED ===== -->
+<div class="page" id="page-activity">
+  <div class="page-title">📜 Activity Feed</div>
+  <div class="feed" id="activity-feed"></div>
+</div>
+
+</main>
+
+<script>
+// === DATA ===
+const ideas = {"inbox":[],"doit":[],"explain":[{"title":"ClawRouter Setup","desc":"توفير 96% في تكلفة LLMs","tag":"tech"},{"title":"AI Ops Dashboard","desc":"داشبورد متكامل للعمليات اليومية مربوط بأنظمة أتمتة","tag":"tech"},{"title":"Cron Job Security Audit","desc":"تدقيق دوري للـ cron jobs — تتبع network calls و file accesses","tag":"security"},{"title":"No-code multi-agent automator","desc":"منصة drag & drop لإنشاء أوتوميشنات بدون كود","tag":"tech"},{"title":"Ideas Auto-Sync Cron","desc":"تحديث تلقائي للوحة الأفكار من التقارير","tag":"tech"}],"dontdoit":[{"title":"Video Gen Costs","desc":"مقارنة أسعار: Runway, Luma, HeyGen","tag":"tech"},{"title":"AI Agents Monitoring","desc":"تكامل مع New Relic لمتابعة أداء AI","tag":"tech"},{"title":"Near-Miss Digest","desc":"تقرير أسبوعي عن الـ near-misses","tag":"tech"},{"title":"Kimi/Moonshot","desc":"محركات بحث وفيديو جديدة","tag":"tech"},{"title":"Security Alert","desc":"+380 malicious skills على ClawHub","tag":"tech"},{"title":"aws-security-scanner","desc":"فحص أمان AWS","tag":"skill"},{"title":"AI CRM Sales Assistant","desc":"مساعد CRM للـ SMEs","tag":"business"},{"title":"Alexa CLI Bridge","desc":"ربط Alexa مع OpenClaw","tag":"skill"}],"done":[{"title":"OpenClaw Immutable","desc":"تحديث + security hardening","tag":"tech"},{"title":"MiniMax Setup","desc":"إضافة API key + default model","tag":"tech"},{"title":"Ideas Pipeline","desc":"لوحة Kanban على Gateway","tag":"tech"},{"title":"Memory Auto-Flush","desc":"تلقائي قبل compaction","tag":"tech"},{"title":"Self-Improving Merge","desc":"دمج في SOUL.md","tag":"tech"},{"title":"Dashboard Access Fix","desc":"allowedOrigins = [*]","tag":"tech"},{"title":"MiniMax Direct","desc":"إضافة مباشر كـ default","tag":"tech"},{"title":"Agent Self-Hash","desc":"SHA-256 integrity check","tag":"security"},{"title":"AI Video Gen","desc":"Sora 2 API — مفعّل","tag":"skill"}]};
+
+const cronJobs = [
+  {name:"☀️ التقرير الصباحي",time:"07:30",model:"GPT-4.1",status:"ok"},
+  {name:"📊 التقرير الاقتصادي",time:"08:15",model:"GPT-4.1",status:"ok"},
+  {name:"📈 أسهم صباحي",time:"10:20",model:"GPT-4.1",status:"ok",days:"أحد-خميس"},
+  {name:"🤖 تقرير تقني",time:"12:00",model:"GPT-4.1",status:"ok"},
+  {name:"📈 أسهم عصري",time:"15:30",model:"GPT-4.1",status:"ok",days:"أحد-خميس"},
+  {name:"🌙 ملخص مسائي",time:"21:00",model:"GPT-4.1",status:"ok"},
+  {name:"🏭 Night Build",time:"02:00",model:"Sonnet 4.5",status:"error",error:"model not allowed (تم الإصلاح)"},
+  {name:"📊 قوائم مالية",time:"03:00 الجمعة",model:"GPT-4.1",status:"ok"},
+];
+
+const dailyCosts = [
+  {date:"2026-03-02",total:55.14,opus:42.94,gpt:11.06,other:1.14},
+  {date:"2026-03-01",total:24.18,opus:19.62,gpt:3.82,other:0.74},
+  {date:"2026-02-28",total:102.37,opus:94.92,gpt:6.53,other:0.92},
+  {date:"2026-02-27",total:54.41,opus:53.22,gpt:0,other:1.19},
+  {date:"2026-02-26",total:23.88,opus:23.15,gpt:0,other:0.73},
+  {date:"2026-02-25",total:8.40,opus:7.51,gpt:0,other:0.89},
+  {date:"2026-02-24",total:117.60,opus:116.88,gpt:0,other:0.72},
+  {date:"2026-02-23",total:50.54,opus:47.42,gpt:0,other:3.12},
+  {date:"2026-02-22",total:12.53,opus:12.27,gpt:0,other:0.26},
+];
+
+const agents = [
+  {name:"هادي (Main)",model:"Claude Opus 4.6 / GPT-4.1",role:"الوكيل الرئيسي — يدير كل شي، يرد على سلطان، يراقب النظام",device:"VPS (Hostinger)",status:"active",tokens:"120,817"},
+  {name:"Cron Worker",model:"GPT-4.1",role:"ينفّذ كل التقارير الدورية (صباحي، اقتصادي، تقني، أسهم، مسائي)",device:"VPS (Hostinger)",status:"active",tokens:"295,537"},
+  {name:"Night Builder",model:"Claude Sonnet 4.5",role:"يبني منتج حقيقي كل ليلة (أدوات، داشبوردات، أوتوميشن)",device:"VPS (Hostinger)",status:"fixed",tokens:"—"},
+  {name:"Web Searcher",model:"Sonar Pro (Perplexity)",role:"بحث ويب لتغذية التقارير والأبحاث",device:"API",status:"active",tokens:"188,906"},
+];
+
+const memories = {
+  "2026-03-03":"Night Build Investigation — اكتشاف صرف $39 على Opus، GPT-4.1 بنى mini-dashboard بسيط، Sonnet 4.5 بنى حاسبة كفالة تفاعلية. تحديث دروس مستفادة وإصلاح cron.",
+  "2026-03-02":"هيكلة جديدة للـ Cron — Night Build تحوّل لمصنع حقيقي. تحديث التقارير.",
+  "2026-03-01":"تقارير يومية عادية. Night Build بنى تقرير أولي.",
+  "2026-02-28":"يوم مكلف ($102) — Opus استهلك $95. مراجعة الاستراتيجية.",
+  "2026-02-27":"تحسينات على الذاكرة والـ cron. إضافة أفكار جديدة.",
+  "2026-02-26":"إعداد MiniMax Direct. تحسين الأداء.",
+  "2026-02-25":"Memory-First Rule. تحسين hybrid search و context pruning.",
+  "2026-02-24":"يوم مكلف ($117) — تجارب مكثفة مع Opus.",
+  "2026-02-23":"تثبيت self-improving + transcriptapi. تصحيح cron.",
+  "2026-02-22":"الإعداد الأولي — Telegram، OpenRouter، Maton، Google OAuth.",
+};
+
+const builds = [
+  {date:"2026-03-03",name:"حاسبة كفالة تفاعلية",builder:"Sonnet 4.5",link:"https://ideas-pipeline.github.io/ideas/kafalah-calculator.html",desc:"حاسبة ضمانات بنكية تفاعلية — mobile-first"},
+  {date:"2026-03-02",name:"Night Mini Dashboard",builder:"GPT-4.1",link:"https://ideas-pipeline.github.io/ideas/night-mini-dashboard.html",desc:"صفحة بسيطة بـ 4 أرقام ثابتة (لا قيمة فعلية)"},
+  {date:"2026-03-01",name:"Night Build Report",builder:"GPT-4.1",link:"—",desc:"تقرير نصي — ليس منتج حقيقي"},
+];
+
+const activityFeed = [
+  {time:"19:15",text:"⚙️ بناء Mission Control الكامل",color:"var(--accent)"},
+  {time:"18:50",text:"📋 نقل 8 أفكار إلى Don't Do It",color:"var(--orange)"},
+  {time:"18:30",text:"🎬 تحليل فيديو Alex Finn (Mission Control)",color:"var(--blue)"},
+  {time:"18:09",text:"🔄 تبديل النموذج إلى Claude Opus 4.6",color:"var(--accent2)"},
+  {time:"17:00",text:"🏭 Night Build يدوي — Sonnet 4.5 بنى حاسبة كفالة",color:"var(--green)"},
+  {time:"16:16",text:"📊 تقرير اقتصادي (GPT-4.1) — تم الإرسال",color:"var(--blue)"},
+  {time:"14:01",text:"🤖 تقرير تقني (GPT-4.1) — تم الإرسال",color:"var(--blue)"},
+  {time:"12:16",text:"📊 تقرير اقتصادي (GPT-4.1) — تم الإرسال",color:"var(--blue)"},
+  {time:"10:20",text:"📈 تحديث أسهم صباحي — TASI: 10,557",color:"var(--green)"},
+  {time:"08:15",text:"📊 تقرير اقتصادي — كفالة + مؤشرات",color:"var(--blue)"},
+  {time:"07:30",text:"☀️ تقرير صباحي — يوم فاضي",color:"var(--orange)"},
+  {time:"02:00",text:"🏭 Night Build فشل ❌ model not allowed",color:"var(--red)"},
+  {time:"00:00",text:"🌙 بداية يوم جديد — 3 مارس 2026",color:"var(--text3)"},
+];
+
+// === RENDERING ===
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  document.querySelector('.sidebar').classList.remove('open');
+}
+
+// Daily chart
+function renderDailyChart() {
+  const el = document.getElementById('daily-chart');
+  const max = Math.max(...dailyCosts.map(d=>d.total));
+  el.innerHTML = dailyCosts.map(d => {
+    const w = (d.total/max*100).toFixed(0);
+    const color = d.total > 80 ? 'var(--red)' : d.total > 40 ? 'var(--orange)' : 'var(--green)';
+    return `<div class="bar-row"><div class="bar-label">${d.date.slice(5)}</div><div class="bar-fill" style="width:${w}%;background:${color}">$${d.total.toFixed(0)}</div></div>`;
+  }).join('');
+}
+
+// Model chart
+function renderModelChart() {
+  const el = document.getElementById('model-chart');
+  const models = [{name:'Claude Opus 4.6',cost:417.94,color:'var(--accent)'},{name:'GPT-4.1',cost:21.41,color:'var(--blue)'},{name:'Sonar Pro',cost:5.06,color:'var(--green)'},{name:'MiniMax M2.5',cost:4.66,color:'var(--orange)'}];
+  const max = models[0].cost;
+  el.innerHTML = models.map(m => {
+    const w = (m.cost/max*100).toFixed(0);
+    return `<div class="bar-row"><div class="bar-label">${m.name}</div><div class="bar-fill" style="width:${w}%;background:${m.color}">$${m.cost.toFixed(0)}</div></div>`;
+  }).join('');
+}
+
+// Kanban
+function renderKanban() {
+  const board = document.getElementById('kanban-board');
+  const cols = [
+    {key:'inbox',name:'📥 Inbox',color:'var(--orange)'},
+    {key:'doit',name:'🚀 Do It',color:'var(--red)'},
+    {key:'explain',name:'🔍 Explain',color:'var(--blue)'},
+    {key:'done',name:'✅ Done',color:'var(--green)'},
+    {key:'dontdoit',name:'🚫 Don\'t Do It',color:'var(--text3)'},
+  ];
+  board.innerHTML = cols.map(col => {
+    const items = ideas[col.key] || [];
+    return `<div class="kanban-col"><div class="kanban-col-title" style="color:${col.color}">${col.name} <span class="count">${items.length}</span></div>${items.map(i => `<div class="kanban-item"><h4>${i.title}</h4><p>${i.desc}</p><span class="tag tag-${i.tag||'tech'}">${i.tag||''}</span></div>`).join('')}</div>`;
+  }).join('');
+}
+
+// Calendar
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  const days = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+  let html = days.map(d => `<div class="cal-header">${d}</div>`).join('');
+  // March 2026 starts on Sunday (day 0)
+  const startDay = 0;
+  for(let i=0;i<startDay;i++) html += '<div></div>';
+  for(let d=1;d<=31;d++) {
+    const isToday = d === 3;
+    const dayOfWeek = (startDay + d - 1) % 7;
+    let events = '';
+    cronJobs.forEach(c => {
+      if(c.days && (dayOfWeek === 5 || dayOfWeek === 6)) return; // skip weekends for stock
+      if(c.name.includes('الجمعة') && dayOfWeek !== 5) return;
+      if(!c.name.includes('الجمعة') || dayOfWeek === 5) {
+        const cls = c.status === 'ok' ? 'ok' : 'error';
+        if(d <= 3) events += `<div class="cal-event ${cls}">${c.time}</div>`;
+      }
+    });
+    html += `<div class="cal-day ${isToday?'today':''}"><div class="day-num">${d}</div>${d<=3?events:''}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+// Cron table
+function renderCronTable() {
+  document.getElementById('cron-table-body').innerHTML = cronJobs.map(c =>
+    `<tr><td>${c.name}</td><td>${c.time}${c.days?' ('+c.days+')':''}</td><td>${c.model}</td><td class="${c.status==='ok'?'status-ok':'status-err'}">${c.status==='ok'?'✅ نجح':'❌ فشل'}</td></tr>`
+  ).join('');
+}
+
+// Daily cost table
+function renderDailyCostTable() {
+  document.getElementById('daily-cost-table').innerHTML = dailyCosts.map(d =>
+    `<tr><td>${d.date}</td><td style="font-weight:700;color:${d.total>80?'var(--red)':d.total>40?'var(--orange)':'var(--green)'}">$${d.total.toFixed(2)}</td><td>$${d.opus.toFixed(2)}</td><td>$${d.gpt.toFixed(2)}</td><td>$${d.other.toFixed(2)}</td></tr>`
+  ).join('');
+}
+
+// Team
+function renderTeam() {
+  document.getElementById('team-grid').innerHTML = agents.map(a =>
+    `<div class="agent-card"><div class="agent-name">${a.name}</div><div class="agent-model">${a.model}</div><div class="agent-role">${a.role}</div><div style="margin-top:8px;font-size:.8em;color:var(--text3)">📱 ${a.device} | Tokens: ${a.tokens}</div></div>`
+  ).join('');
+}
+
+// Memory
+function renderMemory() {
+  const el = document.getElementById('memory-list');
+  el.innerHTML = Object.entries(memories).sort((a,b)=>b[0].localeCompare(a[0])).map(([date,content]) =>
+    `<div class="memory-day" data-content="${content}"><h3 onclick="this.nextElementSibling.classList.toggle('open')">📅 ${date}</h3><div class="memory-content">${content}</div></div>`
+  ).join('');
+}
+
+function filterMemory(q) {
+  document.querySelectorAll('.memory-day').forEach(el => {
+    const show = !q || el.dataset.content.includes(q);
+    el.style.display = show ? 'block' : 'none';
+  });
+}
+
+// Builds
+function renderBuilds() {
+  document.getElementById('builds-list').innerHTML = builds.map(b =>
+    `<div class="card"><h3>${b.name}</h3><p style="margin-bottom:6px">${b.desc}</p><div style="font-size:.85em;color:var(--text3)">📅 ${b.date} | 🤖 ${b.builder} | 🔗 <a href="${b.link}" target="_blank" style="color:var(--accent2)">${b.link!=='—'?'فتح الرابط':'—'}</a></div></div>`
+  ).join('');
+}
+
+// System cron table
+function renderSystemCron() {
+  document.getElementById('system-cron-table').innerHTML = cronJobs.map(c =>
+    `<tr><td>${c.name}</td><td class="${c.status==='ok'?'status-ok':'status-err'}">${c.status==='ok'?'✅':'❌'}</td><td>${c.model}</td><td>—</td><td style="color:var(--red);font-size:.85em">${c.error||'—'}</td></tr>`
+  ).join('');
+}
+
+// Activity Feed
+function renderActivity() {
+  document.getElementById('activity-feed').innerHTML = activityFeed.map(a =>
+    `<div class="feed-item"><div class="feed-dot" style="background:${a.color}"></div><div><div class="feed-text">${a.text}</div><div class="feed-time">${a.time}</div></div></div>`
+  ).join('');
+}
+
+// === INIT ===
+renderDailyChart(); renderModelChart(); renderKanban(); renderCalendar();
+renderCronTable(); renderDailyCostTable(); renderTeam(); renderMemory();
+renderBuilds(); renderSystemCron(); renderActivity();
+</script>
+</body>
+</html>
