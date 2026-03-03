@@ -170,14 +170,14 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 <div class="page active" id="page-dashboard">
   <div class="page-title">📊 Dashboard</div>
   <div class="kpi-grid" id="kpi-grid">
-    <div class="kpi-card"><div class="kpi-value">$—</div><div class="kpi-label">تكلفة اليوم</div></div>
-    <div class="kpi-card"><div class="kpi-value">$—</div><div class="kpi-label">تكلفة الشهر</div></div>
-    <div class="kpi-card"><div class="kpi-value">$—</div><div class="kpi-label">المتبقي من $1,800</div></div>
-    <div class="kpi-card"><div class="kpi-value">—</div><div class="kpi-label">جلسات نشطة</div></div>
-    <div class="kpi-card"><div class="kpi-value">—</div><div class="kpi-label">Cron Jobs</div></div>
-    <div class="kpi-card warn"><div class="kpi-value">—%</div><div class="kpi-label">نسبة Opus من التكلفة</div></div>
-    <div class="kpi-card"><div class="kpi-value">—</div><div class="kpi-label">إجمالي الطلبات</div></div>
-    <div class="kpi-card"><div class="kpi-value" id="kpi-pending-suggestions">—</div><div class="kpi-label">اقتراحات معلقة</div></div>
+    <div class="kpi-card"><div class="kpi-value">$22.28</div><div class="kpi-label">تكلفة اليوم</div></div>
+    <div class="kpi-card"><div class="kpi-value">$101.58</div><div class="kpi-label">تكلفة الشهر</div></div>
+    <div class="kpi-card"><div class="kpi-value">$1,329</div><div class="kpi-label">المتبقي من $1,800</div></div>
+    <div class="kpi-card"><div class="kpi-value">24</div><div class="kpi-label">جلسات نشطة</div></div>
+    <div class="kpi-card"><div class="kpi-value">8</div><div class="kpi-label">Cron Jobs</div></div>
+    <div class="kpi-card warn"><div class="kpi-value">93%</div><div class="kpi-label">نسبة Opus من التكلفة</div></div>
+    <div class="kpi-card"><div class="kpi-value">3,338</div><div class="kpi-label">إجمالي الطلبات</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kpi-pending-suggestions">12</div><div class="kpi-label">اقتراحات معلقة</div></div>
   </div>
 
   <div class="card">
@@ -311,7 +311,7 @@ const API_BASE = 'http://127.0.0.1:48100';
 // === STATE ===
 let ideasData = {};
 let statsData = {};
-let suggestionsData = [];
+let suggestionsData = [{"id": "mmb0vpyd", "title": "4 AI Prompt Patterns You NEED To Know (in Genspark)", "desc": "Tech With Tim: 4 AI Prompt Patterns You NEED To Know (in Genspark) (Views: 5102)", "tag": "tech", "source": "Tech With Tim: 4 AI Prompt Patterns You NEED To Know (in Genspark) (Views: 5102)", "sourceUrl": "https://youtube.com/watch?v=mib1r_UuGEs", "createdAt": "2026-03-03T19:50:29.413Z", "status": "pending"}, {"id": "mmb0vqn2", "title": "they stole Claude’s brain 16 million times", "desc": "NetworkChuck: they stole Claude’s brain 16 million times (Views: 30150)", "tag": "tech", "source": "NetworkChuck: they stole Claude’s brain 16 million times (Views: 30150)", "sourceUrl": "https://youtube.com/watch?v=lO961HRQn5Q", "createdAt": "2026-03-03T19:50:30.302Z", "status": "pending"}, {"id": "mmb0vqnz", "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)", "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)", "tag": "tech", "source": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)", "sourceUrl": "https://youtube.com/watch?v=ocQ7ZKhHU5Q", "createdAt": "2026-03-03T19:50:30.335Z", "status": "pending"}, {"id": "mmb0vqow", "title": "become an AI HACKER (it's easier than you think)", "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)", "tag": "tech", "source": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)", "sourceUrl": "https://youtube.com/watch?v=_yfiUQSbdPY", "createdAt": "2026-03-03T19:50:30.368Z", "status": "pending"}, {"id": "mmb0vurf", "title": "Super Nested Claude Code Is Vibecoding On STEROIDS", "desc": "All About AI: Super Nested Claude Code Is Vibecoding On STEROIDS (Views: 3539)", "tag": "tech", "source": "All About AI: Super Nested Claude Code Is Vibecoding On STEROIDS (Views: 3539)", "sourceUrl": "https://youtube.com/watch?v=BlyJKhhbzwA", "createdAt": "2026-03-03T19:50:35.643Z", "status": "pending"}, {"id": "mmb0vus9", "title": "Claude Code AI Agent Controls Claude Code On Twitch", "desc": "All About AI: Claude Code AI Agent Controls Claude Code On Twitch (Views: 1400)", "tag": "tech", "source": "All About AI: Claude Code AI Agent Controls Claude Code On Twitch (Views: 1400)", "sourceUrl": "https://youtube.com/watch?v=rtTuXAvS2yw", "createdAt": "2026-03-03T19:50:35.673Z", "status": "pending"}, {"id": "mmb0vut4", "title": "I Let My AI Agent Run for 504 Hours Straight — Here's What Happened", "desc": "All About AI: I Let My AI Agent Run for 504 Hours Straight — Here's What Happened (Views: 7047)", "tag": "tech", "source": "All About AI: I Let My AI Agent Run for 504 Hours Straight — Here's What Happened (Views: 7047)", "sourceUrl": "https://youtube.com/watch?v=O_5vugzgoik", "createdAt": "2026-03-03T19:50:35.704Z", "status": "pending"}, {"id": "mmb0vvf2", "title": "AMA with StepFun AI - Ask Us Anything", "desc": "r/LocalLLaMA: AMA with StepFun AI - Ask Us Anything (Score: 126)", "tag": "tech", "source": "r/LocalLLaMA: AMA with StepFun AI - Ask Us Anything (Score: 126)", "sourceUrl": "https://reddit.com/r/LocalLLaMA/comments/1r8snay/ama_with_stepfun_ai_ask_us_anything/", "createdAt": "2026-03-03T19:50:36.494Z", "status": "pending"}, {"id": "mmb0w0mh", "title": "MacBook Air with M5", "desc": "HN: MacBook Air with M5 (Score: 269)", "tag": "tech", "source": "HN: MacBook Air with M5 (Score: 269)", "sourceUrl": "https://www.apple.com/newsroom/2026/03/apple-introduces-the-new-macbook-air-with-m5/", "createdAt": "2026-03-03T19:50:43.241Z", "status": "pending"}, {"id": "mmb0w0nc", "title": "Claude's Cycles [pdf]", "desc": "HN: Claude's Cycles [pdf] (Score: 300)", "tag": "tech", "source": "HN: Claude's Cycles [pdf] (Score: 300)", "sourceUrl": "https://www-cs-faculty.stanford.edu/~knuth/papers/claude-cycles.pdf", "createdAt": "2026-03-03T19:50:43.272Z", "status": "pending"}, {"id": "mmb0w0sa", "title": "GIF optimization tool using WebAssembly and Gifsicle", "desc": "Simon Willison: GIF optimization tool using WebAssembly and Gifsicle", "tag": "tech", "source": "Simon Willison: GIF optimization tool using WebAssembly and Gifsicle", "sourceUrl": "https://simonwillison.net/guides/agentic-engineering-patterns/gif-optimization/#atom-everything", "createdAt": "2026-03-03T19:50:43.450Z", "status": "pending"}, {"id": "mmb0w0t9", "title": "Quoting claude.com/import-memory", "desc": "Simon Willison: Quoting claude.com/import-memory", "tag": "tech", "source": "Simon Willison: Quoting claude.com/import-memory", "sourceUrl": "https://simonwillison.net/2026/Mar/1/claude-import-memory/#atom-everything", "createdAt": "2026-03-03T19:50:43.485Z", "status": "pending"}];
 
 // === DATA (fallback) ===
 const cronJobs = [
@@ -402,7 +402,7 @@ async function fetchStats() {
     updateDashboard();
   } catch (err) {
     console.error('Error fetching stats:', err);
-    statsData = {pending_suggestions: 0};
+    statsData = {inbox:0,doit:0,explain:5,dontdoit:8,done:9,pending_suggestions:12,total_suggestions:12};
   }
 }
 
@@ -442,7 +442,7 @@ async function approveSuggestion(id) {
       body: JSON.stringify({id})
     });
     if (!res.ok) throw new Error('Failed to approve suggestion');
-    await fetchSuggestions();
+    await fetchSuggestions().catch(() => renderSuggestions());
     await fetchIdeas();
     await fetchStats();
   } catch (err) {
@@ -459,7 +459,7 @@ async function rejectSuggestion(id) {
       body: JSON.stringify({id})
     });
     if (!res.ok) throw new Error('Failed to reject suggestion');
-    await fetchSuggestions();
+    await fetchSuggestions().catch(() => renderSuggestions());
     await fetchStats();
   } catch (err) {
     console.error('Error rejecting suggestion:', err);
@@ -476,7 +476,7 @@ function showPage(id) {
   document.querySelector('.sidebar').classList.remove('open');
   
   // Load data when switching to specific pages
-  if (id === 'suggestions') fetchSuggestions();
+  if (id === 'suggestions') fetchSuggestions().catch(() => renderSuggestions());
   if (id === 'tasks') fetchIdeas();
 }
 
@@ -739,7 +739,7 @@ renderActivity();
 // Load live data on init
 fetchIdeas();
 fetchStats();
-fetchSuggestions();
+fetchSuggestions().catch(() => renderSuggestions());
 </script>
 </body>
 </html>
