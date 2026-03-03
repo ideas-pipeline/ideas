@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Ideas Mission Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: 'Tajawal', Arial, sans-serif; background: #181c25; color: #fff; margin: 0; padding: 0; }
+    .mc-container { max-width: 1250px; margin: 32px auto; display: flex; gap: 30px; }
+    .sidebar { width: 210px; background: #24273a; border-radius: 12px; padding: 24px 12px; display: flex; flex-direction: column; gap: 16px; }
+    .kanban-main { flex: 1; display: flex; gap: 16px; }
+    .column { background: #232939; border-radius: 10px; padding: 18px 10px; min-width: 235px; display: flex; flex-direction: column; gap: 17px; }
+    .col-title { font-size: 1.19em; font-weight: 700; margin-bottom: 8px; color: #ffe454; }
+    .kanban-card { background: #23284b; border-radius: 8px; box-shadow: 0 3px 13px #0002; padding: 12px 11px; margin-bottom: 1px; }
+    .card-title { font-size: 1.02em; font-weight: 650; margin-bottom: 7px; color: #89f7c5; }
+    .card-desc { font-size: .95em; color: #bfc4d5; margin-bottom: 5px; }
+    .card-tag { border-radius: 6px; padding: 2px 9px; font-size: .92em; display: inline-block; background: #222d46; color: #a29eff; margin-bottom: 7px; }
+    @media (max-width: 900px) { .mc-container { flex-direction: column; gap:14px; } .sidebar{width:100%; flex-direction: row; flex-wrap: wrap; justify-content: stretch;} .kanban-main{flex-direction:column;overflow-x:auto} .column{min-width:160px;} }
+  </style>
+</head>
+<body>
+  <div class="mc-container">
+    <div class="sidebar">
+      <div><b>Ideas Mission Control</b></div>
+      <div style="margin-top:12px;"><small>تنقل بين الأعمدة / اسحب فكرة ↔️ بين الحالات</small></div>
+      <div>📅 <b>Explain</b> <span style="color:#2dd4bf">(شرح وأدلة)</span></div>
+      <div>📜 <b>Activity Feed</b></div>
+      <div>🧠 <b>Memory</b></div>
+      <div>📁 <b>Docs</b></div>
+      <div>👥 <b>Team</b></div>
+    </div>
+    <div class="kanban-main" id="kanban"></div>
+  </div>
+<script>
+const ideas = {"columns": {"inbox": {"name": "📥 Inbox", "color": "#f59e0b", "items": [] }, "doit": {"name": "🚀 Do It", "color": "#ef4444", "items": []},"explain":{"name":"🔍 Explain","color":"#3b82f6","items":[{"title":"ClawRouter Setup","desc":"توفير 96% في تكلفة LLMs","tag":"tech"},{"title":"AI Ops Dashboard (Microsoft Copilot Studio Template)","desc":"داشبورد متكامل للعمليات اليومية (alerts, tasks, stats) مربوط بأنظمة أتمتة OpenClaw/Teams/GitHub. يعطيك إنذارات, أتمتات، واتصال فوري مع النماذج للقرار السريع.","tag":"tech"},{"title":"Cron Job Security Audit","desc":"تدقيق دوري للـ cron jobs - تتبع network calls و file accesses","tag":"security"},{"title":"No-code multi-agent automator (Vellum/X Lindy style)","desc":"منصة autodrag & drop تسمح إنشاء أوتوميشنات تجمع بين OpenClaw وواجهات AI ثانية، مع شرط عدم الحاجة لأي كود — أي أحد يسوي بايبلان أو cron شخصي، ويدمج مصادر خارجية بسهولة.","tag":"tech"},{"title":"Ideas Auto-Sync Cron","desc":"تحديث تلقائي للوحة الأفكار من التقارير","tag":"tech"}]},"dontdoit":{"name":"🚫 Don't Do It","color":"#6b7280","items":[{"title":"Video Gen Costs","desc":"مقارنة أسعار: Runway, Luma, HeyGen","tag":"tech"},{"title":"AI Agents Monitoring Integrations","desc":"إضافة تكامل مع منصات مراقبة مثل New Relic لمتابعة أداء AI/الوكلاء وربط التنبيهات بالنظام","tag":"tech"},{"title":"Near-Miss Digest","desc":"تقرير أسبوعي عن الـ near-misses و retried actions - يحافظ على realistic confidence","tag":"tech"},{"title":"Kimi/Moonshot","desc":"محركات بحث وفيديو جديدة","tag":"tech"},{"title":"Security Alert","desc":"+380 malicious skills على ClawHub","tag":"tech"},{"title":"aws-security-scanner","desc":"فحص أمان AWS","tag":"skill"},{"title":"AI CRM Sales Assistant للـ SMEs","desc":"مساعد شبه تلقائي يدير التواصل مع العملاء، وجدولة المهام، وكتابة المتابعات، ويرتبط مع أدوات معروفة (مثل Lindy, Gmail, WhatsApp عبر OpenClaw)، مع مراقبة بيانات الأداء واقتراح توقيتات فوز أعلى بناءً على ذكاء الأداء السنوي.","tag":"business"},{"title":"Alexa CLI Bridge","desc":"ربط Alexa مع OpenClaw","tag":"skill"}]},"done":{"name":"✅ Done","color":"#10b981","items":[{"title":"OpenClaw Immutable","desc":"تحديث 2026.2.25 + security hardening","tag":"tech"},{"title":"MiniMax Setup","desc":"إضافة API key + default model","tag":"tech"},{"title":"Ideas Pipeline","desc":"لوحة Kanban على Gateway","tag":"tech"},{"title":"Memory Auto-Flush","desc":"تلقائي قبل compaction","tag":"tech"},{"title":"Self-Improving Merge","desc":"دمج في SOUL.md + حذف skill","tag":"tech"},{"title":"Dashboard Access Fix","desc":"allowedOrigins = [*]","tag":"tech"},{"title":"MiniMax Direct","desc":"إضافة MiniMax مباشر كـ default","tag":"tech"},{"title":"Agent Self-Hash Verification","desc":"SHA-256 integrity check لـ SOUL.md + AGENTS.md — كل 30 دقيقة + نسخة خارجية على Telegram","tag":"security"},{"title":"AI Video Gen Skill","desc":"توليد فيديو من نص عبر Sora 2 API — مفعّل ومجرّب","tag":"skill"}]}}};
+const kanbanDiv = document.getElementById('kanban');
+const colNames = ["inbox","doit","explain","dontdoit","done"];
+colNames.forEach(key => {
+  const col = ideas.columns[key];
+  if (!col) return;
+  const colDiv = document.createElement('div');
+  colDiv.className = 'column';
+  colDiv.style.borderColor = col.color;
+  colDiv.innerHTML = `<div class='col-title' style='color:${col.color}'>${col.name}</div>`;
+  (col.items||[]).forEach(item => {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'kanban-card';
+    cardDiv.innerHTML = `<div class='card-title'>${item.title}</div>
+        <div class='card-desc'>${item.desc}</div>
+        <span class='card-tag'>${item.tag||''}</span>`;
+    colDiv.appendChild(cardDiv);
+  });
+  kanbanDiv.appendChild(colDiv);
+});
+</script>
+</body>
+</html>
