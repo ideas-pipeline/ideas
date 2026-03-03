@@ -1049,7 +1049,7 @@ async function fetchDashboardData() {
     const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
     set('kv-balance', '$' + d.balance.toLocaleString());
     set('kv-cost-today', '$' + (d.costToday || 0).toLocaleString());
-    set('kv-cost-month', '$' + d.costMonth.toLocaleString());
+    set('kv-cost-month', '$' + (d.costMonth || 0).toLocaleString());
     set('kv-sessions', d.activeSessions);
     set('kv-cron', d.cronJobs);
     set('kv-opus', d.opusPercent + '%');
