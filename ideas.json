@@ -4,18 +4,18 @@
     "inbox": {
       "name": "📥 Inbox",
       "color": "#f59e0b",
-      "items": [
-        {
-          "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
-          "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
-          "tag": "tech"
-        }
-      ]
+      "items": []
     },
     "doit": {
       "name": "🚀 Do It",
       "color": "#ef4444",
       "items": [
+        {
+          "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
+          "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
+          "tag": "tech",
+          "movedAt": 1772589192
+        },
         {
           "title": "become an AI HACKER (it's easier than you think)",
           "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
