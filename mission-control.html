@@ -578,7 +578,7 @@ async function fetchSuggestions() {
 }
 
 // === WRITE OPERATIONS ===
-async function moveIdea(title, from, to) {
+async function moveIdea(title, from, to, retries = 3) {
   if (!checkToken()) return;
   
   try {
@@ -608,6 +608,11 @@ async function moveIdea(title, from, to) {
     showToast('✅ تم النقل');
     await fetchIdeas();
   } catch (err) {
+    if (err.message.includes('409') && retries > 0) {
+      console.log('SHA conflict, retrying... (' + retries + ' left)');
+      await new Promise(r => setTimeout(r, 1000));
+      return moveIdea(title, from, to, retries - 1);
+    }
     console.error('Error moving idea:', err);
     showToast('❌ فشل النقل: ' + err.message, true);
   }
