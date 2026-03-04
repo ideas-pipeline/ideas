@@ -179,7 +179,7 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
     <div class="stat"><span>الجلسات</span><b id="mini-sessions">—</b></div>
     <div class="stat"><span>اقتراحات</span><b id="mini-suggestions">—</b></div>
   </div>
-  <button class="token-btn" onclick="showTokenModal()">🔑 تغيير Token</button>
+  <button class="token-btn" onclick="showTokenModal()">🔐 تسجيل الدخول</button>
 </aside>
 
 <main class="main">
@@ -331,14 +331,14 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 <!-- Toast Notification -->
 <div class="toast" id="toast"></div>
 
-<!-- GitHub Token Modal -->
+<!-- Password Modal -->
 <div class="modal" id="token-modal">
   <div class="modal-content">
-    <h3>🔑 GitHub Personal Access Token</h3>
-    <p style="font-size:.85em;color:var(--text2);margin-bottom:12px">أدخل GitHub Token (repo scope) للوصول إلى ideas-pipeline/ideas</p>
-    <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx">
+    <h3>🔐 كلمة المرور</h3>
+    <p style="font-size:.85em;color:var(--text2);margin-bottom:12px">أدخل كلمة المرور للتعديل</p>
+    <input type="password" id="token-input" placeholder="كلمة المرور">
     <div class="modal-actions">
-      <button class="btn btn-approve" onclick="saveToken()">حفظ</button>
+      <button class="btn btn-approve" onclick="saveToken()">دخول</button>
     </div>
   </div>
 </div>
@@ -441,8 +441,15 @@ const activityFeed = [
 ];
 
 // === GITHUB API HELPERS ===
+const GH_TOKEN = 'REMOVED';
+const EDIT_PW_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
+
 function getToken() {
-  return localStorage.getItem('gh_token');
+  return GH_TOKEN;
+}
+
+function isEditAuthed() {
+  return localStorage.getItem('edit_authed') === 'true';
 }
 
 async function readFile(path) {
@@ -496,7 +503,7 @@ async function writeFile(path, content, sha, message) {
 
 // === TOKEN MANAGEMENT ===
 function checkToken() {
-  if (!getToken()) {
+  if (!isEditAuthed()) {
     showTokenModal();
     return false;
   }
@@ -509,19 +516,21 @@ function showTokenModal() {
   document.getElementById('token-input').focus();
 }
 
-function saveToken() {
-  const token = document.getElementById('token-input').value.trim();
-  if (!token) {
-    alert('الرجاء إدخال Token');
-    return;
+async function saveToken() {
+  const pw = document.getElementById('token-input').value.trim();
+  if (!pw) { alert('أدخل كلمة المرور'); return; }
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pw);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  if (hashHex === EDIT_PW_HASH) {
+    localStorage.setItem('edit_authed', 'true');
+    document.getElementById('token-modal').classList.remove('active');
+    showToast('✅ تم تسجيل الدخول');
+  } else {
+    showToast('❌ كلمة المرور غلط', true);
   }
-  
-  localStorage.setItem('gh_token', token);
-  document.getElementById('token-modal').classList.remove('active');
-  showToast('✅ تم حفظ Token');
-  
-  // Reload data
-  init();
 }
 
 // === DATA LOADING ===
