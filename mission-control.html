@@ -64,12 +64,14 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 .kanban-item h4 { font-size: .92em; font-weight: 600; margin-bottom: 5px; color: var(--text); }
 .kanban-item p { font-size: .82em; color: var(--text2); line-height: 1.4; }
 /* Suggestions */
-.suggestion-card { background: var(--bg2); border: 1px solid var(--bg3); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; transition: border-color .2s; }
-.suggestion-card:hover { border-color: var(--accent); }
+.suggestion-card { background: var(--bg2); border: 1px solid var(--bg3); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; transition: all .3s; opacity: 1; transform: translateY(0); animation: fadeIn .4s ease-out; }
+.suggestion-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 20px #0004; }
+.suggestion-card.hiding { opacity: 0; transform: translateX(100%); pointer-events: none; }
 .suggestion-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
 .suggestion-title { font-size: 1.05em; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.suggestion-source { display: flex; align-items: center; gap: 6px; font-size: .85em; color: var(--text3); }
-.suggestion-source .icon { font-size: 1.1em; }
+.suggestion-source { display: flex; align-items: center; gap: 6px; font-size: .85em; color: var(--text3); margin-bottom: 4px; }
+.suggestion-source .icon { font-size: 1.3em; }
+.suggestion-date { font-size: .75em; color: var(--text3); margin-top: 2px; }
 .suggestion-desc { color: var(--text2); font-size: .9em; line-height: 1.5; margin-bottom: 12px; }
 .suggestion-actions { display: flex; gap: 8px; }
 .btn { padding: 8px 16px; border: none; border-radius: var(--radius2); font-size: .88em; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'Tajawal', sans-serif; }
@@ -78,6 +80,22 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 .btn-reject { background: var(--red); color: #fff; }
 .btn-reject:hover { background: #ff8787; transform: translateY(-1px); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.suggestion-card:nth-child(1) { animation-delay: 0s; }
+.suggestion-card:nth-child(2) { animation-delay: .1s; }
+.suggestion-card:nth-child(3) { animation-delay: .2s; }
+.suggestion-card:nth-child(4) { animation-delay: .3s; }
+.suggestion-card:nth-child(5) { animation-delay: .4s; }
+/* Filter Buttons */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-btn { padding: 6px 14px; background: var(--bg3); color: var(--text2); border: 1px solid var(--bg4); border-radius: 20px; font-size: .82em; font-weight: 600; cursor: pointer; transition: all .2s; }
+.filter-btn:hover { background: var(--bg4); color: var(--text); }
+.filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+/* Empty State */
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-state .emoji { font-size: 4em; margin-bottom: 16px; opacity: 0.3; }
+.empty-state h3 { font-size: 1.3em; color: var(--green2); margin-bottom: 8px; }
+.empty-state p { color: var(--text3); font-size: .95em; }
 /* Calendar */
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
 .cal-header { text-align: center; font-size: .8em; color: var(--text3); font-weight: 600; padding: 6px; }
@@ -224,6 +242,15 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 <!-- ===== SUGGESTIONS ===== -->
 <div class="page" id="page-suggestions">
   <div class="page-title">💡 Suggestions <span id="suggestions-counter" style="font-size:.6em;color:var(--text3);margin-right:10px"></span></div>
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-filter="all">الكل</button>
+    <button class="filter-btn" data-filter="youtube">🎬 YouTube</button>
+    <button class="filter-btn" data-filter="reddit">🔴 Reddit</button>
+    <button class="filter-btn" data-filter="hn">🟧 HN</button>
+    <button class="filter-btn" data-filter="github">🐙 GitHub</button>
+    <button class="filter-btn" data-filter="producthunt">🔶 Product Hunt</button>
+    <button class="filter-btn" data-filter="other">🌐 أخرى</button>
+  </div>
   <div id="suggestions-list"></div>
 </div>
 
@@ -365,7 +392,6 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 
 <script>
 // === GITHUB CONFIG ===
-const API_URL = 'https://clean-locks-forth-warrior.trycloudflare.com';
 const GITHUB_REPO = 'ideas-pipeline/ideas';
 const GITHUB_BRANCH = 'master';
 
@@ -826,21 +852,16 @@ function handleDrop(e) {
     if (!isEditAuthed()) { showTokenModal(); return false; }
     moveIdea(title, sourceColumn, targetColumn);
     
-    // أتمتة حسب العمود الجديد — إرسال webhook للـ VPS
-    const ideaDesc = draggedItem.querySelector('p') ? draggedItem.querySelector('p').textContent : '';
-    if (['explain','doit','dontdoit'].includes(targetColumn)) {
-      fetch(API_URL + '/action', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({action: targetColumn, title: title, desc: ideaDesc})
-      }).then(r => r.json()).then(d => {
-        showToast(d.message || '✅ تم');
-      }).catch(e => {
-        showToast('⚠️ الإجراء محلي فقط — API غير متاح', true);
-      });
-    }
-    if (targetColumn === 'done') {
-      showToast('✅ تم — ستُحذف بعد 10 أيام');
+    // Toast message حسب العمود
+    const messages = {
+      'explain': '🔍 انتقلت لـ Explain',
+      'doit': '🚀 انتقلت لـ Do It',
+      'dontdoit': '🚫 انتقلت لـ Don\'t Do It',
+      'done': '✅ تم — ستُحذف بعد 10 أيام',
+      'inbox': '📥 رجعت لـ Inbox'
+    };
+    if (messages[targetColumn]) {
+      showToast('✅ ' + messages[targetColumn]);
     }
   }
   
@@ -886,39 +907,80 @@ async function submitNewIdea() {
 }
 
 // Suggestions
+let currentFilter = 'all';
+
 function getSourceIcon(source) {
   const s = (source || '').toLowerCase();
   if (s.includes('youtube')) return '🎬';
   if (s.includes('reddit')) return '🔴';
   if (s.includes('hn') || s.includes('hackernews')) return '🟧';
+  if (s.includes('github')) return '🐙';
+  if (s.includes('producthunt') || s.includes('product hunt')) return '🔶';
   if (s.includes('blog')) return '📝';
   return '🌐';
+}
+
+function getSourceCategory(source) {
+  const s = (source || '').toLowerCase();
+  if (s.includes('youtube')) return 'youtube';
+  if (s.includes('reddit')) return 'reddit';
+  if (s.includes('hn') || s.includes('hackernews')) return 'hn';
+  if (s.includes('github')) return 'github';
+  if (s.includes('producthunt') || s.includes('product hunt')) return 'producthunt';
+  return 'other';
+}
+
+function formatDate(timestamp) {
+  if (!timestamp) return '';
+  const d = new Date(timestamp * 1000);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'اليوم';
+  if (diffDays === 1) return 'أمس';
+  if (diffDays < 7) return `منذ ${diffDays} أيام`;
+  if (diffDays < 30) return `منذ ${Math.floor(diffDays/7)} أسابيع`;
+  return d.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
 }
 
 function renderSuggestions() {
   const list = document.getElementById('suggestions-list');
   const counter = document.getElementById('suggestions-counter');
-  const pending = suggestionsData.filter(s => s.status === 'pending');
+  let pending = suggestionsData.filter(s => s.status === 'pending');
   
-  if (counter) {
-    counter.textContent = pending.length > 0 ? `(${pending.length} معلّق)` : '';
+  // Apply filter
+  if (currentFilter !== 'all') {
+    pending = pending.filter(s => getSourceCategory(s.source) === currentFilter);
   }
   
+  // Update counter
+  const totalPending = suggestionsData.filter(s => s.status === 'pending').length;
+  if (counter) {
+    counter.textContent = totalPending > 0 ? `(${totalPending} معلّق)` : '';
+  }
+  
+  // Empty state
   if (pending.length === 0) {
-    list.innerHTML = '<div class="card"><p style="text-align:center;color:var(--green2);font-size:1.1em">✅ لا توجد اقتراحات معلقة</p></div>';
+    const emptyMsg = currentFilter === 'all' 
+      ? '<div class="empty-state"><div class="emoji">✅</div><h3>لا توجد اقتراحات معلقة</h3><p>كل الاقتراحات تمت مراجعتها</p></div>'
+      : '<div class="empty-state"><div class="emoji">🔍</div><h3>لا توجد نتائج</h3><p>لا توجد اقتراحات من هذا المصدر</p></div>';
+    list.innerHTML = emptyMsg;
     return;
   }
   
+  // Render cards
   list.innerHTML = pending.map(s => `
-    <div class="suggestion-card" id="suggestion-${s.id}">
+    <div class="suggestion-card" id="suggestion-${s.id}" data-source="${getSourceCategory(s.source)}">
       <div class="suggestion-header">
-        <div>
+        <div style="flex:1">
           <div class="suggestion-title">${s.title}</div>
           <div class="suggestion-source">
             <span class="icon">${getSourceIcon(s.source)}</span>
-            <span>${s.source || 'Unknown'}</span>
+            <span style="font-weight:600">${s.source || 'Unknown'}</span>
             ${s.sourceUrl ? `<a href="${s.sourceUrl}" target="_blank" style="color:var(--accent2);text-decoration:none;margin-right:6px" title="فتح المصدر">🔗</a>` : ''}
           </div>
+          ${s.timestamp ? `<div class="suggestion-date">📅 ${formatDate(s.timestamp)}</div>` : ''}
         </div>
       </div>
       <div class="suggestion-desc">${s.desc || s.description || 'لا يوجد وصف'}</div>
@@ -928,20 +990,87 @@ function renderSuggestions() {
       </div>
     </div>
   `).join('');
+  
+  // Setup filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderSuggestions();
+    };
+  });
 }
 
 async function handleApprove(id) {
   const card = document.getElementById(`suggestion-${id}`);
-  const btns = card.querySelectorAll('button');
-  btns.forEach(b => b.disabled = true);
-  await approveSuggestion(id);
+  if (!card) return;
+  
+  // Optimistic UI — hide immediately
+  card.classList.add('hiding');
+  
+  // Update counter immediately
+  const totalPending = suggestionsData.filter(s => s.status === 'pending').length - 1;
+  const counter = document.getElementById('mini-suggestions');
+  if (counter) counter.textContent = totalPending;
+  const pageCounter = document.getElementById('suggestions-counter');
+  if (pageCounter) pageCounter.textContent = totalPending > 0 ? `(${totalPending} معلّق)` : '';
+  
+  // Background API call
+  try {
+    await approveSuggestion(id);
+    // Remove from DOM after animation
+    setTimeout(() => {
+      if (card.parentNode) card.parentNode.removeChild(card);
+      // Check if empty
+      const list = document.getElementById('suggestions-list');
+      if (list && list.children.length === 0) {
+        renderSuggestions();
+      }
+    }, 300);
+  } catch (err) {
+    // Rollback on error
+    card.classList.remove('hiding');
+    showToast('❌ فشلت الموافقة: ' + err.message, true);
+    // Restore counter
+    const totalPending = suggestionsData.filter(s => s.status === 'pending').length;
+    if (counter) counter.textContent = totalPending;
+    if (pageCounter) pageCounter.textContent = totalPending > 0 ? `(${totalPending} معلّق)` : '';
+  }
 }
 
 async function handleReject(id) {
   const card = document.getElementById(`suggestion-${id}`);
-  const btns = card.querySelectorAll('button');
-  btns.forEach(b => b.disabled = true);
-  await rejectSuggestion(id);
+  if (!card) return;
+  
+  // Optimistic UI
+  card.classList.add('hiding');
+  
+  // Update counter immediately
+  const totalPending = suggestionsData.filter(s => s.status === 'pending').length - 1;
+  const counter = document.getElementById('mini-suggestions');
+  if (counter) counter.textContent = totalPending;
+  const pageCounter = document.getElementById('suggestions-counter');
+  if (pageCounter) pageCounter.textContent = totalPending > 0 ? `(${totalPending} معلّق)` : '';
+  
+  // Background API call
+  try {
+    await rejectSuggestion(id);
+    setTimeout(() => {
+      if (card.parentNode) card.parentNode.removeChild(card);
+      const list = document.getElementById('suggestions-list');
+      if (list && list.children.length === 0) {
+        renderSuggestions();
+      }
+    }, 300);
+  } catch (err) {
+    // Rollback
+    card.classList.remove('hiding');
+    showToast('❌ فشل الرفض: ' + err.message, true);
+    const totalPending = suggestionsData.filter(s => s.status === 'pending').length;
+    if (counter) counter.textContent = totalPending;
+    if (pageCounter) pageCounter.textContent = totalPending > 0 ? `(${totalPending} معلّق)` : '';
+  }
 }
 
 // Calendar
