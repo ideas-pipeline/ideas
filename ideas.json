@@ -1,28 +1,26 @@
 {
-  "lastUpdated": "2026-03-04T01:55:09Z",
+  "lastUpdated": "2026-03-04T01:55:12Z",
   "columns": {
     "inbox": {
       "name": "📥 Inbox",
       "color": "#f59e0b",
-      "items": []
-    },
-    "doit": {
-      "name": "🚀 Do It",
-      "color": "#ef4444",
       "items": [
         {
           "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
           "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
-          "tag": "tech",
-          "movedAt": 1772589192
+          "tag": "tech"
         },
         {
           "title": "become an AI HACKER (it's easier than you think)",
           "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
-          "tag": "tech",
-          "movedAt": 1772589118
+          "tag": "tech"
         }
       ]
+    },
+    "doit": {
+      "name": "🚀 Do It",
+      "color": "#ef4444",
+      "items": []
     },
     "explain": {
       "name": "🔍 Explain",
