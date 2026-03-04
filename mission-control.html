@@ -631,67 +631,79 @@ async function fetchSuggestions() {
 }
 
 // === WRITE OPERATIONS ===
-async function moveIdea(title, from, to, retries = 3) {
+async function moveIdea(title, from, to, retries = 5) {
   if (!checkToken()) return;
   
-  try {
-    // Read fresh copy
-    const { content, sha } = await readFile('ideas.json');
-    
-    // Find and move item
-    let item = null;
-    if (content.columns && content.columns[from] && content.columns[from].items) {
-      const idx = content.columns[from].items.findIndex(i => i.title === title);
-      if (idx !== -1) {
-        item = content.columns[from].items.splice(idx, 1)[0];
-        if (!content.columns[to]) content.columns[to] = { items: [] };
-        if (!content.columns[to].items) content.columns[to].items = [];
-        item.movedAt = Math.floor(Date.now() / 1000);
-        content.columns[to].items.unshift(item);
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      // Always read fresh copy right before writing
+      const { content, sha } = await readFile('ideas.json');
+      
+      // Find and move item
+      let item = null;
+      if (content.columns && content.columns[from] && content.columns[from].items) {
+        const idx = content.columns[from].items.findIndex(i => i.title === title);
+        if (idx !== -1) {
+          item = content.columns[from].items.splice(idx, 1)[0];
+          if (!content.columns[to]) content.columns[to] = { items: [] };
+          if (!content.columns[to].items) content.columns[to].items = [];
+          item.movedAt = Math.floor(Date.now() / 1000);
+          content.columns[to].items.unshift(item);
+        }
       }
+      
+      if (!item) {
+        throw new Error('Idea not found');
+      }
+      
+      // Write back with fresh SHA
+      await writeFile('ideas.json', content, sha, `Move "${title}" from ${from} to ${to}`);
+      
+      showToast('✅ تم النقل');
+      await fetchIdeas();
+      return; // success — exit
+    } catch (err) {
+      if (err.message.includes('409') && attempt < retries) {
+        console.log(`SHA conflict, retry ${attempt + 1}/${retries} after ${(attempt + 1) * 1500}ms...`);
+        await new Promise(r => setTimeout(r, (attempt + 1) * 1500));
+        continue; // retry with fresh read
+      }
+      console.error('Error moving idea:', err);
+      showToast('❌ فشل النقل: ' + err.message, true);
+      return;
     }
-    
-    if (!item) {
-      throw new Error('Idea not found');
-    }
-    
-    // Write back
-    await writeFile('ideas.json', content, sha, `Move "${title}" from ${from} to ${to}`);
-    
-    showToast('✅ تم النقل');
-    await fetchIdeas();
-  } catch (err) {
-    if (err.message.includes('409') && retries > 0) {
-      console.log('SHA conflict, retrying... (' + retries + ' left)');
-      await new Promise(r => setTimeout(r, 1000));
-      return moveIdea(title, from, to, retries - 1);
-    }
-    console.error('Error moving idea:', err);
-    showToast('❌ فشل النقل: ' + err.message, true);
   }
 }
 
 async function addIdea(title, desc, tag) {
   if (!checkToken()) return;
   
-  try {
-    const { content, sha } = await readFile('ideas.json');
-    
-    const newItem = { title, desc, tag };
-    
-    if (!content.columns) content.columns = {};
-    if (!content.columns.inbox) content.columns.inbox = { items: [] };
-    if (!content.columns.inbox.items) content.columns.inbox.items = [];
-    
-    content.columns.inbox.items.unshift(newItem);
-    
-    await writeFile('ideas.json', content, sha, `Add new idea: ${title}`);
-    
-    showToast('✅ تمت الإضافة');
-    await fetchIdeas();
-  } catch (err) {
-    console.error('Error adding idea:', err);
-    showToast('❌ فشلت الإضافة: ' + err.message, true);
+  for (let attempt = 0; attempt <= 5; attempt++) {
+    try {
+      const { content, sha } = await readFile('ideas.json');
+      
+      const newItem = { title, desc, tag };
+      
+      if (!content.columns) content.columns = {};
+      if (!content.columns.inbox) content.columns.inbox = { items: [] };
+      if (!content.columns.inbox.items) content.columns.inbox.items = [];
+      
+      content.columns.inbox.items.unshift(newItem);
+      
+      await writeFile('ideas.json', content, sha, `Add new idea: ${title}`);
+      
+      showToast('✅ تمت الإضافة');
+      await fetchIdeas();
+      return;
+    } catch (err) {
+      if (err.message.includes('409') && attempt < 5) {
+        await new Promise(r => setTimeout(r, (attempt + 1) * 1500));
+        continue;
+      }
+      console.error('Error adding idea:', err);
+      showToast('❌ فشلت الإضافة: ' + err.message, true);
+      return;
+    }
   }
 }
 
