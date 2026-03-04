@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-04T02:51:01Z",
+  "lastUpdated": "2026-03-04T13:01:10Z",
   "columns": {
     "inbox": {
       "name": "📥 Inbox",
@@ -13,6 +13,11 @@
         {
           "title": "become an AI HACKER (it's easier than you think)",
           "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
+          "tag": "tech"
+        },
+        {
+          "title": "Agentic Tools Hub للسوق السعودي",
+          "desc": "منصة تجمع أدوات وبرمجيات AI Agent جاهزة تربط مع الأنظمة المحلية (سداد، أبشر، تم) بدون كود — تسهّل الأتمتة للشركات الصغيرة والمتوسطة بخصوصية عالية",
           "tag": "tech"
         }
       ]
