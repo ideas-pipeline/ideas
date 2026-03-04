@@ -817,6 +817,7 @@ function handleDrop(e) {
   const title = draggedItem.dataset.title;
   
   if (sourceColumn !== targetColumn) {
+    if (!isEditAuthed()) { showTokenModal(); return false; }
     moveIdea(title, sourceColumn, targetColumn);
     
     // أتمتة حسب العمود الجديد
