@@ -11,11 +11,6 @@
           "tag": "tech"
         },
         {
-          "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
-          "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
-          "tag": "tech"
-        },
-        {
           "title": "Agentic Tools Hub للسوق السعودي",
           "desc": "منصة تجمع أدوات وبرمجيات AI Agent جاهزة تربط مع الأنظمة المحلية (سداد، أبشر، تم) بدون كود — تسهّل الأتمتة للشركات الصغيرة والمتوسطة بخصوصية عالية",
           "tag": "tech"
@@ -31,6 +26,12 @@
       "name": "🔍 Explain",
       "color": "#3b82f6",
       "items": [
+        {
+          "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
+          "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
+          "tag": "tech",
+          "movedAt": 1772666916
+        },
         {
           "title": "become an AI HACKER (it's easier than you think)",
           "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
