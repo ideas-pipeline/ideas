@@ -9,19 +9,18 @@
     "doit": {
       "name": "🚀 Do It",
       "color": "#ef4444",
-      "items": [
-        {
-          "title": "become an AI HACKER (it's easier than you think)",
-          "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
-          "tag": "tech",
-          "movedAt": 1772589397
-        }
-      ]
+      "items": []
     },
     "explain": {
       "name": "🔍 Explain",
       "color": "#3b82f6",
       "items": [
+        {
+          "title": "become an AI HACKER (it's easier than you think)",
+          "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
+          "tag": "tech",
+          "movedAt": 1772590516
+        },
         {
           "title": "Self-Improving Merge",
           "desc": "دمج في SOUL.md + حذف skill",
