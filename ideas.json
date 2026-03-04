@@ -9,11 +9,6 @@
           "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
           "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
           "tag": "tech"
-        },
-        {
-          "title": "become an AI HACKER (it's easier than you think)",
-          "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
-          "tag": "tech"
         }
       ]
     },
@@ -26,6 +21,12 @@
       "name": "🔍 Explain",
       "color": "#3b82f6",
       "items": [
+        {
+          "title": "become an AI HACKER (it's easier than you think)",
+          "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
+          "tag": "tech",
+          "movedAt": 1772590945
+        },
         {
           "title": "ClawRouter Setup",
           "desc": "توفير 96% في تكلفة LLMs",
