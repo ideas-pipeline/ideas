@@ -391,6 +391,24 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 </div>
 
 <script>
+// === VPS API (Cloudflare Tunnel) ===
+const VPS_API_URL = 'https://clean-locks-forth-warrior.trycloudflare.com';
+
+async function triggerAction(action, title, desc) {
+  try {
+    const res = await fetch(VPS_API_URL + '/action', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action, title, desc})
+    });
+    const data = await res.json();
+    if (data.message) showToast(data.message);
+  } catch(e) {
+    console.log('VPS API unavailable:', e);
+    // Fallback: لا تعطي error للمستخدم — الأتمتة ستتفعل من الـ heartbeat
+  }
+}
+
 // === GITHUB CONFIG ===
 const GITHUB_REPO = 'ideas-pipeline/ideas';
 const GITHUB_BRANCH = 'master';
@@ -891,10 +909,16 @@ function handleDrop(e) {
     if (!isEditAuthed()) { showTokenModal(); return false; }
     moveIdea(title, sourceColumn, targetColumn);
     
+    // أتمتة: إرسال webhook للـ VPS عند النقل لـ Explain أو Do It
+    const ideaDesc = draggedItem.querySelector('p') ? draggedItem.querySelector('p').textContent : '';
+    if (['explain','doit','dontdoit'].includes(targetColumn)) {
+      triggerAction(targetColumn, title, ideaDesc);
+    }
+    
     // Toast message حسب العمود
     const messages = {
-      'explain': '🔍 انتقلت لـ Explain',
-      'doit': '🚀 انتقلت لـ Do It',
+      'explain': '🔍 انتقلت لـ Explain — جاري التحليل...',
+      'doit': '🚀 انتقلت لـ Do It — جاري التنفيذ...',
       'dontdoit': '🚫 انتقلت لـ Don\'t Do It',
       'done': '✅ تم — ستُحذف بعد 10 أيام',
       'inbox': '📥 رجعت لـ Inbox'
