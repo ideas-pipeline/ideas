@@ -4,13 +4,7 @@
     "inbox": {
       "name": "📥 Inbox",
       "color": "#f59e0b",
-      "items": [
-        {
-          "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
-          "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
-          "tag": "tech"
-        }
-      ]
+      "items": []
     },
     "doit": {
       "name": "🚀 Do It",
@@ -28,6 +22,12 @@
       "name": "🔍 Explain",
       "color": "#3b82f6",
       "items": [
+        {
+          "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
+          "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
+          "tag": "tech",
+          "movedAt": 1772589785
+        },
         {
           "title": "Cron Job Security Audit",
           "desc": "تدقيق دوري للـ cron jobs - تتبع network calls و file accesses",
