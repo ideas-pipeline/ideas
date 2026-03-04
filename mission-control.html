@@ -194,7 +194,8 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
   <div class="page-title">📊 Dashboard</div>
   <div class="kpi-grid" id="kpi-grid">
     <div class="kpi-card"><div class="kpi-value" id="kv-cost-today">—</div><div class="kpi-label">تكلفة اليوم</div></div>
-    <div class="kpi-card"><div class="kpi-value" id="kv-cost-month">—</div><div class="kpi-label">تكلفة الشهر</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kv-cost-month">—</div><div class="kpi-label">تكلفة 30 يوم</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kv-cost-total">—</div><div class="kpi-label">إجمالي الصرف</div></div>
     <div class="kpi-card" id="kpi-balance"><div class="kpi-value" id="kv-balance">—</div><div class="kpi-label">الرصيد (Credits)</div></div>
     <div class="kpi-card"><div class="kpi-value" id="kv-days-left">—</div><div class="kpi-label">أيام قبل الشحن</div></div>
     <div class="kpi-card"><div class="kpi-value" id="kv-cron">—</div><div class="kpi-label">Cron Jobs</div></div>
@@ -1084,6 +1085,7 @@ async function fetchDashboardData() {
     set('kv-balance', '$' + balance.toLocaleString());
     set('kv-cost-today', '$' + costToday.toLocaleString());
     set('kv-cost-month', '$' + costMonth.toLocaleString());
+    set('kv-cost-total', '$' + totalUsage.toLocaleString());
     
     // Balance color
     const balEl = document.getElementById('kv-balance');
