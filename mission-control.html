@@ -365,6 +365,7 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 
 <script>
 // === GITHUB CONFIG ===
+const API_URL = 'http://100.94.106.28:48100';
 const GITHUB_REPO = 'ideas-pipeline/ideas';
 const GITHUB_BRANCH = 'master';
 
@@ -820,16 +821,18 @@ function handleDrop(e) {
     if (!isEditAuthed()) { showTokenModal(); return false; }
     moveIdea(title, sourceColumn, targetColumn);
     
-    // أتمتة حسب العمود الجديد
-    if (targetColumn === 'explain') {
-      showToast('🔍 جاري شرح الفكرة...');
-      // الشرح يتم عبر الـ heartbeat
-    }
-    if (targetColumn === 'doit') {
-      showToast('🚀 بدأ التنفيذ — سيصلك إشعار على Telegram');
-    }
-    if (targetColumn === 'dontdoit') {
-      showToast('🚫 ستختفي بعد 10 دقائق');
+    // أتمتة حسب العمود الجديد — إرسال webhook للـ VPS
+    const ideaDesc = draggedItem.querySelector('p') ? draggedItem.querySelector('p').textContent : '';
+    if (['explain','doit','dontdoit'].includes(targetColumn)) {
+      fetch(API_URL + '/action', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({action: targetColumn, title: title, desc: ideaDesc})
+      }).then(r => r.json()).then(d => {
+        showToast(d.message || '✅ تم');
+      }).catch(e => {
+        showToast('⚠️ الإجراء محلي فقط — API غير متاح', true);
+      });
     }
     if (targetColumn === 'done') {
       showToast('✅ تم — ستُحذف بعد 10 أيام');
