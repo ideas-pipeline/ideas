@@ -23,6 +23,12 @@
       "color": "#3b82f6",
       "items": [
         {
+          "title": "AI Video Gen Skill",
+          "desc": "توليد فيديو من نص عبر Sora 2 API — مفعّل ومجرّب",
+          "tag": "skill",
+          "movedAt": 1772590195
+        },
+        {
           "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
           "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
           "tag": "tech",
@@ -106,11 +112,6 @@
           "title": "Agent Self-Hash Verification",
           "desc": "SHA-256 integrity check لـ SOUL.md + AGENTS.md — كل 30 دقيقة + نسخة خارجية على Telegram",
           "tag": "security"
-        },
-        {
-          "title": "AI Video Gen Skill",
-          "desc": "توليد فيديو من نص عبر Sora 2 API — مفعّل ومجرّب",
-          "tag": "skill"
         }
       ]
     }
