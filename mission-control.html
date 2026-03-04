@@ -196,7 +196,7 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
     <div class="kpi-card"><div class="kpi-value" id="kv-cost-today">—</div><div class="kpi-label">تكلفة اليوم</div></div>
     <div class="kpi-card"><div class="kpi-value" id="kv-cost-month">—</div><div class="kpi-label">تكلفة الشهر</div></div>
     <div class="kpi-card" id="kpi-balance"><div class="kpi-value" id="kv-balance">—</div><div class="kpi-label">الرصيد (Credits)</div></div>
-    <div class="kpi-card"><div class="kpi-value" id="kv-sessions">—</div><div class="kpi-label">جلسات نشطة</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kv-days-left">—</div><div class="kpi-label">أيام قبل الشحن</div></div>
     <div class="kpi-card"><div class="kpi-value" id="kv-cron">—</div><div class="kpi-label">Cron Jobs</div></div>
     <div class="kpi-card"><div class="kpi-value" id="kv-opus">—</div><div class="kpi-label">نسبة Opus من التكلفة</div></div>
     <div class="kpi-card"><div class="kpi-value" id="kv-requests">—</div><div class="kpi-label">إجمالي الطلبات</div></div>
@@ -1098,7 +1098,12 @@ async function fetchDashboardData() {
       if (res.ok) {
         const data = await res.json();
         const d = JSON.parse(decodeURIComponent(escape(atob(data.content))));
-        set('kv-sessions', d.activeSessions || '—');
+        // حساب أيام الرصيد المتبقية
+const avgDaily = costToday > 0 ? costToday : (costWeek > 0 ? costWeek / 7 : costMonth / 30);
+const daysLeft = avgDaily > 0 ? Math.floor(balance / avgDaily) : 99;
+set('kv-days-left', daysLeft + ' يوم');
+const dlEl = document.getElementById('kv-days-left');
+if (dlEl) dlEl.style.color = daysLeft > 14 ? 'var(--green2)' : daysLeft > 5 ? 'var(--orange)' : 'var(--red)';
         set('kv-cron', d.cronJobs || '—');
         set('kv-opus', (d.opusPercent || '—') + '%');
         set('kv-requests', (d.totalRequests || '—').toLocaleString());
