@@ -35,18 +35,18 @@
     "explain": {
       "name": "🔍 Explain",
       "color": "#3b82f6",
-      "items": [
-        {
-          "title": "AI Ops Dashboard (Microsoft Copilot Studio Template)",
-          "desc": "داشبورد متكامل للعمليات اليومية (alerts, tasks, stats) مربوط بأنظمة أتمتة OpenClaw/Teams/GitHub. يعطيك إنذارات, أتمتات، واتصال فوري مع النماذج للقرار السريع.",
-          "tag": "tech"
-        }
-      ]
+      "items": []
     },
     "dontdoit": {
       "name": "🚫 Don't Do It",
       "color": "#6b7280",
       "items": [
+        {
+          "title": "AI Ops Dashboard (Microsoft Copilot Studio Template)",
+          "desc": "داشبورد متكامل للعمليات اليومية (alerts, tasks, stats) مربوط بأنظمة أتمتة OpenClaw/Teams/GitHub. يعطيك إنذارات, أتمتات، واتصال فوري مع النماذج للقرار السريع.",
+          "tag": "tech",
+          "movedAt": 1772665132
+        },
         {
           "title": "No-code multi-agent automator (Vellum/X Lindy style)",
           "desc": "منصة autodrag & drop تسمح إنشاء أوتوميشنات تجمع بين OpenClaw وواجهات AI ثانية، مع شرط عدم الحاجة لأي كود — أي أحد يسوي بايبلان أو cron شخصي، ويدمج مصادر خارجية بسهولة.",
