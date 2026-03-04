@@ -4,13 +4,7 @@
     "inbox": {
       "name": "📥 Inbox",
       "color": "#f59e0b",
-      "items": [
-        {
-          "title": "they stole Claude’s brain 16 million times",
-          "desc": "NetworkChuck: they stole Claude’s brain 16 million times (Views: 30150)",
-          "tag": "tech"
-        }
-      ]
+      "items": []
     },
     "doit": {
       "name": "🚀 Do It",
@@ -21,6 +15,12 @@
       "name": "🔍 Explain",
       "color": "#3b82f6",
       "items": [
+        {
+          "title": "they stole Claude’s brain 16 million times",
+          "desc": "NetworkChuck: they stole Claude’s brain 16 million times (Views: 30150)",
+          "tag": "tech",
+          "movedAt": 1772667696
+        },
         {
           "title": "Agentic Tools Hub للسوق السعودي",
           "desc": "منصة تجمع أدوات وبرمجيات AI Agent جاهزة تربط مع الأنظمة المحلية (سداد، أبشر، تم) بدون كود — تسهّل الأتمتة للشركات الصغيرة والمتوسطة بخصوصية عالية",
