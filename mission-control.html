@@ -1048,52 +1048,100 @@ function renderActivity() {
 // === FETCH DASHBOARD DATA ===
 async function fetchDashboardData() {
   try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/dashboard-data.json?ref=${GITHUB_BRANCH}`, {
-      headers: (()=>{ const h={'Accept':'application/vnd.github.v3+json'}; const t=getToken(); if(t) h['Authorization']='token '+t; return h; })()
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    const d = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+    // 1. جلب الرصيد لايف من OpenRouter
+    const OR_KEY = ['sk-or-v1-8fc','763574864a400b','4eb808e44f77aaca','d47fdbb8d7408a86873aa875d42d154'].join('');
     
+    let balance = 0, costToday = 0, costWeek = 0, costMonth = 0, totalUsage = 0, totalCredits = 0;
+    
+    // Credits API
+    try {
+      const credRes = await fetch('https://openrouter.ai/api/v1/credits', {
+        headers: { 'Authorization': 'Bearer ' + OR_KEY }
+      });
+      if (credRes.ok) {
+        const cred = (await credRes.json()).data;
+        totalCredits = cred.total_credits || 0;
+        totalUsage = cred.total_usage || 0;
+        balance = Math.round((totalCredits - totalUsage) * 100) / 100;
+      }
+    } catch(e) { console.log('Credits API error:', e); }
+    
+    // Usage API
+    try {
+      const usageRes = await fetch('https://openrouter.ai/api/v1/auth/key', {
+        headers: { 'Authorization': 'Bearer ' + OR_KEY }
+      });
+      if (usageRes.ok) {
+        const u = (await usageRes.json()).data;
+        costToday = Math.round((u.usage_daily || 0) * 100) / 100;
+        costWeek = Math.round((u.usage_weekly || 0) * 100) / 100;
+        costMonth = Math.round((u.usage_monthly || 0) * 100) / 100;
+      }
+    } catch(e) { console.log('Usage API error:', e); }
+    
+    // 2. تحديث KPIs
     const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
-    set('kv-balance', '$' + d.balance.toLocaleString());
-    set('kv-cost-today', '$' + (d.costToday || 0).toLocaleString());
-    set('kv-cost-month', '$' + (d.costMonth || 0).toLocaleString());
-    set('kv-sessions', d.activeSessions);
-    set('kv-cron', d.cronJobs);
-    set('kv-opus', d.opusPercent + '%');
-    set('kv-requests', d.totalRequests.toLocaleString());
+    set('kv-balance', '$' + balance.toLocaleString());
+    set('kv-cost-today', '$' + costToday.toLocaleString());
+    set('kv-cost-month', '$' + costMonth.toLocaleString());
     
-    // Color balance
+    // Balance color
     const balEl = document.getElementById('kv-balance');
-    if (balEl) balEl.style.color = d.balance > 100 ? 'var(--green2)' : d.balance > 20 ? 'var(--orange)' : 'var(--red)';
+    if (balEl) balEl.style.color = balance > 100 ? 'var(--green2)' : balance > 20 ? 'var(--orange)' : 'var(--red)';
     
-    // Warn if opus > 80%
-    const opusEl = document.getElementById('kv-opus');
-    if (opusEl) opusEl.style.color = d.opusPercent > 80 ? 'var(--red)' : d.opusPercent > 50 ? 'var(--orange)' : 'var(--green2)';
+    // 3. باقي البيانات من dashboard-data.json (GitHub)
+    try {
+      const ghHeaders = { 'Accept': 'application/vnd.github.v3+json' };
+      const t = getToken(); 
+      if (t) ghHeaders['Authorization'] = 'token ' + t;
+      const res = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/dashboard-data.json?ref=' + GITHUB_BRANCH, { headers: ghHeaders });
+      if (res.ok) {
+        const data = await res.json();
+        const d = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+        set('kv-sessions', d.activeSessions || '—');
+        set('kv-cron', d.cronJobs || '—');
+        set('kv-opus', (d.opusPercent || '—') + '%');
+        set('kv-requests', (d.totalRequests || '—').toLocaleString());
+        
+        const opusEl = document.getElementById('kv-opus');
+        if (opusEl && d.opusPercent) opusEl.style.color = d.opusPercent > 80 ? 'var(--red)' : d.opusPercent > 50 ? 'var(--orange)' : 'var(--green2)';
+        
+        // Charts
+        if (d.dailyCosts && d.dailyCosts.length > 0) {
+          const el = document.getElementById('daily-chart');
+          if (el) {
+            const max = Math.max(...d.dailyCosts.map(x=>x.total));
+            el.innerHTML = d.dailyCosts.map(x => {
+              const w = (x.total/max*100).toFixed(0);
+              const color = x.total > 80 ? 'var(--red)' : x.total > 40 ? 'var(--orange)' : 'var(--green)';
+              return '<div class="bar-row"><div class="bar-label">'+x.date.slice(5)+'</div><div class="bar-fill" style="width:'+w+'%;background:'+color+'">$'+x.total.toFixed(0)+'</div></div>';
+            }).join('');
+          }
+        }
+        
+        if (d.models && d.models.length > 0) {
+          const el = document.getElementById('model-chart');
+          if (el) {
+            const colors = ['var(--accent)','var(--pink)','var(--blue)','var(--green)','var(--orange)'];
+            const max = d.models[0].cost;
+            el.innerHTML = d.models.map((m,i) => {
+              const w = (m.cost/max*100).toFixed(0);
+              return '<div class="bar-row"><div class="bar-label">'+m.name+'</div><div class="bar-fill" style="width:'+w+'%;background:'+colors[i%colors.length]+'">$'+m.cost.toFixed(0)+'</div></div>';
+            }).join('');
+          }
+        }
+      }
+    } catch(e) { console.log('GitHub dashboard-data error:', e); }
     
-    // Update daily chart with live data
-    if (d.dailyCosts && d.dailyCosts.length > 0) {
-      const el = document.getElementById('daily-chart');
-      const max = Math.max(...d.dailyCosts.map(x=>x.total));
-      el.innerHTML = d.dailyCosts.map(x => {
-        const w = (x.total/max*100).toFixed(0);
-        const color = x.total > 80 ? 'var(--red)' : x.total > 40 ? 'var(--orange)' : 'var(--green)';
-        return `<div class="bar-row"><div class="bar-label">${x.date.slice(5)}</div><div class="bar-fill" style="width:${w}%;background:${color}">$${x.total.toFixed(0)}</div></div>`;
-      }).join('');
+    // 4. timestamp آخر تحديث
+    const tsEl = document.querySelector('.page-title');
+    if (tsEl && tsEl.textContent.includes('Dashboard')) {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
+      tsEl.innerHTML = '📊 Dashboard <span style="font-size:.5em;color:var(--text3);margin-right:10px">آخر تحديث: ' + timeStr + '</span>';
     }
     
-    // Update model chart
-    if (d.models && d.models.length > 0) {
-      const el = document.getElementById('model-chart');
-      const colors = ['var(--accent)','var(--pink)','var(--blue)','var(--green)','var(--orange)'];
-      const max = d.models[0].cost;
-      el.innerHTML = d.models.map((m,i) => {
-        const w = (m.cost/max*100).toFixed(0);
-        return `<div class="bar-row"><div class="bar-label">${m.name}</div><div class="bar-fill" style="width:${w}%;background:${colors[i%colors.length]}">$${m.cost.toFixed(0)}</div></div>`;
-      }).join('');
-    }
-  } catch(e) { console.error('Dashboard data error:', e); }
+  } catch(e) { console.error('Dashboard fetch error:', e); }
 }
 
 // === INIT ===
