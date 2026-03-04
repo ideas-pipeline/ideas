@@ -54,7 +54,7 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 .kpi-card.warn .kpi-value { color: var(--orange); }
 /* Kanban */
 .kanban { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 12px; }
-.kanban-col { min-width: 240px; flex: 1; max-width: 300px; flex-shrink: 0; background: var(--bg2); border-radius: var(--radius); padding: 14px; border: 1px solid var(--bg3); min-height: 300px; }
+.kanban-col { min-width: 180px; flex: 1; max-width: 300px; flex-shrink: 0; background: var(--bg2); border-radius: var(--radius); padding: 14px; border: 1px solid var(--bg3); min-height: 300px; }
 .kanban-col.drag-over { background: var(--bg3); border-color: var(--accent); }
 .kanban-col-title { font-size: 1em; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--bg3); display: flex; align-items: center; justify-content: space-between; }
 .kanban-col-title .count { background: var(--bg3); color: var(--text3); font-size: .75em; padding: 2px 8px; border-radius: 10px; }
@@ -592,6 +592,7 @@ async function moveIdea(title, from, to) {
         item = content.columns[from].items.splice(idx, 1)[0];
         if (!content.columns[to]) content.columns[to] = { items: [] };
         if (!content.columns[to].items) content.columns[to].items = [];
+        item.movedAt = Math.floor(Date.now() / 1000);
         content.columns[to].items.unshift(item);
       }
     }
@@ -754,7 +755,8 @@ function renderKanban() {
     {key:'inbox',name:'📥 Inbox',color:'var(--orange)'},
     {key:'explain',name:'🔍 Explain',color:'var(--blue)'},
     {key:'doit',name:'🚀 Do It',color:'var(--red)'},
-    {key:'done',name:'✅ Done',color:'var(--green)'}
+    {key:'done',name:'✅ Done',color:'var(--green)'},
+    {key:'dontdoit',name:'🚫 Don\'t Do It',color:'var(--text3)'}
   ];
   board.innerHTML = cols.map(col => {
     const items = ideasData[col.key] || [];
@@ -816,6 +818,21 @@ function handleDrop(e) {
   
   if (sourceColumn !== targetColumn) {
     moveIdea(title, sourceColumn, targetColumn);
+    
+    // أتمتة حسب العمود الجديد
+    if (targetColumn === 'explain') {
+      showToast('🔍 جاري شرح الفكرة...');
+      // الشرح يتم عبر الـ heartbeat
+    }
+    if (targetColumn === 'doit') {
+      showToast('🚀 بدأ التنفيذ — سيصلك إشعار على Telegram');
+    }
+    if (targetColumn === 'dontdoit') {
+      showToast('🚫 ستختفي بعد 10 دقائق');
+    }
+    if (targetColumn === 'done') {
+      showToast('✅ تم — ستُحذف بعد 10 أيام');
+    }
   }
   
   return false;
