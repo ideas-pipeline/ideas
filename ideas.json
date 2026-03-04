@@ -16,11 +16,6 @@
           "tag": "tech"
         },
         {
-          "title": "become an AI HACKER (it's easier than you think)",
-          "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
-          "tag": "tech"
-        },
-        {
           "title": "Agentic Tools Hub للسوق السعودي",
           "desc": "منصة تجمع أدوات وبرمجيات AI Agent جاهزة تربط مع الأنظمة المحلية (سداد، أبشر، تم) بدون كود — تسهّل الأتمتة للشركات الصغيرة والمتوسطة بخصوصية عالية",
           "tag": "tech"
@@ -35,7 +30,14 @@
     "explain": {
       "name": "🔍 Explain",
       "color": "#3b82f6",
-      "items": []
+      "items": [
+        {
+          "title": "become an AI HACKER (it's easier than you think)",
+          "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
+          "tag": "tech",
+          "movedAt": 1772665196
+        }
+      ]
     },
     "dontdoit": {
       "name": "🚫 Don't Do It",
