@@ -23,6 +23,12 @@
       "color": "#3b82f6",
       "items": [
         {
+          "title": "Self-Improving Merge",
+          "desc": "دمج في SOUL.md + حذف skill",
+          "tag": "tech",
+          "movedAt": 1772590470
+        },
+        {
           "title": "AI Video Gen Skill",
           "desc": "توليد فيديو من نص عبر Sora 2 API — مفعّل ومجرّب",
           "tag": "skill",
@@ -91,11 +97,6 @@
         {
           "title": "Memory Auto-Flush",
           "desc": "تلقائي قبل compaction",
-          "tag": "tech"
-        },
-        {
-          "title": "Self-Improving Merge",
-          "desc": "دمج في SOUL.md + حذف skill",
           "tag": "tech"
         },
         {
