@@ -9,11 +9,6 @@
           "title": "they stole Claude’s brain 16 million times",
           "desc": "NetworkChuck: they stole Claude’s brain 16 million times (Views: 30150)",
           "tag": "tech"
-        },
-        {
-          "title": "Agentic Tools Hub للسوق السعودي",
-          "desc": "منصة تجمع أدوات وبرمجيات AI Agent جاهزة تربط مع الأنظمة المحلية (سداد، أبشر، تم) بدون كود — تسهّل الأتمتة للشركات الصغيرة والمتوسطة بخصوصية عالية",
-          "tag": "tech"
         }
       ]
     },
@@ -26,6 +21,12 @@
       "name": "🔍 Explain",
       "color": "#3b82f6",
       "items": [
+        {
+          "title": "Agentic Tools Hub للسوق السعودي",
+          "desc": "منصة تجمع أدوات وبرمجيات AI Agent جاهزة تربط مع الأنظمة المحلية (سداد، أبشر، تم) بدون كود — تسهّل الأتمتة للشركات الصغيرة والمتوسطة بخصوصية عالية",
+          "tag": "tech",
+          "movedAt": 1772667511
+        },
         {
           "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
           "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
