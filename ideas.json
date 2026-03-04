@@ -1,10 +1,21 @@
 {
-  "lastUpdated": "2026-03-04T02:15:40Z",
+  "lastUpdated": "2026-03-04T02:15:50Z",
   "columns": {
     "inbox": {
       "name": "📥 Inbox",
       "color": "#f59e0b",
-      "items": []
+      "items": [
+        {
+          "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
+          "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
+          "tag": "tech"
+        },
+        {
+          "title": "become an AI HACKER (it's easier than you think)",
+          "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
+          "tag": "tech"
+        }
+      ]
     },
     "doit": {
       "name": "🚀 Do It",
@@ -16,28 +27,14 @@
       "color": "#3b82f6",
       "items": [
         {
-          "title": "become an AI HACKER (it's easier than you think)",
-          "desc": "NetworkChuck: become an AI HACKER (it's easier than you think) (Views: 235732)",
-          "tag": "tech",
-          "movedAt": 1772590516
+          "title": "ClawRouter Setup",
+          "desc": "توفير 96% في تكلفة LLMs",
+          "tag": "tech"
         },
         {
-          "title": "Self-Improving Merge",
-          "desc": "دمج في SOUL.md + حذف skill",
-          "tag": "tech",
-          "movedAt": 1772590470
-        },
-        {
-          "title": "AI Video Gen Skill",
-          "desc": "توليد فيديو من نص عبر Sora 2 API — مفعّل ومجرّب",
-          "tag": "skill",
-          "movedAt": 1772590195
-        },
-        {
-          "title": "Claude Code on your Phone is OFFICIAL (it changes  everything)",
-          "desc": "NetworkChuck: Claude Code on your Phone is OFFICIAL (it changes  everything) (Views: 177317)",
-          "tag": "tech",
-          "movedAt": 1772589785
+          "title": "AI Ops Dashboard (Microsoft Copilot Studio Template)",
+          "desc": "داشبورد متكامل للعمليات اليومية (alerts, tasks, stats) مربوط بأنظمة أتمتة OpenClaw/Teams/GitHub. يعطيك إنذارات, أتمتات، واتصال فوري مع النماذج للقرار السريع.",
+          "tag": "tech"
         },
         {
           "title": "Cron Job Security Audit",
@@ -59,20 +56,7 @@
     "dontdoit": {
       "name": "🚫 Don't Do It",
       "color": "#6b7280",
-      "items": [
-        {
-          "title": "AI Ops Dashboard (Microsoft Copilot Studio Template)",
-          "desc": "داشبورد متكامل للعمليات اليومية (alerts, tasks, stats) مربوط بأنظمة أتمتة OpenClaw/Teams/GitHub. يعطيك إنذارات, أتمتات، واتصال فوري مع النماذج للقرار السريع.",
-          "tag": "tech",
-          "movedAt": 1772589692
-        },
-        {
-          "title": "ClawRouter Setup",
-          "desc": "توفير 96% في تكلفة LLMs",
-          "tag": "tech",
-          "movedAt": 1772589649
-        }
-      ]
+      "items": []
     },
     "done": {
       "name": "✅ Done",
@@ -99,6 +83,11 @@
           "tag": "tech"
         },
         {
+          "title": "Self-Improving Merge",
+          "desc": "دمج في SOUL.md + حذف skill",
+          "tag": "tech"
+        },
+        {
           "title": "Dashboard Access Fix",
           "desc": "allowedOrigins = [*]",
           "tag": "tech"
@@ -112,6 +101,11 @@
           "title": "Agent Self-Hash Verification",
           "desc": "SHA-256 integrity check لـ SOUL.md + AGENTS.md — كل 30 دقيقة + نسخة خارجية على Telegram",
           "tag": "security"
+        },
+        {
+          "title": "AI Video Gen Skill",
+          "desc": "توليد فيديو من نص عبر Sora 2 API — مفعّل ومجرّب",
+          "tag": "skill"
         }
       ]
     }
