@@ -610,7 +610,14 @@ async function fetchIdeas() {
 
 async function fetchSuggestions() {
   try {
-    suggestionsData = await readLocalJSON('suggestions');
+    const base = getApiBase();
+    const res = await fetch(base + 'suggestions');
+    if (res.ok) {
+      const all = await res.json();
+      suggestionsData = all.filter(s => s.status === 'pending' || !s.status);
+    } else {
+      suggestionsData = [];
+    }
     renderSuggestions();
     updateStats();
   } catch (err) {
@@ -666,19 +673,47 @@ async function addIdea(title, desc, tag) {
 async function approveSuggestion(id) {
   if (!checkToken()) return;
   try {
-    const suggestions = await readLocalJSON('suggestions');
+    // 1. Load fresh suggestions from API
+    const base = getApiBase();
+    const sugRes = await fetch(base + 'suggestions');
+    if (!sugRes.ok) throw new Error('Failed to load suggestions');
+    const suggestions = await sugRes.json();
+
     const s = suggestions.find(x => x.id === id);
-    if (!s) throw new Error('Not found');
+    if (!s) throw new Error('Suggestion not found');
+
+    // 2. Mark as approved
     s.status = 'approved';
-    await writeLocalJSON('suggestions', suggestions);
+    const saveSugRes = await fetch(base + 'suggestions', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(suggestions)
+    });
+    if (!saveSugRes.ok) throw new Error('Failed to save suggestions');
 
-    const ideas = await readLocalJSON('ideas');
+    // 3. Add to ideas inbox
+    const ideasRes = await fetch(base + 'ideas');
+    if (!ideasRes.ok) throw new Error('Failed to load ideas');
+    const ideas = await ideasRes.json();
+
     if (!ideas.columns) ideas.columns = {};
-    if (!ideas.columns.inbox) ideas.columns.inbox = { items: [] };
-    ideas.columns.inbox.items.unshift({ title: s.title, desc: s.desc || s.description || '', tag: s.tag || 'tech' });
-    await writeLocalJSON('ideas', ideas);
+    if (!ideas.columns.inbox) ideas.columns.inbox = { name: '📥 Inbox', items: [] };
+    if (!ideas.columns.inbox.items) ideas.columns.inbox.items = [];
+    ideas.columns.inbox.items.unshift({
+      title: s.title,
+      desc: s.desc || s.description || '',
+      tag: s.tag || 'tech',
+      movedAt: Math.floor(Date.now() / 1000)
+    });
 
-    showToast('✅ تمت الموافقة');
+    const saveIdeasRes = await fetch(base + 'ideas', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(ideas)
+    });
+    if (!saveIdeasRes.ok) throw new Error('Failed to save ideas');
+
+    showToast('✅ تمت الموافقة — أُضيفت للمهام');
     await fetchSuggestions();
     await fetchIdeas();
   } catch (err) {
@@ -690,11 +725,22 @@ async function approveSuggestion(id) {
 async function rejectSuggestion(id) {
   if (!checkToken()) return;
   try {
-    const suggestions = await readLocalJSON('suggestions');
+    const base = getApiBase();
+    const sugRes = await fetch(base + 'suggestions');
+    if (!sugRes.ok) throw new Error('Failed to load suggestions');
+    const suggestions = await sugRes.json();
+
     const s = suggestions.find(x => x.id === id);
-    if (!s) throw new Error('Not found');
+    if (!s) throw new Error('Suggestion not found');
+
     s.status = 'rejected';
-    await writeLocalJSON('suggestions', suggestions);
+    const saveSugRes = await fetch(base + 'suggestions', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(suggestions)
+    });
+    if (!saveSugRes.ok) throw new Error('Failed to save suggestions');
+
     showToast('✅ تم الرفض');
     await fetchSuggestions();
   } catch (err) {
