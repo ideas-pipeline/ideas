@@ -1,10 +1,16 @@
 {
-  "lastUpdated": "2026-03-05T16:38:10Z",
+  "lastUpdated": "2026-03-05T17:04:07Z",
   "columns": {
     "inbox": {
       "name": "📥 Inbox",
       "color": "#f59e0b",
-      "items": []
+      "items": [
+        {
+          "title": "MCP Learning Kit",
+          "desc": "دورة مجانية Model Context Protocol من Microsoft - مقدمة عملية للمطورين",
+          "tag": "tech"
+        }
+      ]
     },
     "doit": {
       "name": "🚀 Do It",
