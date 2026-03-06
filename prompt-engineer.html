@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Prompt Engineer — بناء وتحسين Prompts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .template-btn {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .template-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: scale(1.02);
+        }
+        .template-btn strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .variables {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .variable-input {
+            margin-bottom: 10px;
+        }
+        .variable-input label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .variable-input input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .tips {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .tips h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+        .tips ul {
+            list-style-position: inside;
+            line-height: 1.8;
+        }
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            .template-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .history-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .history-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        .history-item small {
+            display: block;
+            color: #666;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Prompt Engineer</h1>
+            <p class="subtitle">بناء وتحسين Prompts بشكل تفاعلي واحترافي</p>
+        </header>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2>📝 بناء Prompt</h2>
+                
+                <div class="template-grid">
+                    <div class="template-btn" onclick="loadTemplate('analysis')">
+                        <strong>📊 تحليل</strong>
+                        <small>تحليل نص أو بيانات</small>
+                    </div>
+                    <div class="template-btn" onclick="loadTemplate('creative')">
+                        <strong>🎨 إبداعي</strong>
+                        <small>كتابة قصص ومحتوى</small>
+                    </div>
+                    <div class="template-btn" onclick="loadTemplate('code')">
+                        <strong>💻 برمجة</strong>
+                        <small>كتابة أو شرح كود</small>
+                    </div>
+                    <div class="template-btn" onclick="loadTemplate('qa')">
+                        <strong>❓ Q&A</strong>
+                        <small>سؤال وجواب</small>
+                    </div>
+                    <div class="template-btn" onclick="loadTemplate('roleplay')">
+                        <strong>🎭 لعب أدوار</strong>
+                        <small>محاكاة شخصية</small>
+                    </div>
+                    <div class="template-btn" onclick="loadTemplate('reasoning')">
+                        <strong>🧠 استنتاج</strong>
+                        <small>تفكير منطقي</small>
+                    </div>
+                </div>
+
+                <div class="variables" id="variables" style="display:none;">
+                    <h3>🔧 المتغيرات</h3>
+                    <div id="variableInputs"></div>
+                </div>
+
+                <textarea id="promptInput" placeholder="اختر قالب أو اكتب prompt خاص بك..."></textarea>
+
+                <div class="controls">
+                    <button class="btn-primary" onclick="analyzePrompt()">🔍 تحليل</button>
+                    <button class="btn-primary" onclick="improvePrompt()">⚡ تحسين تلقائي</button>
+                    <button class="btn-secondary" onclick="copyPrompt()">📋 نسخ</button>
+                    <button class="btn-secondary" onclick="savePrompt()">💾 حفظ</button>
+                    <button class="btn-secondary" onclick="clearPrompt()">🗑️ مسح</button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <span class="stat-value" id="charCount">0</span>
+                        <span class="stat-label">حرف</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value" id="wordCount">0</span>
+                        <span class="stat-label">كلمة</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value" id="tokenEstimate">0</span>
+                        <span class="stat-label">توكن (تقريبي)</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value" id="qualityScore">-</span>
+                        <span class="stat-label">درجة الجودة</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💡 التحليل والاقتراحات</h2>
+                <div id="analysis" style="min-height: 200px; line-height: 1.8;">
+                    <p style="color: #999; text-align: center; padding-top: 50px;">اختر قالب أو اكتب prompt واضغط "تحليل"</p>
+                </div>
+
+                <div class="tips">
+                    <h3>💎 نصائح لـ Prompts أفضل:</h3>
+                    <ul>
+                        <li><strong>كن محدداً:</strong> وضّح بالضبط وش تبي</li>
+                        <li><strong>أعط سياق:</strong> زوّد النموذج بمعلومات خلفية</li>
+                        <li><strong>حدد التنسيق:</strong> (JSON, bullet points, etc.)</li>
+                        <li><strong>أمثلة:</strong> أعط مثال أو اثنين للنتيجة المطلوبة</li>
+                        <li><strong>القيود:</strong> حدد الحد الأقصى للطول أو الأسلوب</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📚 السجل</h2>
+            <div class="history" id="history">
+                <p style="color: #999; text-align: center;">لا يوجد سجل بعد</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const templates = {
+            analysis: {
+                name: 'تحليل',
+                variables: ['موضوع', 'زاوية'],
+                template: `حلل {موضوع} من زاوية {زاوية}.
+
+اتبع الخطوات التالية:
+1. ملخص سريع
+2. النقاط الرئيسية
+3. الإيجابيات والسلبيات
+4. الاستنتاجات
+5. التوصيات
+
+استخدم أسلوب واضح ومنظم.`
+            },
+            creative: {
+                name: 'إبداعي',
+                variables: ['نوع', 'موضوع', 'طول'],
+                template: `اكتب {نوع} عن {موضوع}.
+
+المتطلبات:
+- الطول: {طول} كلمة تقريباً
+- الأسلوب: إبداعي وجذّاب
+- الجمهور: عام
+- اللغة: عربية فصحى معاصرة
+
+ابدأ بافتتاحية قوية واختم بخاتمة لا تُنسى.`
+            },
+            code: {
+                name: 'برمجة',
+                variables: ['مهمة', 'لغة'],
+                template: `اكتب كود {لغة} ينفّذ المهمة التالية:
+{مهمة}
+
+المتطلبات:
+- كود نظيف ومنظم
+- تعليقات توضيحية
+- معالجة الأخطاء
+- أمثلة استخدام
+- اتبع best practices
+
+اشرح الكود بعد كتابته.`
+            },
+            qa: {
+                name: 'سؤال وجواب',
+                variables: ['سؤال'],
+                template: `أجب على السؤال التالي بدقة ووضوح:
+{سؤال}
+
+تنسيق الإجابة:
+1. إجابة مباشرة (فقرة واحدة)
+2. تفصيل (إذا لزم)
+3. أمثلة (إن وُجدت)
+4. مصادر أو مراجع (اختياري)
+
+كن دقيقاً وواضحاً.`
+            },
+            roleplay: {
+                name: 'لعب أدوار',
+                variables: ['شخصية', 'سيناريو'],
+                template: `تصرّف كـ {شخصية} في السيناريو التالي:
+{سيناريو}
+
+القواعد:
+- ابقَ في الشخصية طوال الوقت
+- استخدم أسلوب ومفردات الشخصية
+- تفاعل بشكل طبيعي وواقعي
+- لا تكسر الجدار الرابع
+
+ابدأ مباشرة في الدور.`
+            },
+            reasoning: {
+                name: 'استنتاج',
+                variables: ['مسألة'],
+                template: `حل المسألة التالية خطوة بخطوة:
+{مسألة}
+
+المطلوب:
+1. فهم المسألة: أعد صياغة المطلوب
+2. التخطيط: حدد الخطوات اللازمة
+3. التنفيذ: حل كل خطوة بوضوح
+4. المراجعة: تأكد من منطقية النتيجة
+5. الحل النهائي
+
+فكّر بصوت مرتفع واشرح كل خطوة.`
+            }
+        };
+
+        let history = JSON.parse(localStorage.getItem('promptHistory') || '[]');
+
+        function loadTemplate(type) {
+            const template = templates[type];
+            const variablesDiv = document.getElementById('variables');
+            const variableInputsDiv = document.getElementById('variableInputs');
+            
+            variableInputsDiv.innerHTML = '';
+            
+            if (template.variables.length > 0) {
+                variablesDiv.style.display = 'block';
+                template.variables.forEach(v => {
+                    const div = document.createElement('div');
+                    div.className = 'variable-input';
+                    div.innerHTML = `
+                        <label>${v}:</label>
+                        <input type="text" id="var_${v}" placeholder="أدخل ${v}..." onkeyup="updatePrompt('${type}')">
+                    `;
+                    variableInputsDiv.appendChild(div);
+                });
+            } else {
+                variablesDiv.style.display = 'none';
+            }
+            
+            document.getElementById('promptInput').value = template.template;
+            updateStats();
+        }
+
+        function updatePrompt(type) {
+            const template = templates[type];
+            let prompt = template.template;
+            
+            template.variables.forEach(v => {
+                const value = document.getElementById(`var_${v}`).value || `{${v}}`;
+                prompt = prompt.replace(new RegExp(`{${v}}`, 'g'), value);
+            });
+            
+            document.getElementById('promptInput').value = prompt;
+            updateStats();
+        }
+
+        function updateStats() {
+            const text = document.getElementById('promptInput').value;
+            const chars = text.length;
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            const tokens = Math.ceil(words * 1.3); // rough estimate
+            
+            document.getElementById('charCount').textContent = chars;
+            document.getElementById('wordCount').textContent = words;
+            document.getElementById('tokenEstimate').textContent = tokens;
+        }
+
+        function analyzePrompt() {
+            const prompt = document.getElementById('promptInput').value;
+            
+            if (!prompt.trim()) {
+                alert('الرجاء كتابة prompt أولاً');
+                return;
+            }
+            
+            let score = 0;
+            const feedback = [];
+            
+            // Check clarity
+            if (prompt.length > 50) score += 20;
+            else feedback.push('❌ Prompt قصير جداً — وضّح أكثر');
+            
+            // Check structure
+            if (prompt.includes('\n')) score += 20;
+            else feedback.push('⚠️ استخدم فقرات أو نقاط لتنظيم أفضل');
+            
+            // Check specificity
+            const hasNumbers = /\d/.test(prompt);
+            const hasQuotes = prompt.includes('"') || prompt.includes("'");
+            if (hasNumbers || hasQuotes) score += 20;
+            else feedback.push('💡 أضف تفاصيل محددة أو أمثلة');
+            
+            // Check instructions
+            const hasKeywords = /قم|اكتب|حلل|وضح|اشرح|أنشئ|حدد/i.test(prompt);
+            if (hasKeywords) score += 20;
+            else feedback.push('📋 ابدأ بفعل أمر واضح');
+            
+            // Check constraints
+            const hasConstraints = /طول|أسلوب|تنسيق|شرط|حد/i.test(prompt);
+            if (hasConstraints) score += 20;
+            else feedback.push('🎯 حدد قيود أو متطلبات للنتيجة');
+            
+            document.getElementById('qualityScore').textContent = score + '%';
+            
+            let analysis = '<h3>📊 التحليل:</h3><ul>';
+            
+            if (score >= 80) {
+                analysis += '<li style="color: green;">✅ Prompt ممتاز!</li>';
+            } else if (score >= 60) {
+                analysis += '<li style="color: orange;">⚠️ Prompt جيد لكن يمكن تحسينه</li>';
+            } else {
+                analysis += '<li style="color: red;">❌ Prompt يحتاج تحسين</li>';
+            }
+            
+            feedback.forEach(f => {
+                analysis += `<li>${f}</li>`;
+            });
+            
+            analysis += '</ul>';
+            
+            document.getElementById('analysis').innerHTML = analysis;
+        }
+
+        function improvePrompt() {
+            const prompt = document.getElementById('promptInput').value;
+            
+            if (!prompt.trim()) {
+                alert('الرجاء كتابة prompt أولاً');
+                return;
+            }
+            
+            let improved = prompt;
+            
+            // Add structure if missing
+            if (!improved.includes('\n\n')) {
+                improved += '\n\nالمتطلبات:\n- [أضف متطلبات]\n\nالتنسيق:\n- [حدد التنسيق المطلوب]';
+            }
+            
+            // Add clarity instruction
+            if (!improved.toLowerCase().includes('وضح') && !improved.toLowerCase().includes('اشرح')) {
+                improved += '\n\nوضّح إجابتك بأمثلة.';
+            }
+            
+            document.getElementById('promptInput').value = improved;
+            updateStats();
+            
+            document.getElementById('analysis').innerHTML = `
+                <h3>✨ تم التحسين!</h3>
+                <p>أضفت بنية وتوجيهات أوضح. راجع Prompt وعدّل حسب حاجتك.</p>
+            `;
+        }
+
+        function copyPrompt() {
+            const prompt = document.getElementById('promptInput').value;
+            navigator.clipboard.writeText(prompt).then(() => {
+                alert('✅ تم النسخ!');
+            });
+        }
+
+        function savePrompt() {
+            const prompt = document.getElementById('promptInput').value;
+            
+            if (!prompt.trim()) {
+                alert('لا يوجد شيء للحفظ');
+                return;
+            }
+            
+            const entry = {
+                id: Date.now(),
+                prompt: prompt.substring(0, 100) + (prompt.length > 100 ? '...' : ''),
+                full: prompt,
+                timestamp: new Date().toLocaleString('ar-SA')
+            };
+            
+            history.unshift(entry);
+            if (history.length > 20) history.pop();
+            
+            localStorage.setItem('promptHistory', JSON.stringify(history));
+            renderHistory();
+            
+            alert('✅ تم الحفظ في السجل!');
+        }
+
+        function renderHistory() {
+            const historyDiv = document.getElementById('history');
+            
+            if (history.length === 0) {
+                historyDiv.innerHTML = '<p style="color: #999; text-align: center;">لا يوجد سجل بعد</p>';
+                return;
+            }
+            
+            historyDiv.innerHTML = history.map(h => `
+                <div class="history-item" onclick="loadFromHistory(${h.id})">
+                    <small>${h.timestamp}</small>
+                    <div>${h.prompt}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(id) {
+            const entry = history.find(h => h.id === id);
+            if (entry) {
+                document.getElementById('promptInput').value = entry.full;
+                updateStats();
+            }
+        }
+
+        function clearPrompt() {
+            document.getElementById('promptInput').value = '';
+            document.getElementById('variables').style.display = 'none';
+            document.getElementById('analysis').innerHTML = '<p style="color: #999; text-align: center; padding-top: 50px;">اختر قالب أو اكتب prompt واضغط "تحليل"</p>';
+            updateStats();
+        }
+
+        // Event listeners
+        document.getElementById('promptInput').addEventListener('input', updateStats);
+        
+        // Initialize
+        renderHistory();
+        updateStats();
+    </script>
+</body>
+</html>
