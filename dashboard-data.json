@@ -1,26 +1,26 @@
 {
-  "lastUpdated": "2026-03-04T02:50:53Z",
-  "balance": 23.43,
-  "totalCredits": 711,
-  "totalUsage": 687.57,
-  "limit": 1800,
-  "costToday": 65.96,
-  "costWeek": 293.65,
-  "costMonth": 317.83,
-  "activeSessions": 9,
+  "lastUpdated": "2026-03-24T00:58:45.085158Z",
+  "balance": "70.33",
+  "totalCredits": 2181,
+  "totalUsage": "2880.67",
+  "limit": null,
+  "costToday": 8.4,
+  "costWeek": 35.2,
+  "costMonth": 1753.65,
+  "activeSessions": 2,
   "cronJobs": 8,
-  "totalRequests": 3500,
+  "totalRequests": 3570,
   "opusPercent": 68,
   "models": [
-    {
-      "name": "Claude Opus 4.6",
-      "cost": 417.94,
-      "requests": 1361
-    },
     {
       "name": "Claude Sonnet 4.5",
       "cost": 120.5,
       "requests": 450
+    },
+    {
+      "name": "Claude Opus 4.6",
+      "cost": 417.94,
+      "requests": 1361
     },
     {
       "name": "GPT-4.1",
@@ -40,32 +40,32 @@
   ],
   "dailyCosts": [
     {
-      "date": "2026-03-04",
-      "total": 167.91
+      "date": "2026-03-18",
+      "total": 35.2
     },
     {
-      "date": "2026-03-03",
-      "total": 62.0
+      "date": "2026-03-17",
+      "total": 28.48
     },
     {
-      "date": "2026-03-02",
+      "date": "2026-03-16",
+      "total": 42.3
+    },
+    {
+      "date": "2026-03-15",
       "total": 55.14
     },
     {
-      "date": "2026-03-01",
+      "date": "2026-03-14",
       "total": 24.18
     },
     {
-      "date": "2026-02-28",
+      "date": "2026-03-13",
       "total": 102.37
     },
     {
-      "date": "2026-02-27",
+      "date": "2026-03-12",
       "total": 54.41
-    },
-    {
-      "date": "2026-02-26",
-      "total": 23.88
     }
   ]
 }

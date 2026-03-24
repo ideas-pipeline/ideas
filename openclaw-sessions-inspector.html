@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Sessions Inspector 🔍</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .sessions-container {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .session-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .session-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.3);
+        }
+        
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .session-key {
+            font-family: monospace;
+            background: rgba(0, 210, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .session-kind {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .kind-main {
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+        }
+        
+        .kind-cron {
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+        }
+        
+        .kind-subagent {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+        }
+        
+        .session-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-bottom: 3px;
+        }
+        
+        .info-value {
+            font-weight: bold;
+        }
+        
+        .messages-preview {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .message-role {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .role-user {
+            color: #00d2ff;
+        }
+        
+        .role-assistant {
+            color: #3a7bd5;
+        }
+        
+        .role-system {
+            color: #f5576c;
+        }
+        
+        .timeline {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+        
+        .timeline-event {
+            min-width: 100px;
+            padding: 8px;
+            background: rgba(0, 210, 255, 0.2);
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.8em;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            padding: 15px 30px;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 210, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 210, 255, 0.6);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+        }
+        
+        .error {
+            background: rgba(245, 87, 108, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #ff6b6b;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .session-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 OpenClaw Sessions Inspector</h1>
+            <p>مراقبة لايف لكل الـ sessions والـ sub-agents</p>
+        </header>
+        
+        <div class="stats-grid" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalSessions">-</div>
+                <div class="stat-label">إجمالي Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeSessions">-</div>
+                <div class="stat-label">نشطة (آخر 30 دقيقة)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalMessages">-</div>
+                <div class="stat-label">إجمالي الرسائل</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCost">$-</div>
+                <div class="stat-label">التكلفة الإجمالية</div>
+            </div>
+        </div>
+        
+        <div id="sessionsContainer" class="sessions-container">
+            <div class="loading">⏳ جاري التحميل...</div>
+        </div>
+    </div>
+    
+    <button class="refresh-btn" onclick="loadSessions()">🔄 تحديث</button>
+    
+    <script>
+        async function loadSessions() {
+            const container = document.getElementById('sessionsContainer');
+            container.innerHTML = '<div class="loading">⏳ جاري التحميل...</div>';
+            
+            try {
+                const response = await fetch('/mc/sessions-list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                if (!data.sessions || data.sessions.length === 0) {
+                    container.innerHTML = '<div class="error">لا توجد sessions نشطة</div>';
+                    return;
+                }
+                
+                // تحديث الإحصائيات
+                updateStats(data.sessions);
+                
+                // عرض Sessions
+                container.innerHTML = '';
+                data.sessions.forEach(session => {
+                    const card = createSessionCard(session);
+                    container.appendChild(card);
+                });
+                
+            } catch (error) {
+                container.innerHTML = `<div class="error">❌ خطأ في التحميل: ${error.message}</div>`;
+                console.error('Error loading sessions:', error);
+            }
+        }
+        
+        function updateStats(sessions) {
+            const now = Date.now();
+            const thirtyMinsAgo = now - (30 * 60 * 1000);
+            
+            let totalMessages = 0;
+            let totalCost = 0;
+            let activeSessions = 0;
+            
+            sessions.forEach(s => {
+                // حساب عدد الرسائل من tokens (تقريبي)
+                const estimatedMessages = Math.floor((s.inputTokens + s.outputTokens) / 500);
+                totalMessages += estimatedMessages;
+                
+                totalCost += s.totalCost || 0;
+                
+                if (s.lastActivityMs && s.lastActivityMs > thirtyMinsAgo) {
+                    activeSessions++;
+                }
+            });
+            
+            document.getElementById('totalSessions').textContent = sessions.length;
+            document.getElementById('activeSessions').textContent = activeSessions;
+            document.getElementById('totalMessages').textContent = totalMessages + ' (تقديري)';
+            document.getElementById('totalCost').textContent = '$' + totalCost.toFixed(3);
+        }
+        
+        function createSessionCard(session) {
+            const card = document.createElement('div');
+            card.className = 'session-card';
+            
+            const kind = session.kind || 'unknown';
+            const kindClass = kind === 'main' ? 'kind-main' : 
+                             kind.includes('cron') ? 'kind-cron' : 'kind-subagent';
+            
+            const created = session.createdAt ? new Date(session.createdAt).toLocaleString('ar-SA') : 'غير معروف';
+            const lastActivity = session.lastActivityMs ? 
+                new Date(session.lastActivityMs).toLocaleString('ar-SA') : 'لا يوجد';
+            
+            const model = session.model || 'غير محدد';
+            const messageCount = session.messages ? session.messages.length : 0;
+            const cost = session.usage && session.usage.totalCost ? 
+                '$' + session.usage.totalCost.toFixed(4) : '$0';
+            
+            let html = `
+                <div class="session-header">
+                    <div class="session-key">${session.sessionKey}</div>
+                    <div class="session-kind ${kindClass}">${kind}</div>
+                </div>
+                
+                <div class="session-info">
+                    <div class="info-item">
+                        <div class="info-label">النموذج</div>
+                        <div class="info-value">${model}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">الرسائل</div>
+                        <div class="info-value">${messageCount}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">التكلفة</div>
+                        <div class="info-value">${cost}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">آخر نشاط</div>
+                        <div class="info-value" style="font-size: 0.8em;">${lastActivity}</div>
+                    </div>
+                </div>
+            `;
+            
+            // عرض معلومات Tokens
+            const inputK = (session.inputTokens / 1000).toFixed(1);
+            const outputK = (session.outputTokens / 1000).toFixed(1);
+            const contextK = (session.contextTokens / 1000).toFixed(0);
+            const usage = session.contextTokens > 0 ? 
+                Math.round((session.inputTokens + session.outputTokens) / session.contextTokens * 100) : 0;
+            
+            html += `
+                <div class="messages-preview">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <strong>📥 Input:</strong> ${inputK}K tokens
+                        </div>
+                        <div>
+                            <strong>📤 Output:</strong> ${outputK}K tokens
+                        </div>
+                        <div>
+                            <strong>🧠 Context:</strong> ${contextK}K tokens
+                        </div>
+                        <div>
+                            <strong>📊 Usage:</strong> ${usage}%
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            card.innerHTML = html;
+            return card;
+        }
+        
+        // تحميل أولي
+        loadSessions();
+        
+        // تحديث تلقائي كل دقيقة
+        setInterval(loadSessions, 60000);
+    </script>
+</body>
+</html>

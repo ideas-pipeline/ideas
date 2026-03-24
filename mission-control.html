@@ -305,11 +305,19 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 
 <!-- ===== AGENTS & TEAM ===== -->
 <div class="page" id="page-agents">
-  <div class="page-title">🤖 Agents & Team <button class="btn" onclick="refreshAgents()" style="font-size:.75em;padding:6px 12px;background:var(--accent);color:#fff;margin-right:auto">🔄 تحديث</button></div>
+  <div class="page-title">🤖 Agents & Team <button class="btn" onclick="fetchAgentsStatus()" style="font-size:.75em;padding:6px 12px;background:var(--accent);color:#fff;margin-right:auto">🔄 تحديث</button> <span id="agents-timestamp" style="font-size:.5em;color:var(--text3);margin-right:10px"></span></div>
+  
   <div class="mission-box">
     <h3>🎯 Mission Statement</h3>
     <p>بناء منظومة AI متكاملة تعمل 24/7 لسلطان — تراقب، تبني، تحلل، وتبادر. كل يوم أقوى من اللي قبله.</p>
   </div>
+  
+  <!-- Live Agents Cards -->
+  <div id="agents-live-cards" style="margin-bottom:20px">
+    <div style="text-align:center;padding:40px;color:var(--text3)">⏳ جاري تحميل بيانات الوكلاء...</div>
+  </div>
+  
+  <!-- Legacy Team Grid (fallback) -->
   <div class="team-grid" id="team-grid"></div>
 </div>
 
@@ -328,31 +336,20 @@ body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--t
 
 <!-- ===== SYSTEM HEALTH ===== -->
 <div class="page" id="page-system">
-  <div class="page-title">⚙️ System Health</div>
-  <div class="kpi-grid">
-    <div class="kpi-card"><div class="kpi-value" style="color:var(--green2)">🟢</div><div class="kpi-label">Gateway</div></div>
-    <div class="kpi-card"><div class="kpi-value" style="color:var(--green2)">🟢</div><div class="kpi-label">Telegram Bot</div></div>
-    <div class="kpi-card"><div class="kpi-value" style="color:var(--orange)">🟡</div><div class="kpi-label">Night Build</div></div>
-    <div class="kpi-card"><div class="kpi-value" style="color:var(--red)">🔴</div><div class="kpi-label">Integrity Check</div></div>
-  </div>
-  <div class="card">
-    <h3>📋 حالة Cron Jobs</h3>
-    <table class="cron-table">
-      <thead><tr><th>المهمة</th><th>آخر حالة</th><th>النموذج</th><th>المدة</th><th>الخطأ</th></tr></thead>
-      <tbody id="system-cron-table"></tbody>
-    </table>
-  </div>
-  <div class="card">
-    <h3>⚠️ مشاكل تحتاج انتباه</h3>
-    <div style="padding:8px">
-      <div style="color:var(--red);margin-bottom:8px">🔴 integrity-check.sh مفقود — الفحص الأمني متوقف</div>
-      <div style="color:var(--orange);margin-bottom:8px">🟡 Night Build فشل (model not allowed) — تم الإصلاح</div>
-      <div style="color:var(--orange);margin-bottom:8px">🟡 تحديث OpenClaw متاح (2026.3.2)</div>
-      <div style="color:var(--red);margin-bottom:8px">🔴 Claude Opus يستهلك 93% من الميزانية</div>
-    </div>
-  </div>
+  <div class="page-title">⚙️ System Health <button onclick="fetchAndRenderSystem()" style="margin-right:8px;padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius2);cursor:pointer;font-size:.8em">🔄</button></div>
+  <div id="system-content"><div style="text-align:center;padding:40px;color:var(--text3)">جاري التحميل...</div></div>
 </div>
 
+
+    <!-- System Resources Bars -->
+    <div class="card" id="system-resources-bars" style="margin-top:12px">
+      <h3>🔋 استهلاك الموارد</h3>
+      <div class="bar-chart">
+        <div class="bar-row"><div class="bar-label">RAM</div><div class="bar-fill" id="bar-ram" style="width:1%;background:var(--green)">1%</div></div>
+        <div class="bar-row"><div class="bar-label">Disk</div><div class="bar-fill" id="bar-disk" style="width:1%;background:var(--orange)">1%</div></div>
+        <div class="bar-row"><div class="bar-label">CPU</div><div class="bar-fill" id="bar-cpu" style="width:1%;background:var(--pink)">1%</div></div>
+      </div>
+    </div>
 <!-- ===== ACTIVITY FEED ===== -->
 <div class="page" id="page-activity">
   <div class="page-title">📜 Activity Feed</div>
@@ -474,11 +471,7 @@ const memories = {
   "2026-02-22":"الإعداد الأولي — Telegram، OpenRouter، Maton، Google OAuth.",
 };
 
-const builds = [
-  {date:"2026-03-03",name:"حاسبة كفالة تفاعلية",builder:"Sonnet 4.5",link:"https://saif-sadeem.com/kafalah-calculator.html",desc:"حاسبة ضمانات بنكية تفاعلية — mobile-first"},
-  {date:"2026-03-03",name:"Mission Control",builder:"Opus + Sonnet + GPT",link:"https://saif-sadeem.com/mission-control.html",desc:"لوحة تحكم متكاملة — 9 شاشات لإدارة النظام"},
-  {date:"2026-03-02",name:"Night Mini Dashboard",builder:"GPT-4.1",link:"https://saif-sadeem.com/night-mini-dashboard.html",desc:"صفحة بسيطة بـ 4 أرقام ثابتة"},
-];
+let builds = []; // populated from API
 
 const activityFeed = [
   {time:"19:15",text:"⚙️ بناء Mission Control الكامل",color:"var(--accent)"},
@@ -519,7 +512,9 @@ async function readLocalJSON(endpoint) {
 
 async function writeLocalJSON(endpoint, data) {
   const base = getApiBase();
-  const res = await fetch(base + endpoint, {
+  // Add token for write operations
+  const url = endpoint.includes('?') ? base + endpoint + '&token=v5eYeag3SABLBgpPpR367fGjCg1zizfO9DZmL5vVD3w' : base + endpoint + '?token=v5eYeag3SABLBgpPpR367fGjCg1zizfO9DZmL5vVD3w';
+  const res = await fetch(url, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify(data)
@@ -611,7 +606,7 @@ async function fetchIdeas() {
 async function fetchSuggestions() {
   try {
     const base = getApiBase();
-    const res = await fetch(base + 'suggestions');
+    const res = await fetch(base + 'suggestions?token=v5eYeag3SABLBgpPpR367fGjCg1zizfO9DZmL5vVD3w');
     if (res.ok) {
       const all = await res.json();
       suggestionsData = all.filter(s => s.status === 'pending' || !s.status);
@@ -670,48 +665,26 @@ async function addIdea(title, desc, tag) {
   }
 }
 
-async function approveSuggestion(id) {
+async function approveSuggestion(titleOrId) {
   if (!checkToken()) return;
   try {
     // 1. Load fresh suggestions from API
     const base = getApiBase();
-    const sugRes = await fetch(base + 'suggestions');
+    const sugRes = await fetch(base + 'suggestions?token=v5eYeag3SABLBgpPpR367fGjCg1zizfO9DZmL5vVD3w');
     if (!sugRes.ok) throw new Error('Failed to load suggestions');
     const suggestions = await sugRes.json();
 
-    const s = suggestions.find(x => x.id === id);
-    if (!s) throw new Error('Suggestion not found');
+    // Find by id OR title (supports both old and new suggestions)
+    const s = suggestions.find(x => (x.id && x.id === titleOrId) || x.title === titleOrId);
+    if (!s) throw new Error('Suggestion not found: ' + titleOrId);
 
-    // 2. Mark as approved
-    s.status = 'approved';
-    const saveSugRes = await fetch(base + 'suggestions', {
+    // 2. Call approve endpoint — server handles everything (update status + add to ideas + GitHub push)
+    const approveRes = await fetch(base + 'suggestions/approve?token=v5eYeag3SABLBgpPpR367fGjCg1zizfO9DZmL5vVD3w', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(suggestions)
+      body: JSON.stringify({id: s.id || s.title, column: 'inbox'})
     });
-    if (!saveSugRes.ok) throw new Error('Failed to save suggestions');
-
-    // 3. Add to ideas inbox
-    const ideasRes = await fetch(base + 'ideas');
-    if (!ideasRes.ok) throw new Error('Failed to load ideas');
-    const ideas = await ideasRes.json();
-
-    if (!ideas.columns) ideas.columns = {};
-    if (!ideas.columns.inbox) ideas.columns.inbox = { name: '📥 Inbox', items: [] };
-    if (!ideas.columns.inbox.items) ideas.columns.inbox.items = [];
-    ideas.columns.inbox.items.unshift({
-      title: s.title,
-      desc: s.desc || s.description || '',
-      tag: s.tag || 'tech',
-      movedAt: Math.floor(Date.now() / 1000)
-    });
-
-    const saveIdeasRes = await fetch(base + 'ideas', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(ideas)
-    });
-    if (!saveIdeasRes.ok) throw new Error('Failed to save ideas');
+    if (!approveRes.ok) throw new Error('Failed to approve suggestion');
 
     showToast('✅ تمت الموافقة — أُضيفت للمهام');
     await fetchSuggestions();
@@ -722,24 +695,25 @@ async function approveSuggestion(id) {
   }
 }
 
-async function rejectSuggestion(id) {
+async function rejectSuggestion(titleOrId) {
   if (!checkToken()) return;
   try {
     const base = getApiBase();
-    const sugRes = await fetch(base + 'suggestions');
+    const sugRes = await fetch(base + 'suggestions?token=v5eYeag3SABLBgpPpR367fGjCg1zizfO9DZmL5vVD3w');
     if (!sugRes.ok) throw new Error('Failed to load suggestions');
     const suggestions = await sugRes.json();
 
-    const s = suggestions.find(x => x.id === id);
+    // Find by id OR title (supports both old and new suggestions)
+    const s = suggestions.find(x => (x.id && x.id === titleOrId) || x.title === titleOrId);
     if (!s) throw new Error('Suggestion not found');
 
-    s.status = 'rejected';
-    const saveSugRes = await fetch(base + 'suggestions', {
+    // Use correct reject endpoint
+    const rejectRes = await fetch(base + 'suggestions/reject?token=v5eYeag3SABLBgpPpR367fGjCg1zizfO9DZmL5vVD3w', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(suggestions)
+      body: JSON.stringify({id: s.id || s.title})
     });
-    if (!saveSugRes.ok) throw new Error('Failed to save suggestions');
+    if (!rejectRes.ok) throw new Error('Failed to reject suggestion');
 
     showToast('✅ تم الرفض');
     await fetchSuggestions();
@@ -781,6 +755,8 @@ function showPage(id) {
   if (id === 'tasks') fetchIdeas();
   if (id === 'costs') fetchCostsData();
   if (id === 'agents') renderTeam();
+  if (id === 'builds') fetchAndRenderBuilds();
+  if (id === 'system') fetchAndRenderSystem();
   if (id === 'memory') { if (typeof showMemoryPageInit === 'function') showMemoryPageInit(); }
 }
 
@@ -1003,7 +979,7 @@ function renderSuggestions() {
   
   // Render cards
   list.innerHTML = pending.map(s => `
-    <div class="suggestion-card" id="suggestion-${s.id}" data-source="${getSourceCategory(s.source)}">
+    <div class="suggestion-card" id="suggestion-${s.title}" data-source="${getSourceCategory(s.source)}">
       <div class="suggestion-header">
         <div style="flex:1">
           <div class="suggestion-title">${s.title}</div>
@@ -1017,8 +993,8 @@ function renderSuggestions() {
       </div>
       <div class="suggestion-desc">${s.desc || s.description || 'لا يوجد وصف'}</div>
       <div class="suggestion-actions">
-        <button class="btn btn-approve" onclick="handleApprove('${s.id}')">✅ موافقة</button>
-        <button class="btn btn-reject" onclick="handleReject('${s.id}')">❌ رفض</button>
+        <button class="btn btn-approve" onclick="handleApprove('${s.title.replace(/'/g, "\\'")}')">✅ موافقة</button>
+        <button class="btn btn-reject" onclick="handleReject('${s.title.replace(/'/g, "\\'")}')">❌ رفض</button>
       </div>
     </div>
   `).join('');
@@ -1034,8 +1010,8 @@ function renderSuggestions() {
   });
 }
 
-async function handleApprove(id) {
-  const card = document.getElementById(`suggestion-${id}`);
+async function handleApprove(title) {
+  const card = document.getElementById(`suggestion-${title}`);
   if (!card) return;
   
   // Optimistic UI — hide immediately
@@ -1050,7 +1026,7 @@ async function handleApprove(id) {
   
   // Background API call
   try {
-    await approveSuggestion(id);
+    await approveSuggestion(title);
     // Remove from DOM after animation
     setTimeout(() => {
       if (card.parentNode) card.parentNode.removeChild(card);
@@ -1071,8 +1047,8 @@ async function handleApprove(id) {
   }
 }
 
-async function handleReject(id) {
-  const card = document.getElementById(`suggestion-${id}`);
+async function handleReject(title) {
+  const card = document.getElementById(`suggestion-${title}`);
   if (!card) return;
   
   // Optimistic UI
@@ -1087,7 +1063,7 @@ async function handleReject(id) {
   
   // Background API call
   try {
-    await rejectSuggestion(id);
+    await rejectSuggestion(title);
     setTimeout(() => {
       if (card.parentNode) card.parentNode.removeChild(card);
       const list = document.getElementById('suggestions-list');
@@ -1232,6 +1208,203 @@ function refreshAgents() {
   showToast('🔄 جاري تحديث بيانات الوكلاء...');
 }
 
+// === AGENTS LIVE SCREEN ===
+async function fetchAgentsStatus() {
+  const container = document.getElementById('agents-live-cards');
+  const timestamp = document.getElementById('agents-timestamp');
+  if (!container) return;
+  
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">⏳ جاري تحميل بيانات الوكلاء...</div>';
+  
+  try {
+    // Try agents-status.json first (local file)
+    let data = null;
+    const base = getApiBase();
+    const paths = [base + 'agents-status.json', '/mc/agents-status.json', '/agents-status.json', '/api/agents-status'];
+    
+    for (const p of paths) {
+      try {
+        const res = await fetch(p);
+        if (res.ok) {
+          data = await res.json();
+          break;
+        }
+      } catch(e) { continue; }
+    }
+    
+    // Fallback: try agents-live endpoint
+    if (!data) {
+      try {
+        data = await readLocalJSON('agents-live');
+      } catch(e) {}
+    }
+    
+    if (!data || !data.agents) {
+      container.innerHTML = '<div class="card" style="text-align:center;padding:40px;color:var(--text3)">⚠️ لا توجد بيانات للوكلاء</div>';
+      return;
+    }
+    
+    // Update timestamp
+    const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString('ar-SA') : 'غير معروف';
+    if (timestamp) timestamp.textContent = 'آخر تحديث: ' + lastUpdated;
+    
+    // Render agents cards
+    container.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">' + 
+      data.agents.map(agent => {
+        const statusColor = agent.status === 'busy' ? 'var(--orange)' : agent.status === 'active' ? 'var(--green2)' : 'var(--text3)';
+        const statusIcon = agent.status === 'busy' ? '🟡' : agent.status === 'active' ? '🟢' : '⚪';
+        const statusText = agent.status === 'busy' ? 'مشغول' : agent.status === 'active' ? 'نشط' : 'فاضي';
+        const recentBadge = agent.recentness === 'current' ? ' <span style="background:var(--green);color:#fff;padding:1px 6px;border-radius:8px;font-size:.7em">حالي</span>' : '';
+        
+        // Format last run
+        let lastRunText = '—';
+        if (agent.lastRun) {
+          const lr = new Date(agent.lastRun);
+          const diff = Date.now() - lr.getTime();
+          const mins = Math.floor(diff / 60000);
+          const hours = Math.floor(mins / 60);
+          if (mins < 1) lastRunText = 'الآن';
+          else if (mins < 60) lastRunText = 'منذ ' + mins + ' دقيقة';
+          else if (hours < 24) lastRunText = 'منذ ' + hours + ' ساعة';
+          else lastRunText = lr.toLocaleDateString('ar-SA', {month:'short', day:'numeric'});
+        }
+        
+        // Format duration
+        let durationText = '—';
+        if (agent.lastDuration) {
+          const s = agent.lastDuration;
+          if (s < 60) durationText = s + 's';
+          else if (s < 3600) durationText = Math.floor(s/60) + 'min';
+          else durationText = (s/3600).toFixed(1) + 'h';
+        }
+        
+        // Recent tasks
+        const recentTasksHtml = agent.recentTasks && agent.recentTasks.length > 0
+          ? `<div style="margin-top:12px">
+              <div style="font-size:.82em;color:var(--text3);margin-bottom:6px;font-weight:600">📋 آخر المهام:</div>
+              <div style="max-height:140px;overflow-y:auto">
+                ${agent.recentTasks.slice(0,5).map(t => `
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg3);font-size:.82em">
+                    <span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.task}</span>
+                    <span style="color:var(--text3);margin:0 8px">${t.status}</span>
+                    <span style="color:var(--text3);font-size:.9em">${t.duration}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>`
+          : '';
+        
+        // Stats
+        const statsHtml = agent.stats ? `
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px">
+            <div style="background:var(--bg);padding:8px;border-radius:var(--radius2);text-align:center">
+              <div style="font-size:1em;font-weight:700;color:var(--green2)">$${(agent.stats.totalCost||0).toFixed(1)}</div>
+              <div style="font-size:.65em;color:var(--text3)">إجمالي</div>
+            </div>
+            <div style="background:var(--bg);padding:8px;border-radius:var(--radius2);text-align:center">
+              <div style="font-size:1em;font-weight:700;color:var(--orange)">$${(agent.stats.costToday||0).toFixed(2)}</div>
+              <div style="font-size:.65em;color:var(--text3)">اليوم</div>
+            </div>
+            <div style="background:var(--bg);padding:8px;border-radius:var(--radius2);text-align:center">
+              <div style="font-size:1em;font-weight:700;color:var(--blue)">${agent.stats.totalRequests||0}</div>
+              <div style="font-size:.65em;color:var(--text3)">طلبات</div>
+            </div>
+            <div style="background:var(--bg);padding:8px;border-radius:var(--radius2);text-align:center">
+              <div style="font-size:1em;font-weight:700;color:var(--accent2)">${agent.stats.completedTasks||0}</div>
+              <div style="font-size:.65em;color:var(--text3)">مهام</div>
+            </div>
+          </div>
+        ` : '';
+        
+        // Daily cost chart
+        const chartHtml = agent.dailyCosts && agent.dailyCosts.length > 0
+          ? (() => {
+              const maxCost = Math.max(...agent.dailyCosts.map(d => d.cost), 0.01);
+              return `<div style="margin-top:12px">
+                <div style="font-size:.78em;color:var(--text3);margin-bottom:4px">تكلفة آخر 7 أيام:</div>
+                <div style="display:flex;gap:4px;align-items:flex-end;height:32px">
+                  ${agent.dailyCosts.slice(0,7).reverse().map(d => {
+                    const h = Math.max((d.cost/maxCost*100), 5).toFixed(0);
+                    return `<div style="flex:1;background:var(--accent);border-radius:2px;height:${h}%;min-height:4px;position:relative" title="${d.date}: $${d.cost.toFixed(2)}"></div>`;
+                  }).join('')}
+                </div>
+              </div>`;
+            })()
+          : '';
+        
+        // Log files info
+        const logsInfo = agent.logFiles && agent.logFiles.length > 0
+          ? `<div style="margin-top:10px;font-size:.75em;color:var(--text3)">
+              <span>📁 ${agent.logFiles.length} ملف لوج</span>
+              <span style="margin-right:12px">🔢 ${agent.logFiles.reduce((a,l) => a + (l.completions||0), 0)} completion</span>
+            </div>`
+          : '';
+        
+        return `
+          <div class="agent-card" style="border-right:3px solid ${statusColor}">
+            <!-- Header -->
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+              <span style="font-size:2.2em">${agent.emoji}</span>
+              <div style="flex:1">
+                <div class="agent-name" style="font-size:1.1em;color:var(--green2)">${agent.name}</div>
+                <div style="font-size:.75em;color:var(--accent2)">${(agent.model||'').replace('anthropic/','').replace('openai/','').replace('perplexity/','').replace('minimax/','')}</div>
+              </div>
+              <div style="text-align:left">
+                <div style="font-size:.85em;font-weight:700;color:${statusColor}">${statusIcon} ${statusText}${recentBadge}</div>
+              </div>
+            </div>
+            
+            <!-- Role -->
+            <div class="agent-role" style="color:var(--text2);font-size:.88em;margin-bottom:10px;line-height:1.4">${agent.role}</div>
+            
+            <!-- Current Task -->
+            ${agent.currentTask ? `
+              <div style="padding:8px;background:var(--bg);border-radius:var(--radius2);border-right:2px solid ${statusColor};margin-bottom:10px">
+                <div style="font-size:.72em;color:var(--text3);margin-bottom:3px">المهمة الحالية:</div>
+                <div style="font-size:.88em;color:${statusColor};font-weight:600">${agent.currentTask}</div>
+              </div>
+            ` : ''}
+            
+            <!-- Last Run & Duration -->
+            <div style="display:flex;gap:16px;font-size:.85em;margin-bottom:8px">
+              <div>
+                <span style="color:var(--text3)">آخر تشغيل: </span>
+                <span style="color:var(--text);font-weight:600">${lastRunText}</span>
+              </div>
+              <div>
+                <span style="color:var(--text3)">المدة: </span>
+                <span style="color:var(--text);font-weight:600">${durationText}</span>
+              </div>
+            </div>
+            
+            ${logsInfo}
+            ${statsHtml}
+            ${recentTasksHtml}
+            ${chartHtml}
+          </div>
+        `;
+      }).join('') + '</div>';
+    
+    showToast('✅ تم تحميل بيانات الوكلاء');
+    
+  } catch(e) {
+    console.error('fetchAgentsStatus error:', e);
+    container.innerHTML = '<div class="card" style="text-align:center;padding:40px;color:var(--red)">⚠️ فشل تحميل بيانات الوكلاء: ' + e.message + '</div>';
+    showToast('❌ فشل تحميل بيانات الوكلاء', true);
+  }
+}
+
+// Auto-load agents when page is shown
+const originalShowPage = showPage;
+if (typeof showPage === 'function') {
+  window.showPage = function(page) {
+    originalShowPage(page);
+    if (page === 'agents') {
+      setTimeout(fetchAgentsStatus, 100);
+    }
+  };
+}
+
 // ===== MEMORY PAGE REWORKED =====
 async function fetchMemoryData() {
   try {
@@ -1306,18 +1479,121 @@ function filterMemory(q) {
 // ===== /MEMORY PAGE REWORKED =====
 
 // Builds
-function renderBuilds() {
-  document.getElementById('builds-list').innerHTML = builds.map(b =>
-    `<div class="card"><h3>${b.name}</h3><p style="margin-bottom:6px">${b.desc}</p><div style="font-size:.85em;color:var(--text3)">📅 ${b.date} | 🤖 ${b.builder} | 🔗 <a href="${b.link}" target="_blank" style="color:var(--accent2)">${b.link!=='—'?'فتح الرابط':'—'}</a></div></div>`
-  ).join('');
-}
+async function fetchAndRenderBuilds() {
+  try {
+    const data = await readLocalJSON('night-builds');
+    const runs = data.runs || [];
+    const products = data.products || [];
+    const stats = data.stats || {};
 
-// System cron table
-function renderSystemCron() {
-  document.getElementById('system-cron-table').innerHTML = cronJobs.map(c =>
-    `<tr><td>${c.name}</td><td class="${c.status==='ok'?'status-ok':'status-err'}">${c.status==='ok'?'✅':'❌'}</td><td>${c.model}</td><td>—</td><td style="color:var(--red);font-size:.85em">${c.error||'—'}</td></tr>`
-  ).join('');
+    // KPIs
+    const kpiHtml = `<div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-value" style="color:var(--green2)">${stats.successful||0}</div><div class="kpi-label">ناجح</div></div>
+      <div class="kpi-card"><div class="kpi-value" style="color:var(--red)">${stats.failed||0}</div><div class="kpi-label">فشل</div></div>
+      <div class="kpi-card"><div class="kpi-value">${stats.total||0}</div><div class="kpi-label">إجمالي</div></div>
+      <div class="kpi-card"><div class="kpi-value" style="color:var(--accent2)">${products.length}</div><div class="kpi-label">منتجات</div></div>
+    </div>`;
+
+    // Products
+    const productsHtml = products.length ? `<div class="card"><h3>📦 المنتجات</h3>` + products.map(p =>
+      `<div style="padding:8px 0;border-bottom:1px solid var(--border)"><a href="/mc/${p.file}" target="_blank" style="color:var(--accent2);text-decoration:none;font-weight:600">${p.name}</a></div>`
+    ).join('') + `</div>` : '';
+
+    // History
+    const historyHtml = `<div class="card"><h3>📋 سجل البناء</h3>` + runs.slice(0,10).map(r =>
+      `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span>${r.status==='ok'?'✅':'❌'} ${r.date}</span>
+        <span style="font-size:.85em;color:var(--text3)">${r.duration?r.duration+'s':'—'} | ${r.model?.split('/').pop()||'—'}</span>
+        ${r.error?`<div style="color:var(--red);font-size:.8em;margin-top:4px">${r.error.substring(0,60)}...</div>`:''}
+      </div>`
+    ).join('') + `</div>`;
+
+    document.getElementById('builds-list').innerHTML = kpiHtml + productsHtml + historyHtml;
+  } catch(e) {
+    console.log('Builds fetch error:', e);
+    document.getElementById('builds-list').innerHTML = '<div class="card" style="color:var(--red)">⚠️ تعذر تحميل بيانات البناء الليلي</div>';
+  }
 }
+function renderBuilds() { fetchAndRenderBuilds(); }
+
+
+    
+    // System cron table
+async function fetchAndRenderSystem() {
+    // Resource bars updater
+    function updateResourceBars(sys) {
+      try {
+        const memPct = Math.round((sys.memUsedGB / (sys.memTotalGB || 1)) * 100);
+        const diskPct = parseInt(sys.diskPercent)||0;
+        const cpuPct = Math.min(100, Math.round((sys.loadAvg && sys.loadAvg[0] ? sys.loadAvg[0] * 100 : 0)));
+        const setBar = (id, pct) => { const el = document.getElementById(id); if(el){ el.style.width = pct + '%'; el.textContent = pct + '%'; } };
+        setBar('bar-ram', memPct);
+        setBar('bar-disk', diskPct);
+        setBar('bar-cpu', cpuPct);
+      } catch(e){ console.error('updateResourceBars error', e); }
+    }
+
+
+  try {
+    const d = await readLocalJSON('system-health');
+    const sys = d.system || {};
+    const svc = d.services || {};
+    const crons = d.cronJobs || [];
+    const alerts = d.alerts || [];
+
+    const svcIcon = v => v === true || v === 'ok' ? '🟢' : v === false ? '🔴' : '🟡';
+    const svcColor = v => v === true || v === 'ok' ? 'var(--green2)' : v === false ? 'var(--red)' : 'var(--orange)';
+
+    // KPIs
+    const kpis = `<div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-value" style="color:${svcColor(svc.gateway)}">${svcIcon(svc.gateway)}</div><div class="kpi-label">Gateway</div></div>
+      <div class="kpi-card"><div class="kpi-value" style="color:${svcColor(svc.api)}">${svcIcon(svc.api)}</div><div class="kpi-label">API Server</div></div>
+      <div class="kpi-card"><div class="kpi-value" style="color:${svcColor(svc.integrity)}">${svcIcon(svc.integrity)}</div><div class="kpi-label">Integrity</div></div>
+      <div class="kpi-card"><div class="kpi-value">${sys.uptimeDays||0}d</div><div class="kpi-label">Uptime</div></div>
+    </div>`;
+
+    // Resources
+    const memPct = sys.memPercent || 0;
+    const diskPct = sys.diskPercent || 0;
+    const resources = `<div class="card"><h3>📊 الموارد</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:8px">
+        <div><div style="font-size:.85em;color:var(--text3);margin-bottom:4px">RAM ${sys.memUsedGB||0}/${sys.memTotalGB||0} GB</div>
+          <div style="background:var(--bg2);border-radius:6px;height:8px;overflow:hidden"><div style="width:${memPct}%;height:100%;background:${memPct>80?'var(--red)':memPct>60?'var(--orange)':'var(--green2)'}"></div></div></div>
+        <div><div style="font-size:.85em;color:var(--text3);margin-bottom:4px">Disk ${sys.diskUsedGB||0}/${sys.diskTotalGB||0} GB</div>
+          <div style="background:var(--bg2);border-radius:6px;height:8px;overflow:hidden"><div style="width:${diskPct}%;height:100%;background:${diskPct>80?'var(--red)':diskPct>60?'var(--orange)':'var(--green2)'}"></div></div></div>
+        <div><span style="font-size:.85em;color:var(--text3)">Load:</span> ${sys.loadAvg?sys.loadAvg[0]:'—'}</div>
+        <div><span style="font-size:.85em;color:var(--text3)">Node:</span> ${sys.nodeVersion||'—'}</div>
+      </div>
+    </div>`;
+
+    // Cron Jobs
+    const cronHtml = `<div class="card"><h3>📋 حالة Cron Jobs</h3>
+      <table class="cron-table"><thead><tr><th>المهمة</th><th>الحالة</th><th>النموذج</th><th>المدة</th><th>التالي</th></tr></thead><tbody>` +
+      crons.map(c => {
+        const st = c.lastStatus === 'ok' ? '✅' : c.lastStatus === '—' ? '⏳' : '❌';
+        const stClass = c.lastStatus === 'ok' ? 'status-ok' : 'status-err';
+        const model = (c.model||'').split('/').pop();
+        const dur = c.lastDuration > 0 ? c.lastDuration + 's' : '—';
+        return `<tr><td>${c.name}</td><td class="${stClass}">${st}</td><td style="font-size:.8em">${model}</td><td>${dur}</td><td style="font-size:.8em">${c.nextRun||'—'}</td></tr>`;
+      }).join('') +
+      `</tbody></table></div>`;
+
+    // Alerts
+    let alertsHtml = '';
+    const errCrons = crons.filter(c => c.consecutiveErrors > 0 || (c.error && c.error !== ''));
+    if (errCrons.length > 0) {
+      alertsHtml = `<div class="card"><h3>⚠️ مشاكل تحتاج انتباه</h3><div style="padding:8px">` +
+        errCrons.map(c => `<div style="color:var(--red);margin-bottom:8px">🔴 ${c.name}: ${c.error || 'أخطاء متتالية: ' + c.consecutiveErrors}</div>`).join('') +
+        `</div></div>`;
+    }
+
+    document.getElementById('system-content').innerHTML = kpis + resources + cronHtml + alertsHtml;
+  } catch(e) {
+    console.log('System health error:', e);
+    document.getElementById('system-content').innerHTML = '<div class="card" style="color:var(--red)">⚠️ تعذر تحميل بيانات النظام</div>';
+  }
+}
+function renderSystemCron() { fetchAndRenderSystem(); }
 
 // Activity Feed
 function renderActivity() {

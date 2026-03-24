@@ -1,0 +1,360 @@
+{
+  "version": 1,
+  "jobs": [
+    {
+      "name": "التقرير التنفيذي الصباحي",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 7 * * *",
+        "tz": "Asia/Riyadh"
+      },
+      "sessionTarget": "isolated",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "اقرأ /data/.openclaw/workspace/reports/morning-executive.md ونفّذ. استخدم Maton لـ Gmail و Calendar. أرسل عبر message لـ telegram:576845770",
+        "model": "minimax/MiniMax-M2.5"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "wakeMode": "next-heartbeat",
+      "state": {
+        "nextRunAtMs": 1773721800000,
+        "lastRunAtMs": 1773635400006,
+        "lastRunStatus": "ok",
+        "lastStatus": "ok",
+        "lastDurationMs": 169079,
+        "lastDelivered": true,
+        "lastDeliveryStatus": "delivered",
+        "consecutiveErrors": 0
+      },
+      "updatedAtMs": 1773635569085,
+      "id": "morning-executive"
+    },
+    {
+      "name": "التقرير الاقتصادي",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "15 8 * * *",
+        "tz": "Asia/Riyadh"
+      },
+      "sessionTarget": "isolated",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "اقرأ /data/.openclaw/workspace/reports/economic-report.md ونفّذ. ابحث عن أخبار كفالة. أرسل عبر message لـ telegram:576845770",
+        "model": "minimax/MiniMax-M2.5"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "wakeMode": "next-heartbeat",
+      "state": {
+        "nextRunAtMs": 1773724500000,
+        "lastRunAtMs": 1773638100005,
+        "lastRunStatus": "ok",
+        "lastStatus": "ok",
+        "lastDurationMs": 63937,
+        "lastDelivered": false,
+        "lastDeliveryStatus": "not-delivered",
+        "consecutiveErrors": 0,
+        "lastDeliveryError": "cron announce delivery failed",
+        "lastError": "cron announce delivery failed"
+      },
+      "id": "economic-report",
+      "updatedAtMs": 1773638163942
+    },
+    {
+      "name": "تقرير Moltbook + GitHub",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 12 * * *",
+        "tz": "Asia/Riyadh"
+      },
+      "sessionTarget": "isolated",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "اقرأ /data/.openclaw/workspace/reports/tech-report.md ونفّذ. اجلب Moltbook + OpenClaw. أرسل عبر message لـ telegram:576845770",
+        "model": "minimax/MiniMax-M2.5"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "wakeMode": "next-heartbeat",
+      "state": {
+        "nextRunAtMs": 1773738000000,
+        "lastRunAtMs": 1773651600004,
+        "lastRunStatus": "ok",
+        "lastStatus": "ok",
+        "lastDurationMs": 149297,
+        "lastDelivered": true,
+        "lastDeliveryStatus": "delivered",
+        "consecutiveErrors": 0
+      },
+      "id": "tech-report",
+      "updatedAtMs": 1773651749301
+    },
+    {
+      "name": "ملخص نهاية اليوم",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 21 * * *",
+        "tz": "Asia/Riyadh"
+      },
+      "sessionTarget": "isolated",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "اقرأ /data/.openclaw/workspace/reports/evening-summary.md ونفّذ. راجع إيميلات اليوم. أرسل عبر message لـ telegram:576845770",
+        "model": "minimax/MiniMax-M2.5"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "wakeMode": "next-heartbeat",
+      "state": {
+        "nextRunAtMs": 1773770400000,
+        "lastRunAtMs": 1773684000004,
+        "lastRunStatus": "ok",
+        "lastStatus": "ok",
+        "lastDurationMs": 108804,
+        "lastDelivered": true,
+        "lastDeliveryStatus": "delivered",
+        "consecutiveErrors": 0
+      },
+      "id": "evening-summary",
+      "updatedAtMs": 1773684108808
+    },
+    {
+      "id": "ac9bab33-1306-44f4-88fa-86dbe7e9af50",
+      "name": "🏭 Night Build (مصنع)",
+      "enabled": true,
+      "createdAtMs": 1772282715153,
+      "updatedAtMs": 1773616115122,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 2 * * *",
+        "tz": "Asia/Riyadh"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "اقرأ /data/.openclaw/workspace/reports/night-build.md ونفّذ كل المهام. ابنِ شي حقيقي — مو تقرير. لا ترسل رسائل لسلطان.",
+        "model": "minimax/MiniMax-M2.5",
+        "timeoutSeconds": 600
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "state": {
+        "nextRunAtMs": 1773702000000,
+        "lastRunAtMs": 1773615600006,
+        "lastRunStatus": "error",
+        "lastStatus": "error",
+        "lastDurationMs": 515116,
+        "lastDeliveryStatus": "not-delivered",
+        "consecutiveErrors": 1,
+        "lastDelivered": false,
+        "lastDeliveryError": "⚠️ ✍️ Write failed",
+        "runningAtMs": 1773702000003
+      }
+    },
+    {
+      "id": "dd4121e0-9841-4191-9065-73480fe9e91b",
+      "name": "📈 تحديث الأسهم (صباحي 11:30)",
+      "enabled": true,
+      "createdAtMs": 1772306352676,
+      "updatedAtMs": 1773650024412,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 11 * * 0-4",
+        "tz": "Asia/Riyadh"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "شغّل عبر exec بالترتيب:\n1. bash /data/.openclaw/workspace/scripts/fetch-stock-prices.sh\n2. bash /data/.openclaw/workspace/scripts/fetch-stock-analysis.sh\nانتظر كل أمر يخلص. لا ترسل رسائل.",
+        "model": "minimax/MiniMax-M2.5",
+        "timeoutSeconds": 600
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "state": {
+        "nextRunAtMs": 1773736200000,
+        "lastRunAtMs": 1773649800008,
+        "lastRunStatus": "ok",
+        "lastStatus": "ok",
+        "lastDurationMs": 224404,
+        "lastDeliveryStatus": "not-delivered",
+        "consecutiveErrors": 0,
+        "lastDelivered": false,
+        "lastDeliveryError": "cron announce delivery failed",
+        "lastError": "cron announce delivery failed"
+      },
+      "timeoutMs": 600000
+    },
+    {
+      "id": "80c04bd1-8be8-4888-b869-7aeface7eed0",
+      "name": "📈 تحديث الأسهم (عصري 3:50)",
+      "enabled": true,
+      "createdAtMs": 1772306354924,
+      "updatedAtMs": 1773665694206,
+      "schedule": {
+        "kind": "cron",
+        "expr": "50 15 * * 0-4",
+        "tz": "Asia/Riyadh"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "شغّل عبر exec بالترتيب:\n1. bash /data/.openclaw/workspace/scripts/fetch-stock-prices.sh\n2. bash /data/.openclaw/workspace/scripts/fetch-stock-analysis.sh\nانتظر كل أمر يخلص. لا ترسل رسائل.",
+        "model": "minimax/MiniMax-M2.5",
+        "timeoutSeconds": 600
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "state": {
+        "nextRunAtMs": 1773751800000,
+        "lastRunAtMs": 1773665400004,
+        "lastRunStatus": "ok",
+        "lastStatus": "ok",
+        "lastDurationMs": 294202,
+        "lastDeliveryStatus": "not-delivered",
+        "consecutiveErrors": 0,
+        "lastDelivered": false,
+        "lastDeliveryError": "cron announce delivery failed",
+        "lastError": "cron announce delivery failed"
+      },
+      "timeoutMs": 600000
+    },
+    {
+      "id": "49363816-65b2-40cb-a932-4eb21e249dd6",
+      "name": "📊 تحديث القوائم المالية (أسبوعي)",
+      "enabled": true,
+      "createdAtMs": 1772478013462,
+      "updatedAtMs": 1773360004901,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 3 * * 5",
+        "tz": "Asia/Riyadh",
+        "staggerMs": 0
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "شغّل عبر exec بالترتيب:\n1. bash /data/.openclaw/workspace/scripts/fetch-sector-financials.sh\n2. bash /data/.openclaw/workspace/scripts/fetch-weekly-technical.sh\nالأول يجلب القوائم المالية والثاني يحدث البيانات الأسبوعية + scoring + push. انتظر كل أمر يخلص. لا ترسل رسائل.",
+        "timeoutSeconds": 600,
+        "model": "minimax/MiniMax-M2.5"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "state": {
+        "nextRunAtMs": 1773964800000,
+        "lastRunAtMs": 1773360000006,
+        "lastRunStatus": "error",
+        "lastStatus": "error",
+        "lastDurationMs": 4895,
+        "lastDeliveryStatus": "not-delivered",
+        "consecutiveErrors": 1,
+        "lastError": "⚠️ API rate limit reached. Please try again later.",
+        "lastDelivered": false,
+        "lastDeliveryError": "⚠️ API rate limit reached. Please try again later."
+      }
+    },
+    {
+      "id": "b6cc8cf9-b03f-47bb-9bdc-6bdd2260098f",
+      "name": "💡 تغذية الاقتراحات",
+      "enabled": true,
+      "createdAtMs": 1772743004120,
+      "updatedAtMs": 1773630039986,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 6 * * *",
+        "tz": "Asia/Riyadh"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "شغّل الأمر: bash /data/.openclaw/workspace/scripts/fetch-ideas-sources.sh — هذا يجلب اقتراحات جديدة من HN وReddit وGitHub وdev.to. لا ترسل رسالة لسلطان.",
+        "model": "minimax/MiniMax-M2.5",
+        "timeoutSeconds": 120
+      },
+      "delivery": {
+        "mode": "none",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "state": {
+        "nextRunAtMs": 1773716400000,
+        "lastRunAtMs": 1773630000006,
+        "lastRunStatus": "ok",
+        "lastStatus": "ok",
+        "lastDurationMs": 39980,
+        "lastDelivered": false,
+        "lastDeliveryStatus": "not-delivered",
+        "consecutiveErrors": 0
+      }
+    },
+    {
+      "name": "📊 تحديث سيف للاستثمار الجريء (أسبوعي)",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 17 * * 1",
+        "tz": "Asia/Riyadh"
+      },
+      "sessionTarget": "isolated",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "أنت مسؤول عن التحديث الأسبوعي لمنصة سيف للاستثمار الجريء.\n\n1. شغّل: bash /data/.openclaw/workspace/scripts/vc-news-scan.sh\n2. اقرأ: /data/.openclaw/workspace/vc-saudi/data/weekly-scan.json\n3. اقرأ: /data/.openclaw/workspace/vc-saudi/data/vc-data.json\n\nثم حدّث vc-data.json بالتالي:\n- شركات جديدة ظهرت في الأخبار → أضفها مع تقييم أولي\n- جولات تمويل جديدة → أضفها مع المستثمرين\n- مستثمرين جدد → أضفهم\n- أخبار وinsights جديدة → أضفها في insights\n- حدّث تقييمات الشركات الموجودة إذا تغيّر شي (جولة جديدة = stage يتغير)\n- حدّث meta.lastUpdated\n\nبعد التحديث:\n- cd /data/.openclaw/workspace/vc-saudi && git add -A && git commit -m \"weekly update: $(date +%Y-%m-%d)\" && git push\n\nأرسل لسلطان ملخص على Telegram:\n📊 تحديث سيف للاستثمار — [التاريخ]\n- شركات جديدة: X\n- جولات جديدة: X\n- أخبار: أبرز 3-5 أخبار مع روابط\n- تغييرات في التقييمات (إن وجدت)",
+        "model": "minimax/MiniMax-M2.5"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "telegram:576845770"
+      },
+      "wakeMode": "next-heartbeat",
+      "state": {
+        "consecutiveErrors": 1,
+        "nextRunAtMs": 1774274400000,
+        "lastRunAtMs": 1773669600007,
+        "lastRunStatus": "error",
+        "lastStatus": "error",
+        "lastDurationMs": 203380,
+        "lastError": "⚠️ ✉️ Message failed",
+        "lastDelivered": false,
+        "lastDeliveryStatus": "not-delivered",
+        "lastDeliveryError": "⚠️ ✉️ Message failed"
+      },
+      "updatedAtMs": 1773669803387,
+      "id": "vc-weekly-scan"
+    }
+  ]
+}

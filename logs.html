@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Control - Log Viewer</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'SF Mono', 'Consolas', monospace; background: #0d1117; color: #e6edf3; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #30363d; }
+        h1 { color: #58a6ff; font-size: 24px; }
+        .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        select, input, button { background: #161b22; color: #e6edf3; border: 1px solid #30363d; padding: 8px 12px; border-radius: 6px; font-size: 14px; }
+        button { background: #238636; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #2ea043; }
+        button.refresh { background: #1f6feb; }
+        button.refresh:hover { background: #388bfd; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; }
+        .stat-card .label { color: #8b949e; font-size: 12px; text-transform: uppercase; }
+        .stat-card .value { font-size: 24px; color: #58a6ff; margin-top: 5px; }
+        .stat-card.error .value { color: #f85149; }
+        .stat-card.warn .value { color: #d29922; }
+        .log-container { background: #161b22; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+        .log-header { display: flex; justify-content: space-between; padding: 10px 15px; background: #21262d; border-bottom: 1px solid #30363d; }
+        .log-title { color: #8b949e; font-size: 12px; }
+        .log-content { max-height: 70vh; overflow-y: auto; padding: 15px; font-size: 13px; line-height: 1.6; }
+        .log-entry { padding: 4px 8px; border-radius: 4px; margin-bottom: 2px; white-space: pre-wrap; word-break: break-all; }
+        .log-entry:hover { background: #21262d; }
+        .log-entry.INFO { color: #3fb950; }
+        .log-entry.WARN { color: #d29922; }
+        .log-entry.ERROR { color: #f85149; background: rgba(248, 81, 73, 0.1); }
+        .log-entry.FATAL { color: #ff7b72; background: rgba(255, 123, 114, 0.2); }
+        .log-entry.DEBUG { color: #8b949e; }
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+        .filter-bar input { flex: 1; }
+        .timestamp { color: #6e7681; }
+        .level { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .level.INFO { background: rgba(63, 185, 80, 0.2); }
+        .level.WARN { background: rgba(210, 153, 34, 0.2); }
+        .level.ERROR { background: rgba(248, 81, 73, 0.2); }
+        .level.FATAL { background: rgba(255, 123, 114, 0.3); }
+        .auto-refresh { display: flex; align-items: center; gap: 8px; }
+        .loading { text-align: center; padding: 40px; color: #8b949e; }
+        .error-msg { color: #f85149; padding: 20px; text-align: center; }
+        @media (max-width: 768px) { .controls { flex-direction: column; width: 100%; } select, input, button { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Mission Control - Log Viewer</h1>
+        <div class="controls">
+            <select id="logType">
+                <option value="audit">Audit Log</option>
+                <option value="api">API Calls</option>
+                <option value="errors">Errors</option>
+                <option value="fileWrites">File Writes</option>
+                <option value="cron">Cron Executions</option>
+                <option value="auth">Auth Attempts</option>
+            </select>
+            <select id="levelFilter">
+                <option value="">All Levels</option>
+                <option value="INFO">INFO</option>
+                <option value="WARN">WARN</option>
+                <option value="ERROR">ERROR</option>
+                <option value="FATAL">FATAL</option>
+            </select>
+            <input type="text" id="searchFilter" placeholder="Search logs...">
+            <div class="auto-refresh">
+                <input type="checkbox" id="autoRefresh">
+                <label for="autoRefresh">Auto-refresh (10s)</label>
+            </div>
+            <button onclick="loadLogs()" class="refresh">🔄 Refresh</button>
+            <button onclick="downloadLogs()">📥 Download JSON</button>
+        </div>
+    </div>
+
+    <div class="stats" id="stats">
+        <div class="stat-card">
+            <div class="label">Total Entries</div>
+            <div class="value" id="totalEntries">-</div>
+        </div>
+        <div class="stat-card error">
+            <div class="label">Errors</div>
+            <div class="value" id="errorCount">-</div>
+        </div>
+        <div class="stat-card warn">
+            <div class="label">Warnings</div>
+            <div class="value" id="warnCount">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Log Size</div>
+            <div class="value" id="logSize">-</div>
+        </div>
+    </div>
+
+    <div class="log-container">
+        <div class="log-header">
+            <span class="log-title" id="logTitle">Loading...</span>
+            <span id="entryCount"></span>
+        </div>
+        <div class="log-content" id="logContent">
+            <div class="loading">Loading logs...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.protocol + '//' + window.location.hostname + ':48100';
+        let currentLogType = 'audit';
+        let autoRefreshInterval = null;
+
+        async function loadLogs() {
+            const logType = document.getElementById('logType').value;
+            const levelFilter = document.getElementById('levelFilter').value;
+            const searchFilter = document.getElementById('searchFilter').value;
+            
+            currentLogType = logType;
+            document.getElementById('logContent').innerHTML = '<div class="loading">Loading...</div>';
+            
+            try {
+                const params = new URLSearchParams({ lines: 500 });
+                if (levelFilter) params.append('level', levelFilter);
+                if (searchFilter) params.append('search', searchFilter);
+                
+                const response = await fetch(`${API_BASE}/api/logs/${logType}?${params}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('logContent').innerHTML = `<div class="error-msg">Error: ${data.error}</div>`;
+                    return;
+                }
+                
+                displayLogs(data.entries || [], data.total || 0);
+                updateStats(logType);
+            } catch (e) {
+                document.getElementById('logContent').innerHTML = `<div class="error-msg">Failed to load logs: ${e.message}</div>`;
+            }
+        }
+
+        function displayLogs(entries, total) {
+            const container = document.getElementById('logContent');
+            const logType = document.getElementById('logType').value;
+            
+            const logNames = { audit: 'Audit Log', api: 'API Calls', errors: 'Errors', fileWrites: 'File Writes', cron: 'Cron Executions', auth: 'Auth Attempts' };
+            document.getElementById('logTitle').textContent = logNames[logType] || logType;
+            document.getElementById('entryCount').textContent = `${entries.length} entries shown${total > entries.length ? ` of ${total}` : ''}`;
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<div class="loading">No log entries found</div>';
+                return;
+            }
+            
+            container.innerHTML = entries.map(entry => {
+                if (typeof entry === 'string') {
+                    // Parse log line
+                    const match = entry.match(/^\[(.*?)\]\s*(?:\[(\w+)\])?\s*(?:\[(\w+)\])?\s*(.*)/);
+                    if (match) {
+                        const [, timestamp, level, source, message] = match;
+                        const levelClass = level || 'INFO';
+                        return `<div class="log-entry ${levelClass}"><span class="timestamp">${timestamp}</span> ${level ? `<span class="level ${levelClass}">${level}</span>` : ''} ${source ? `[${source}]` : ''} ${escapeHtml(message)}</div>`;
+                    }
+                    return `<div class="log-entry">${escapeHtml(entry)}</div>`;
+                }
+                return `<div class="log-entry">${escapeHtml(JSON.stringify(entry))}</div>`;
+            }).join('');
+            
+            container.scrollTop = 0;
+        }
+
+        async function updateStats(logType) {
+            try {
+                const response = await fetch(`${API_BASE}/api/logs/stats`);
+                const stats = await response.json();
+                
+                const typeMap = { audit: 'audit', api: 'api', errors: 'errors', fileWrites: 'fileWrites', cron: 'cron', auth: 'auth' };
+                const stat = stats[typeMap[logType]] || stats[typeMap[logType].replace('fileWrites', 'fileWrites')] || {};
+                
+                document.getElementById('totalEntries').textContent = stat.lines || 0;
+                document.getElementById('logSize').textContent = stat.sizeMB ? `${stat.sizeMB} MB` : '-';
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+            }
+        }
+
+        async function downloadLogs() {
+            const logType = document.getElementById('logType').value;
+            try {
+                const response = await fetch(`${API_BASE}/api/logs/download/${logType}`);
+                const data = await response.json();
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${logType}-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('Failed to download: ' + e.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        document.getElementById('logType').addEventListener('change', loadLogs);
+        document.getElementById('levelFilter').addEventListener('change', loadLogs);
+        document.getElementById('searchFilter').addEventListener('input', debounce(loadLogs, 300));
+        
+        document.getElementById('autoRefresh').addEventListener('change', (e) => {
+            if (e.target.checked) {
+                autoRefreshInterval = setInterval(loadLogs, 10000);
+            } else {
+                clearInterval(autoRefreshInterval);
+            }
+        });
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initial load
+        loadLogs();
+    </script>
+</body>
+</html>

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سيف تداول — دليل المنصة</title>
+<style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0f1e; color: #e2e8f0; }
+
+.page {
+  width: 210mm; min-height: 297mm; margin: 0 auto;
+  background: linear-gradient(180deg, #0a0f1e 0%, #0f172a 100%);
+  padding: 32px 36px;
+  page-break-after: always;
+  position: relative;
+  overflow: hidden;
+}
+.page::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* Header */
+.page-header {
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+}
+.page-header h1 {
+  font-size: 28px;
+  color: #f59e0b;
+  letter-spacing: 1px;
+}
+.page-header .sub {
+  color: #64748b;
+  font-size: 13px;
+  margin-top: 6px;
+}
+.page-header .line {
+  width: 60px; height: 3px;
+  background: linear-gradient(90deg, #f59e0b, transparent);
+  margin: 12px auto 0;
+  border-radius: 2px;
+}
+
+/* Page number */
+.page-num {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #334155;
+  font-size: 11px;
+}
+
+/* === PAGE 1: Card Explanation === */
+.card-explain {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.card-mock {
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 18px;
+  border: 1px solid #334155;
+  font-size: 12px;
+  position: relative;
+}
+
+.card-mock .cm-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.card-mock .cm-name { font-weight: bold; font-size: 14px; color: #f8fafc; }
+.card-mock .cm-symbol { color: #64748b; font-size: 11px; font-family: monospace; }
+.card-mock .cm-score { font-size: 32px; font-weight: bold; color: #f59e0b; text-align: center; }
+.card-mock .cm-score span { font-size: 14px; color: #64748b; }
+.card-mock .cm-badge { display: inline-block; padding: 3px 12px; border-radius: 16px; font-size: 11px; font-weight: bold; background: #f59e0b25; color: #f59e0b; margin: 6px auto; text-align: center; }
+
+.cm-bar { display: flex; align-items: center; gap: 6px; margin: 4px 0; font-size: 10px; }
+.cm-bar .label { min-width: 38px; color: #94a3b8; text-align: left; }
+.cm-bar .val { min-width: 28px; font-weight: bold; }
+.cm-bar .track { flex: 1; height: 7px; background: #334155; border-radius: 4px; overflow: hidden; }
+.cm-bar .fill { height: 100%; border-radius: 4px; }
+.cm-bar .fill.g { background: #10b981; }
+.cm-bar .fill.y { background: #f59e0b; }
+.cm-bar .fill.r { background: #ef4444; }
+
+.cm-timing { text-align: center; margin: 10px 0 6px; padding: 8px; background: #0f172a; border-radius: 8px; }
+.cm-timing .t-label { font-size: 10px; color: #94a3b8; }
+.cm-timing .t-val { font-size: 14px; font-weight: bold; color: #10b981; margin-top: 2px; }
+
+.cm-section { margin-top: 10px; }
+.cm-section h4 { font-size: 11px; color: #f59e0b; margin-bottom: 6px; padding-bottom: 3px; border-bottom: 1px solid #33415544; }
+.cm-indicators { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.cm-ind { background: #0f172a; border-radius: 8px; padding: 8px; text-align: center; }
+.cm-ind .v { font-size: 14px; font-weight: bold; }
+.cm-ind .v.green { color: #10b981; }
+.cm-ind .v.red { color: #ef4444; }
+.cm-ind .l { font-size: 9px; color: #64748b; margin-top: 2px; }
+
+/* Annotations */
+.annotations {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.anno {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #1e293b88;
+  border-radius: 10px;
+  border-right: 3px solid #f59e0b;
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+.anno .num {
+  min-width: 24px;
+  height: 24px;
+  background: #f59e0b;
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.anno .text b { color: #f59e0b; }
+
+/* Numbered circles on the card */
+.card-mock .marker {
+  position: absolute;
+  width: 18px; height: 18px;
+  background: #f59e0b;
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: bold;
+  z-index: 5;
+  box-shadow: 0 0 8px rgba(245,158,11,0.5);
+}
+
+/* === PAGE 2: Layers === */
+.layers-section {
+  margin-top: 20px;
+}
+
+.layer-card {
+  background: #1e293b;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #334155;
+  position: relative;
+  overflow: hidden;
+}
+.layer-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 4px; height: 100%;
+}
+.layer-card.l1::before { background: #ef4444; }
+.layer-card.l2::before { background: #f59e0b; }
+.layer-card.l3::before { background: #10b981; }
+
+.layer-card .layer-num {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.layer-card.l1 .layer-num { color: #ef4444; }
+.layer-card.l2 .layer-num { color: #f59e0b; }
+.layer-card.l3 .layer-num { color: #10b981; }
+
+.layer-card h3 { font-size: 16px; color: #f8fafc; margin-bottom: 8px; }
+.layer-card p { font-size: 12px; color: #94a3b8; line-height: 1.7; margin-bottom: 10px; }
+
+.layer-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.layer-pill {
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  background: #0f172a;
+  color: #94a3b8;
+  border: 1px solid #334155;
+}
+
+.flow-arrow {
+  text-align: center;
+  color: #334155;
+  font-size: 24px;
+  margin: -4px 0;
+}
+
+/* Weights visual */
+.weights-bar {
+  display: flex;
+  height: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0 8px;
+}
+.weights-bar div { display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: #000; }
+.wb1 { background: #3b82f6; flex: 30; }
+.wb2 { background: #8b5cf6; flex: 25; }
+.wb3 { background: #f59e0b; flex: 15; }
+.wb4 { background: #ef4444; flex: 15; }
+.wb5 { background: #10b981; flex: 15; }
+
+.weights-labels {
+  display: flex;
+  font-size: 10px;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+.weights-labels div { display: flex; align-items: center; gap: 4px; }
+.weights-labels .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* Classification table */
+.class-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 12px;
+}
+.class-table th {
+  background: #334155;
+  color: #f59e0b;
+  padding: 8px;
+  text-align: right;
+  font-size: 10px;
+}
+.class-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #33415533;
+}
+.class-table .badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: bold;
+}
+.badge-sb { background: #10b98140; color: #10b981; }
+.badge-b { background: #10b98120; color: #10b981; }
+.badge-h { background: #f59e0b20; color: #f59e0b; }
+.badge-s { background: #ef444420; color: #ef4444; }
+.badge-ss { background: #ef444440; color: #ef4444; }
+
+/* Page 3 */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.info-card {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #334155;
+}
+.info-card h4 {
+  color: #f59e0b;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.info-card ul {
+  list-style: none;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.9;
+}
+.info-card ul li::before {
+  content: '› ';
+  color: #f59e0b;
+}
+
+.disclaimer {
+  margin-top: 24px;
+  padding: 14px;
+  background: #ef444410;
+  border: 1px solid #ef444433;
+  border-radius: 10px;
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.7;
+}
+.disclaimer b { color: #ef4444; }
+
+@media print {
+  body { background: #0a0f1e; }
+  .page { margin: 0; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1: شرح بطاقة التحليل ==================== -->
+<div class="page">
+  <div class="page-header">
+    <h1>سيف تداول</h1>
+    <div class="sub">دليل قراءة بطاقة التحليل الاستثماري</div>
+    <div class="line"></div>
+  </div>
+
+  <div class="card-explain">
+    <!-- Card Mock -->
+    <div class="card-mock">
+      <div class="marker" style="top:12px;right:12px">1</div>
+      <div class="cm-header">
+        <div>
+          <div class="cm-name">بترو رابغ</div>
+          <div class="cm-symbol">2380</div>
+        </div>
+        <div style="font-size:10px;color:#64748b">X</div>
+      </div>
+      
+      <div style="position:relative">
+        <div class="marker" style="top:0;left:-6px">2</div>
+        <div style="text-align:center;font-size:11px;color:#f59e0b;margin-bottom:4px">التقييم الاستثماري</div>
+        <div class="cm-score">45<span>/100</span></div>
+        <div style="text-align:center"><span class="cm-badge">بيع</span></div>
+      </div>
+      
+      <div style="position:relative;margin-top:10px">
+        <div class="marker" style="top:0;left:-6px">3</div>
+        <div class="cm-bar"><span class="val" style="color:#ef4444">2/30</span><div class="track"><div class="fill r" style="width:7%"></div></div><span class="label">المالية</span></div>
+        <div class="cm-bar"><span class="val" style="color:#f59e0b">14/25</span><div class="track"><div class="fill y" style="width:56%"></div></div><span class="label">الاتجاه</span></div>
+        <div class="cm-bar"><span class="val" style="color:#10b981">13/15</span><div class="track"><div class="fill g" style="width:87%"></div></div><span class="label">الزخم</span></div>
+        <div class="cm-bar"><span class="val" style="color:#f59e0b">9/15</span><div class="track"><div class="fill y" style="width:60%"></div></div><span class="label">المخاطر</span></div>
+        <div class="cm-bar"><span class="val" style="color:#f59e0b">7/15</span><div class="track"><div class="fill y" style="width:47%"></div></div><span class="label">التقييم</span></div>
+      </div>
+      
+      <div style="position:relative">
+        <div class="marker" style="top:4px;left:-6px">4</div>
+        <div class="cm-timing">
+          <div class="t-label">توقيت الدخول</div>
+          <div class="t-val">ممتاز (3/4)</div>
+        </div>
+      </div>
+
+      <div class="cm-section" style="position:relative">
+        <div class="marker" style="top:0;left:-6px">5</div>
+        <h4>التقييم المالي</h4>
+        <div class="cm-indicators">
+          <div class="cm-ind"><div class="v">8.9</div><div class="l">P/E</div></div>
+          <div class="cm-ind"><div class="v">2.32</div><div class="l">P/B</div></div>
+        </div>
+      </div>
+
+      <div class="cm-section" style="position:relative">
+        <div class="marker" style="top:0;left:-6px">6</div>
+        <h4>الصحة المالية</h4>
+        <div class="cm-indicators">
+          <div class="cm-ind"><div class="v red">-42.9%</div><div class="l">ROE</div></div>
+          <div class="cm-ind"><div class="v red">-11.2%</div><div class="l">هامش الربح</div></div>
+        </div>
+      </div>
+
+      <div class="cm-section" style="position:relative">
+        <div class="marker" style="top:0;left:-6px">7</div>
+        <h4>الاتجاه الأسبوعي</h4>
+        <div class="cm-indicators">
+          <div class="cm-ind"><div class="v green">9.69</div><div class="l">SMA 200W</div></div>
+          <div class="cm-ind"><div class="v">68.3</div><div class="l">RSI 14W</div></div>
+        </div>
+      </div>
+
+      <div class="cm-section" style="position:relative">
+        <div class="marker" style="top:0;left:-6px">8</div>
+        <h4>القوة النسبية مقابل TASI</h4>
+        <div class="cm-indicators">
+          <div class="cm-ind"><div class="v green">+17.8%</div><div class="l">6 أشهر</div></div>
+          <div class="cm-ind"><div class="v green">+27.3%</div><div class="l">سنة</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Annotations -->
+    <div class="annotations">
+      <div class="anno">
+        <div class="num">1</div>
+        <div class="text"><b>اسم السهم والرمز</b> — تعريف السهم في السوق السعودي (تاسي)</div>
+      </div>
+      <div class="anno">
+        <div class="num">2</div>
+        <div class="text"><b>النقاط الإجمالية والتصنيف</b> — نتيجة من 100 نقطة تحدد هل السهم يستحق الاستثمار. التصنيف: شراء قوي (80+) / شراء (65+) / انتظار (50+) / بيع (35+) / بيع قوي (أقل)</div>
+      </div>
+      <div class="anno">
+        <div class="num">3</div>
+        <div class="text"><b>المحاور الخمسة</b> — كل محور يقيّم جانب مختلف. اللون الأخضر = قوي، الأصفر = متوسط، الأحمر = ضعيف. هنا المالية 2/30 (كارثية) لكن الزخم 13/15 (ممتاز)</div>
+      </div>
+      <div class="anno">
+        <div class="num">4</div>
+        <div class="text"><b>توقيت الدخول</b> — مبني على 4 مؤشرات يومية (EMA50 + RSI + MACD + Volume). <b>لا يغيّر النقاط</b> — يجاوب فقط "هل الآن وقت مناسب للتنفيذ؟"</div>
+      </div>
+      <div class="anno">
+        <div class="num">5</div>
+        <div class="text"><b>مضاعفات التقييم</b> — P/E و P/B مقارنة بمتوسط القطاع. إذا أقل من القطاع = خصم (فرصة). إذا أعلى بكثير = مبالغ في تسعيره</div>
+      </div>
+      <div class="anno">
+        <div class="num">6</div>
+        <div class="text"><b>الصحة المالية</b> — أساس التقييم: ROE (كفاءة رأس المال)، هامش الربح، نمو الإيرادات، نسبة الديون. هنا ROE سلبي = الشركة تخسر</div>
+      </div>
+      <div class="anno">
+        <div class="num">7</div>
+        <div class="text"><b>الاتجاه الأسبوعي</b> — هل السهم في مسار صاعد هيكلي؟ SMA 200 أسبوعي هو الفلتر الرئيسي. السعر تحته = لا يدخل المنافسة</div>
+      </div>
+      <div class="anno">
+        <div class="num">8</div>
+        <div class="text"><b>القوة النسبية (Excess Return)</b> — يقيس تفوّق السهم على مؤشر تاسي. +17.8% يعني: لو تاسي ارتفع 5% خلال 6 أشهر، هالسهم ارتفع 22.8% — أي تفوّق بـ 17.8 نقطة مئوية. رقم موجب = يتفوق على السوق. سلبي = يتأخر.</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">1 / 3</div>
+</div>
+
+<!-- ==================== PAGE 2: طبقات التحليل ==================== -->
+<div class="page">
+  <div class="page-header">
+    <h1>كيف يعمل سيف تداول؟</h1>
+    <div class="sub">3 طبقات تحليل — من الفلتر إلى قرار الاستثمار</div>
+    <div class="line"></div>
+  </div>
+
+  <!-- Weights Table -->
+  <div style="font-size:13px;font-weight:bold;color:#f59e0b;text-align:center;margin-bottom:10px">توزيع الأوزان النهائي — 100 نقطة</div>
+  <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:16px">
+    <tr>
+      <td style="background:#3b82f6;color:#fff;text-align:center;padding:10px;border-radius:8px 0 0 8px;width:30%"><b>الصحة المالية</b><br>30 نقطة</td>
+      <td style="background:#8b5cf6;color:#fff;text-align:center;padding:10px;width:25%"><b>الاتجاه الفني</b><br>25 نقطة</td>
+      <td style="background:#f59e0b;color:#000;text-align:center;padding:10px;width:15%"><b>الزخم</b><br>15 نقطة</td>
+      <td style="background:#ef4444;color:#fff;text-align:center;padding:10px;width:15%"><b>المخاطر</b><br>15 نقطة</td>
+      <td style="background:#10b981;color:#fff;text-align:center;padding:10px;border-radius:0 8px 8px 0;width:15%"><b>التقييم</b><br>15 نقطة</td>
+    </tr>
+  </table>
+
+  <div class="layers-section">
+    <!-- Layer 1 -->
+    <div class="layer-card l1">
+      <div class="layer-num">الطبقة الأولى</div>
+      <h3>الفلتر الاستثماري — بوابة الدخول</h3>
+      <p>قبل أي حساب نقاط، السهم لازم يعدّي هالبوابة. إذا ما عدّى → تصنيف "انتظار" تلقائي بدون نقاط.</p>
+      <div class="layer-pills">
+        <span class="layer-pill">السعر فوق SMA 200 أسبوعي ✓</span>
+        <span class="layer-pill">بيانات مالية متوفرة ✓</span>
+        <span class="layer-pill">استثناء: إشارات انعكاس قوية</span>
+      </div>
+      <p style="margin-top:8px;font-size:11px;color:#ef4444">! 164 سهم من 278 لم يعدّ هذا الفلتر — لأن أسعارها تحت SMA 200 أسبوعي لفترة طويلة</p>
+    </div>
+
+    <div class="flow-arrow">↓</div>
+
+    <!-- Layer 2 -->
+    <div class="layer-card l2">
+      <div class="layer-num">الطبقة الثانية</div>
+      <h3>تقييم جودة السهم — 100 نقطة</h3>
+      <p>5 محاور تقيّم السهم من جوانب مختلفة. كل محور مستقل ولا يكرر نفس الفكرة.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div style="background:#0f172a;border-radius:8px;padding:10px">
+          <div style="font-size:11px;font-weight:bold;color:#3b82f6">الصحة المالية (30 نقطة)</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:4px">نمو الإيرادات • هامش الربح • ROE • الديون • السيولة • التدفق النقدي</div>
+        </div>
+        <div style="background:#0f172a;border-radius:8px;padding:10px">
+          <div style="font-size:11px;font-weight:bold;color:#8b5cf6">الاتجاه الفني (25 نقطة)</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:4px">SMA 200W • EMA 40W • RSI أسبوعي • MACD أسبوعي</div>
+        </div>
+        <div style="background:#0f172a;border-radius:8px;padding:10px">
+          <div style="font-size:11px;font-weight:bold;color:#f59e0b">الزخم النسبي (15 نقطة)</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:4px">أداء السهم مقابل TASI خلال 3M / 6M / 12M</div>
+        </div>
+        <div style="background:#0f172a;border-radius:8px;padding:10px">
+          <div style="font-size:11px;font-weight:bold;color:#ef4444">المخاطر (15 نقطة)</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:4px">التقلب ATR% • المسافة من القمة • سيولة التداول</div>
+        </div>
+        <div style="background:#0f172a;border-radius:8px;padding:10px;grid-column:span 2">
+          <div style="font-size:11px;font-weight:bold;color:#10b981">التقييم / القيمة الحقيقية (15 نقطة)</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:4px">P/E vs القطاع • P/B vs القطاع • Dividend Yield • EV/EBITDA — <b style="color:#f59e0b">مضاعفات مالية فقط، لا مؤشرات فنية</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">↓</div>
+
+    <!-- Layer 3 -->
+    <div class="layer-card l3">
+      <div class="layer-num">الطبقة الثالثة</div>
+      <h3> توقيت الدخول — لا يغيّر النقاط</h3>
+      <p>بعد تحديد جودة السهم، هل <b>الآن</b> وقت مناسب للتنفيذ؟ هذه الطبقة تجاوب على هالسؤال بدون ما تأثر على التقييم.</p>
+      <div class="layer-pills">
+        <span class="layer-pill">EMA 50 يومي</span>
+        <span class="layer-pill">RSI 14 يومي</span>
+        <span class="layer-pill">MACD يومي</span>
+        <span class="layer-pill">حجم التداول</span>
+      </div>
+      <p style="margin-top:8px;font-size:11px;color:#10b981">3+ إشارات = <span style="color:#10b981;font-weight:bold">ممتاز</span> | 2 = <span style="color:#f59e0b;font-weight:bold">مقبول</span> | أقل = <span style="color:#ef4444;font-weight:bold">انتظر</span></p>
+    </div>
+  </div>
+
+  <!-- Classification -->
+  <div style="margin-top:10px;font-size:13px;font-weight:bold;color:#f59e0b">التصنيف النهائي</div>
+  <table class="class-table">
+    <tr><th>النقاط</th><th>التوقيت</th><th>التصنيف</th><th style="min-width:140px">المعنى</th></tr>
+    <tr>
+      <td>80 - 100</td>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;margin-left:4px"></span> ممتاز</td>
+      <td><span class="badge badge-sb">شراء قوي</span></td>
+      <td style="font-size:10px;color:#94a3b8">السهم ممتاز والوقت مثالي — ادخل الآن</td>
+    </tr>
+    <tr>
+      <td>80 - 100</td>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f59e0b;margin-left:4px"></span> مقبول</td>
+      <td><span class="badge badge-b">شراء</span></td>
+      <td style="font-size:10px;color:#94a3b8">السهم ممتاز — ادخل بحذر</td>
+    </tr>
+    <tr>
+      <td>65 - 79</td>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;margin-left:4px"></span> ممتاز</td>
+      <td><span class="badge badge-b">شراء</span></td>
+      <td style="font-size:10px;color:#94a3b8">السهم جيد والوقت مناسب</td>
+    </tr>
+    <tr>
+      <td>65 - 79</td>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f59e0b;margin-left:4px"></span> مقبول</td>
+      <td><span class="badge badge-b">شراء مشروط</span></td>
+      <td style="font-size:10px;color:#94a3b8">السهم جيد — يفضّل دخول تدريجي أو انتظار تراجع</td>
+    </tr>
+    <tr>
+      <td>65 - 79</td>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-left:4px"></span> انتظر</td>
+      <td><span class="badge badge-h">انتظار</span></td>
+      <td style="font-size:10px;color:#94a3b8">السهم جيد لكن الحين مو وقته — راقبه</td>
+    </tr>
+    <tr>
+      <td>50 - 64</td>
+      <td>لا يؤثر</td>
+      <td><span class="badge badge-h">انتظار</span></td>
+      <td style="font-size:10px;color:#94a3b8">السهم ما أقنعنا — لا تدخل</td>
+    </tr>
+    <tr>
+      <td>35 - 49</td>
+      <td>لا يؤثر</td>
+      <td><span class="badge badge-s">بيع</span></td>
+      <td style="font-size:10px;color:#94a3b8">ضعيف — اخرج أو تجنّب</td>
+    </tr>
+    <tr>
+      <td>أقل من 35</td>
+      <td>لا يؤثر</td>
+      <td><span class="badge badge-ss">بيع قوي</span></td>
+      <td style="font-size:10px;color:#94a3b8">سيئ — اخرج فوراً</td>
+    </tr>
+  </table>
+
+  <div class="page-num">2 / 3</div>
+</div>
+
+<!-- ==================== PAGE 3: الفلسفة والمصادر ==================== -->
+<div class="page">
+  <div class="page-header">
+    <h1>فلسفة النموذج</h1>
+    <div class="sub">لماذا بُني بهذه الطريقة؟</div>
+    <div class="line"></div>
+  </div>
+
+  <div style="text-align:center;padding:16px 0;margin-bottom:16px">
+    <div style="font-size:18px;color:#f59e0b;font-weight:bold;line-height:1.8">
+      الاختيار استثماري <br>
+      التوقيت فني <br>
+      القرار لا يتأثر بضوضاء الحركة اليومية 
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>لماذا 3 طبقات؟</h4>
+      <ul>
+        <li>الطبقة الأولى تحميك من أسهم في اتجاه هابط هيكلي</li>
+        <li>الطبقة الثانية تقيّم الجودة بموضوعية</li>
+        <li>الطبقة الثالثة تحدد أفضل وقت للتنفيذ</li>
+        <li>النتيجة: قرار مبني على أساس، مو عاطفة</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>وش ما نسويه؟</h4>
+      <ul>
+        <li>لا نعتبر التشبع البيعي الفني = قيمة استثمارية</li>
+        <li>لا Bollinger ولا Stochastic في محور التقييم</li>
+        <li>لا نبني الحكم على التغير اليومي</li>
+        <li>لا نكرر نفس الفكرة عبر مؤشرات مختلفة</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>مصادر البيانات</h4>
+      <ul>
+        <li>أسعار يومية + أسبوعية: Yahoo Finance</li>
+        <li>قوائم مالية: S&P Global عبر StockAnalysis</li>
+        <li>مضاعفات التقييم: StockAnalysis (P/E, P/B, EV/EBITDA)</li>
+        <li>مؤشر TASI: Yahoo Finance (^TASI.SR)</li>
+        <li>تصنيف القطاعات: StockAnalysis (11 قطاع)</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>متى تتحدث البيانات؟</h4>
+      <ul>
+        <li>الأسعار: يومياً (10:00 ص + 3:30 م)</li>
+        <li>المؤشرات الفنية: يومياً</li>
+        <li>القوائم المالية: أسبوعياً (الجمعة)</li>
+        <li>القوة النسبية: يومياً</li>
+        <li>Scoring: يومياً بعد تحديث البيانات</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;text-align:center">
+    <div style="font-size:14px;color:#f59e0b;font-weight:bold;margin-bottom:12px">أفق الاستثمار المستهدف</div>
+    <div style="display:flex;justify-content:center;gap:4px;align-items:center">
+      <div style="background:#334155;border-radius:8px;padding:10px 16px;text-align:center">
+        <div style="font-size:10px;color:#64748b">قصير</div>
+        <div style="font-size:11px;color:#64748b">1-3 أشهر</div>
+      </div>
+      <div style="color:#334155;font-size:20px">→</div>
+      <div style="background:#f59e0b20;border:1px solid #f59e0b;border-radius:8px;padding:10px 16px;text-align:center">
+        <div style="font-size:10px;color:#f59e0b">متوسط ✓</div>
+        <div style="font-size:11px;color:#f59e0b;font-weight:bold">6-12 شهر</div>
+      </div>
+      <div style="color:#334155;font-size:20px">→</div>
+      <div style="background:#334155;border-radius:8px;padding:10px 16px;text-align:center">
+        <div style="font-size:10px;color:#64748b">طويل</div>
+        <div style="font-size:11px;color:#64748b">2+ سنة</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px;background:#1e293b;border-radius:12px;padding:16px;text-align:center">
+    <div style="font-size:13px;font-weight:bold;color:#f8fafc;margin-bottom:8px">مثال عملي: بترو رابغ (2380)</div>
+    <div style="font-size:11px;color:#94a3b8;line-height:1.8">
+      النقاط: <b style="color:#f59e0b">45/100</b> = <b style="color:#ef4444">بيع</b> | التوقيت: <b style="color:#10b981">ممتاز 3/4</b><br>
+      <b>التفسير:</b> السهم في ارتداد فني مؤقت (التوقيت إيجابي) لكن الشركة ضعيفة مالياً (ROE سلبي، هامش ربح سلبي).<br>
+      <b>القرار:</b> المضارب يشوف "فرصة" — النموذج يقول "فخ". <span style="color:#f59e0b">الجودة أهم من التوقيت.</span>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <b>! تنبيه مهم:</b> هذا النموذج أداة تحليلية تساعد في اتخاذ القرار — وليست نصيحة استثمارية.<br>
+    المستثمر مسؤول عن قراراته. الأداء السابق لا يضمن النتائج المستقبلية.
+  </div>
+
+  <div class="page-num">3 / 3</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cron Jobs - تقرير المهام المجدولة</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rowAppear {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #00d4ff;
+            font-size: 2em;
+            animation: slideIn 0.8s ease;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px 30px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        .stat-box.success { border-color: #2ecc71; }
+        .stat-box.error { border-color: #e74c3c; }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .table-container {
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%);
+            padding: 15px;
+            text-align: right;
+            color: #00d4ff;
+            font-weight: bold;
+            border-bottom: 2px solid #00d4ff;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        tr {
+            animation: rowAppear 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        tr:nth-child(1) { animation-delay: 0.1s; }
+        tr:nth-child(2) { animation-delay: 0.2s; }
+        tr:nth-child(3) { animation-delay: 0.3s; }
+        tr:nth-child(4) { animation-delay: 0.4s; }
+        tr:nth-child(5) { animation-delay: 0.5s; }
+        tr:nth-child(6) { animation-delay: 0.6s; }
+        tr:nth-child(7) { animation-delay: 0.7s; }
+        tr:nth-child(8) { animation-delay: 0.8s; }
+        tr:nth-child(9) { animation-delay: 0.9s; }
+        
+        tr:hover {
+            background: rgba(0,212,255,0.1);
+        }
+        
+        .task-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .task-icon {
+            font-size: 1.2em;
+        }
+        
+        .status-ok {
+            color: #2ecc71;
+            font-size: 1.5em;
+        }
+        
+        .status-error {
+            color: #e74c3c;
+            font-size: 1.5em;
+        }
+        
+        .model-badge {
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+        
+        .model-badge.sonnet {
+            background: rgba(155,89,182,0.2);
+            color: #9b59b6;
+        }
+        
+        .error-msg {
+            color: #e74c3c;
+            font-size: 0.8em;
+            padding: 8px 15px;
+            background: rgba(231,76,60,0.1);
+            border-right: 3px solid #e74c3c;
+        }
+        
+        .alerts-section {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .alerts-section h2 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(231,76,60,0.1);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .duration {
+            color: #4ecdc4;
+            font-family: monospace;
+        }
+        
+        .schedule {
+            font-family: monospace;
+            color: #ffe66d;
+            font-size: 0.9em;
+        }
+        
+        .next-run {
+            color: #aaa;
+            font-size: 0.85em;
+        }
+        
+        .time {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .am { color: #4ecdc4; }
+        .pm { color: #ffe66d; }
+        
+        @media (max-width: 768px) {
+            .stats-bar { flex-direction: column; align-items: center; }
+            table { font-size: 0.85em; }
+            th, td { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Cron Jobs (9) — تقرير المهام المجدولة</h1>
+        
+        <div class="stats-bar">
+            <div class="stat-box success">
+                <div class="stat-number" style="color: #2ecc71;">6</div>
+                <div class="stat-label">✅ مهام ناجحة</div>
+            </div>
+            <div class="stat-box error">
+                <div class="stat-number" style="color: #e74c3c;">3</div>
+                <div class="stat-label">❌ مهام فاشلة</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" style="color: #00d4ff;">9</div>
+                <div class="stat-label">📋 إجمالي المهام</div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>المهمة</th>
+                        <th>الجدول</th>
+                        <th>النموذج</th>
+                        <th>آخر حالة</th>
+                        <th>آخر تشغيل</th>
+                        <th>المدة</th>
+                        <th>التالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="task-name">
+                                <span class="task-icon">📋</span>
+                                <span>التقرير التنفيذي الصباحي</span>
+                            </div>
+                        </td>
+                        <td><span class="schedule">30 7 * * *</span></td>
+                        <td><span class="model-badge">MiniMax-M2.5</span></td>
+                        <td><span class="status-ok">✓</span></td>
+                        <td><span class="time am">07:30 ص</span></td>
+                        <td><span class="duration">37s</span></td>
+                        <td><span class="next-run">اليوم 07:30 ص</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">
+                                <span class="task-icon">📈</span>
+                                <span>التقرير الاقتصادي</span>
+                            </div>
+                        </td>
+                        <td><span class="schedule">0 8 * * *</span></td>
+                        <td><span class="model-badge">MiniMax-M2.5</span></td>
+                        <td><span class="status-error">✗</span></td>
+                        <td><span class="time am">08:00 ص</span></td>
+                        <td><span class="duration">123s</span></td>
+                        <td><span class="next-run">اليوم 08:00 ص</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="error-msg">
+                                ⚠️ openrouter (minimax/MiniMax-M2.5) returned a billing error — your API key has run out of credits or has an insufficient balance. Check your openrouter billing dashboard and top up or switch to a different API key.
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">
+                                <span class="task-icon">🤖</span>
+                                <span>تقرير Moltbook + GitHub</span>
+                            </div>
+                        </td>
+                        <td><span class="schedule">0 12 * * *</span></td>
+                        <td><span class="model-badge">MiniMax-M2.5</span></td>
+                        <td><span class="status-ok">✓</span></td>
+                        <td><span class="time pm">12:00 م</span></td>
+                        <td><span class="duration">1s</span></td>
+                        <td><span class="next-run">اليوم 12:00 م</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">
+                                <span class="task-icon">🌙</span>
+                                <span>Night Build (مصنع)</span>
+                            </div>
+                        </td>
+                        <td><span class="schedule">0 2 * * *</span></td>
+                        <td><span class="model-badge sonnet">Claude-Sonnet-4.5</span></td>
+                        <td><span class="status-ok">✓</span></td>
+                        <td><span class="time am">02:00 ص</span></td>
+                        <td><span class="duration">83s</span></td>
+                        <td><span class="next-run">غداً 02:00 ص</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">
+                                <span class="task-icon">📊</span>
+                                <span>تحديث الأسهم (صباحي)</span>
+                            </div>
+                        </td>
+                        <td><span class="schedule">20 10 * * 0-4</span></td>
+                        <td><span class="model-badge">MiniMax-M2.5</span></td>
+                        <td><span class="status-error">✗</span></td>
+                        <td><span class="time am">10:20 ص</span></td>
+                        <td><span class="duration">—</span></td>
+                        <td><span class="next-run">الأحد 10:20 ص</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="error-msg">
+                                ⚠️ model not allowed: openai/MiniMax-M2.5
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">
+                                <span class="task-icon">📊</span>
+                                <span>تحديث الأسهم (عصري)</span>
+                            </div>
+                        </td>
+                        <td><span class="schedule">30 15 * * 0-4</span></td>
+                        <td><span class="model-badge">MiniMax-M2.5</span></td>
+                        <td><span class="status-error">✗</span></td>
+                        <td><span class="time pm">03:30 م</span></td>
+                        <td><span class="duration">—</span></td>
+                        <td><span class="next-run">الأحد 03:30 م</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="error-msg">
+                                ⚠️ openrouter (minimax/MiniMax-M2.5) returned a billing error
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">
+                                <span class="task-icon">💰</span>
+                                <span>تحديث القوائم المالية (أسبوعي)</span>
+                            </div>
+                        </td>
+                        <td><span class="schedule">0 3 * * 5</span></td>
+                        <td><span class="model-badge">MiniMax-M2.5</span></td>
+                        <td><span class="status-error">✗</span></td>
+                        <td><span class="time am">03:00 ص</span></td>
+                        <td><span class="duration">—</span></td>
+                        <td><span class="next-run">الجمعة 03:00 ص</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">
+                                <span class="task-icon">💡</span>
+                                <span>تغذية الاقتراحات</span>
+                            </div>
+                        </td>
+                        <td><span class="schedule">0 6 * * *</span></td>
+                        <td><span class="model-badge">MiniMax-M2.5</span></td>
+                        <td><span class="status-ok">✓</span></td>
+                        <td><span class="time am">06:00 ص</span></td>
+                        <td><span class="duration">45s</span></td>
+                        <td><span class="next-run">اليوم 06:00 ص</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="alerts-section">
+            <h2>🔔 التنبيهات</h2>
+            <div class="alert-item">
+                <span>📊</span>
+                <span>تحديث الأسهم (صباحي):</span>
+                <span style="color: #e74c3c;">1 أخطاء متتالية</span>
+            </div>
+            <div class="alert-item">
+                <span>📊</span>
+                <span>تحديث الأسهم (عصري):</span>
+                <span style="color: #e74c3c;">1 أخطاء متتالية</span>
+            </div>
+            <div class="alert-item">
+                <span>💰</span>
+                <span>تحديث القوائم المالية (أسبوعي):</span>
+                <span style="color: #e74c3c;">1 أخطاء متتالية</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

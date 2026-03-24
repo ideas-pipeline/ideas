@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Cron Real-Time Monitor — هادي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #e0e0e0;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 0 1rem;
+            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(20deg); }
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.active {
+            background: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #bbb;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(15, 12, 41, 0.6);
+            color: #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .filter-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        .jobs-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .job-card {
+            background: rgba(15, 12, 41, 0.7);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-right: 4px solid #667eea;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .job-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(102, 126, 234, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .job-card:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .job-card:hover::before {
+            opacity: 1;
+        }
+
+        .job-card.success {
+            border-right-color: #00ff88;
+        }
+
+        .job-card.error {
+            border-right-color: #ff4757;
+        }
+
+        .job-card.disabled {
+            opacity: 0.5;
+            border-right-color: #555;
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .job-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .job-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .job-status.ok {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.4);
+        }
+
+        .job-status.error {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.4);
+        }
+
+        .job-status.disabled {
+            background: rgba(85, 85, 85, 0.2);
+            color: #999;
+            border: 1px solid rgba(85, 85, 85, 0.4);
+        }
+
+        .job-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .job-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .job-info-label {
+            color: #888;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .job-info-value {
+            color: #e0e0e0;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .job-meta {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .job-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .next-run-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 6px;
+            color: #ffd700;
+            font-size: 0.8rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #667eea;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-radius: 50%;
+            border-top: 4px solid #667eea;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            filter: grayscale(1) opacity(0.5);
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .job-info {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .model-badge {
+            padding: 0.3rem 0.6rem;
+            background: rgba(118, 75, 162, 0.2);
+            border: 1px solid rgba(118, 75, 162, 0.4);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #a78bfa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Cron Real-Time Monitor</h1>
+            <p class="subtitle">مراقبة حية لجميع مهام الجدولة — بُني بواسطة هادي</p>
+        </header>
+
+        <div class="controls">
+            <div class="status-bar">
+                <div class="status-dot active" id="statusDot"></div>
+                <span id="lastUpdate">جارٍ التحميل...</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary" onclick="loadData()">
+                    🔄 تحديث
+                </button>
+                <button class="btn btn-secondary" onclick="toggleAutoRefresh()">
+                    <span id="autoRefreshIcon">⏸️</span>
+                    <span id="autoRefreshText">إيقاف التحديث التلقائي</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalJobs">0</div>
+                <div class="stat-label">إجمالي المهام</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeJobs">0</div>
+                <div class="stat-label">نشط</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="successJobs">0</div>
+                <div class="stat-label">ناجح</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="errorJobs">0</div>
+                <div class="stat-label">أخطاء</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">الكل</button>
+            <button class="filter-btn" data-filter="enabled">نشط</button>
+            <button class="filter-btn" data-filter="disabled">معطل</button>
+            <button class="filter-btn" data-filter="ok">ناجح</button>
+            <button class="filter-btn" data-filter="error">أخطاء</button>
+        </div>
+
+        <div class="jobs-grid" id="jobsGrid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>جارٍ تحميل بيانات المهام...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshInterval = null;
+        let autoRefreshEnabled = true;
+        let currentFilter = 'all';
+        let allJobs = [];
+
+        // تحميل البيانات من jobs.json عبر API
+        async function loadData() {
+            try {
+                const response = await fetch('/mc/cron-jobs');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                allJobs = data.jobs || [];
+
+                renderStats();
+                renderJobs();
+                updateLastUpdateTime();
+                
+                document.getElementById('statusDot').className = 'status-dot active';
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                document.getElementById('jobsGrid').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p style="color: #ff4757; font-weight: 600;">فشل تحميل البيانات</p>
+                        <p style="margin-top: 0.5rem; color: #aaa;">يرجى التأكد من تشغيل الخادم بشكل صحيح</p>
+                    </div>
+                `;
+            }
+        }
+
+        // عرض الإحصائيات
+        function renderStats() {
+            const stats = {
+                total: allJobs.length,
+                active: allJobs.filter(j => j.enabled).length,
+                success: allJobs.filter(j => j.state?.lastRunStatus === 'ok').length,
+                error: allJobs.filter(j => j.state?.lastRunStatus === 'error').length
+            };
+
+            document.getElementById('totalJobs').textContent = stats.total;
+            document.getElementById('activeJobs').textContent = stats.active;
+            document.getElementById('successJobs').textContent = stats.success;
+            document.getElementById('errorJobs').textContent = stats.error;
+        }
+
+        // عرض المهام
+        function renderJobs() {
+            let filteredJobs = allJobs;
+
+            if (currentFilter === 'enabled') {
+                filteredJobs = allJobs.filter(j => j.enabled);
+            } else if (currentFilter === 'disabled') {
+                filteredJobs = allJobs.filter(j => !j.enabled);
+            } else if (currentFilter === 'ok') {
+                filteredJobs = allJobs.filter(j => j.state?.lastRunStatus === 'ok');
+            } else if (currentFilter === 'error') {
+                filteredJobs = allJobs.filter(j => j.state?.lastRunStatus === 'error');
+            }
+
+            if (filteredJobs.length === 0) {
+                document.getElementById('jobsGrid').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>لا توجد مهام ${currentFilter === 'all' ? '' : `في فئة "${currentFilter}"`}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = filteredJobs.map(job => {
+                const state = job.state || {};
+                const status = job.enabled ? (state.lastRunStatus || 'unknown') : 'disabled';
+                const icon = !job.enabled ? '⏸️' : status === 'ok' ? '✅' : status === 'error' ? '❌' : '⚙️';
+                
+                const lastRun = state.lastRunAtMs ? new Date(state.lastRunAtMs) : null;
+                const nextRun = state.nextRunAtMs ? new Date(state.nextRunAtMs) : null;
+                const duration = state.lastDurationMs ? (state.lastDurationMs / 1000).toFixed(2) : 'غير محدد';
+
+                const model = job.payload?.model || 'غير محدد';
+                const schedule = job.schedule?.expr || 'غير محدد';
+
+                return `
+                    <div class="job-card ${status}">
+                        <div class="job-header">
+                            <div class="job-name">
+                                ${icon} ${job.name}
+                            </div>
+                            <div class="job-status ${status}">${status}</div>
+                        </div>
+                        <div class="job-info">
+                            <div class="job-info-item">
+                                <div class="job-info-label">آخر تشغيل</div>
+                                <div class="job-info-value">${lastRun ? formatDate(lastRun) : 'لم يُشغّل بعد'}</div>
+                            </div>
+                            <div class="job-info-item">
+                                <div class="job-info-label">المدة</div>
+                                <div class="job-info-value">${duration} ث</div>
+                            </div>
+                            <div class="job-info-item">
+                                <div class="job-info-label">الجدول</div>
+                                <div class="job-info-value">${schedule}</div>
+                            </div>
+                            ${nextRun ? `
+                            <div class="job-info-item">
+                                <div class="job-info-label">التشغيل القادم</div>
+                                <div class="job-info-value">${formatDate(nextRun)}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="job-meta">
+                            <div class="job-meta-item">
+                                <span style="opacity: 0.7;">🤖</span>
+                                <span class="model-badge">${model}</span>
+                            </div>
+                            ${state.consecutiveErrors > 0 ? `
+                            <div class="job-meta-item">
+                                <span style="color: #ff4757;">⚠️ أخطاء متتالية: ${state.consecutiveErrors}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('jobsGrid').innerHTML = html;
+        }
+
+        // تنسيق التاريخ
+        function formatDate(date) {
+            const now = new Date();
+            const diff = (now - date) / 1000; // بالثواني
+
+            if (diff < 0) {
+                const absDiff = Math.abs(diff);
+                if (absDiff < 3600) return `بعد ${Math.floor(absDiff / 60)} دقيقة`;
+                if (absDiff < 86400) return `بعد ${Math.floor(absDiff / 3600)} ساعة`;
+                return date.toLocaleString('ar-SA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            }
+
+            if (diff < 60) return 'منذ ثوانٍ';
+            if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
+            if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
+            
+            return date.toLocaleString('ar-SA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // تحديث وقت آخر تحديث
+        function updateLastUpdateTime() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = `آخر تحديث: ${now.toLocaleTimeString('ar-SA')}`;
+        }
+
+        // تبديل التحديث التلقائي
+        function toggleAutoRefresh() {
+            autoRefreshEnabled = !autoRefreshEnabled;
+            
+            if (autoRefreshEnabled) {
+                document.getElementById('autoRefreshIcon').textContent = '⏸️';
+                document.getElementById('autoRefreshText').textContent = 'إيقاف التحديث التلقائي';
+                startAutoRefresh();
+            } else {
+                document.getElementById('autoRefreshIcon').textContent = '▶️';
+                document.getElementById('autoRefreshText').textContent = 'تفعيل التحديث التلقائي';
+                stopAutoRefresh();
+            }
+        }
+
+        // بدء التحديث التلقائي
+        function startAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = setInterval(loadData, 30000); // كل 30 ثانية
+        }
+
+        // إيقاف التحديث التلقائي
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
+        // إعداد الفلاتر
+        document.querySelector('.filters').addEventListener('click', (e) => {
+            if (!e.target.classList.contains('filter-btn')) return;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            currentFilter = e.target.getAttribute('data-filter');
+            renderJobs();
+        });
+
+        // تحميل البيانات عند بدء الصفحة
+        loadData();
+        startAutoRefresh();
+    </script>
+</body>
+</html>

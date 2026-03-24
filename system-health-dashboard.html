@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 System Health Dashboard — Hadi</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 1.1em;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .card h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .metric {
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .metric-label {
+      font-size: 0.9em;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+    .metric-value {
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+    .status-ok { color: #4ade80; }
+    .status-warning { color: #fbbf24; }
+    .status-error { color: #f87171; }
+    .cron-job {
+      background: rgba(0,0,0,0.2);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cron-name { font-weight: bold; }
+    .cron-status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+    }
+    .status-success {
+      background: #4ade80;
+      color: #000;
+    }
+    .status-failed {
+      background: #f87171;
+      color: #000;
+    }
+    .status-pending {
+      background: #fbbf24;
+      color: #000;
+    }
+    .builds-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .build-item {
+      background: rgba(0,0,0,0.2);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .build-date {
+      font-size: 0.85em;
+      opacity: 0.7;
+    }
+    .refresh-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: #fff;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+    }
+    .refresh-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-size: 1.2em;
+      opacity: 0.7;
+    }
+    @media (max-width: 768px) {
+      h1 { font-size: 2em; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 System Health Dashboard</h1>
+    <div class="subtitle">مراقبة شاملة لحالة النظام — تحديث تلقائي كل دقيقة</div>
+
+    <div class="grid">
+      <!-- OpenRouter Credits -->
+      <div class="card">
+        <h2>💰 OpenRouter</h2>
+        <div class="metric">
+          <div class="metric-label">الرصيد المتبقي</div>
+          <div class="metric-value status-ok" id="credits-balance">$--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">الاستهلاك الكلي</div>
+          <div class="metric-value" id="credits-usage">$--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">آخر تحديث</div>
+          <div class="metric-value" style="font-size: 1em;" id="credits-updated">--</div>
+        </div>
+      </div>
+
+      <!-- System Resources -->
+      <div class="card">
+        <h2>💾 System Resources</h2>
+        <div class="metric">
+          <div class="metric-label">Disk Usage</div>
+          <div class="metric-value" id="disk-usage">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Memory Files</div>
+          <div class="metric-value" id="memory-files">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Uptime</div>
+          <div class="metric-value" style="font-size: 1em;" id="uptime">--</div>
+        </div>
+      </div>
+
+      <!-- Cron Jobs Status -->
+      <div class="card" style="grid-column: 1 / -1;">
+        <h2>⏰ Cron Jobs Status</h2>
+        <div id="cron-jobs">
+          <div class="loading">جاري التحميل...</div>
+        </div>
+      </div>
+
+      <!-- Recent Night Builds -->
+      <div class="card" style="grid-column: 1 / -1;">
+        <h2>🏭 Recent Night Builds</h2>
+        <div class="builds-list" id="builds-list">
+          <div class="loading">جاري التحميل...</div>
+        </div>
+      </div>
+
+      <!-- Memory Files -->
+      <div class="card" style="grid-column: 1 / -1;">
+        <h2>🧠 Memory Files (آخر 5 أيام)</h2>
+        <div id="memory-list">
+          <div class="loading">جاري التحميل...</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="refresh-btn" onclick="loadAllData()">🔄 تحديث</button>
+  </div>
+
+  <script>
+    const API_BASE = 'https://srv1341157.tail16af71.ts.net/mc';
+
+    async function loadCredits() {
+      try {
+        const res = await fetch(`${API_BASE}/costs-data`);
+        const data = await res.json();
+        
+        const balance = (data.total_credits - data.total_usage).toFixed(2);
+        const usage = data.total_usage.toFixed(2);
+        
+        document.getElementById('credits-balance').textContent = `$${balance}`;
+        document.getElementById('credits-usage').textContent = `$${usage}`;
+        document.getElementById('credits-updated').textContent = new Date().toLocaleTimeString('ar-SA');
+        
+        // Color coding
+        const balanceEl = document.getElementById('credits-balance');
+        if (parseFloat(balance) > 50) balanceEl.className = 'metric-value status-ok';
+        else if (parseFloat(balance) > 20) balanceEl.className = 'metric-value status-warning';
+        else balanceEl.className = 'metric-value status-error';
+      } catch (err) {
+        document.getElementById('credits-balance').textContent = 'Error';
+        console.error('Credits load failed:', err);
+      }
+    }
+
+    async function loadSystemInfo() {
+      try {
+        // Disk usage
+        const diskRes = await fetch(`${API_BASE}/system/disk`);
+        const disk = await diskRes.json();
+        document.getElementById('disk-usage').textContent = disk.usage || '--';
+
+        // Uptime
+        const uptimeRes = await fetch(`${API_BASE}/system/uptime`);
+        const uptime = await uptimeRes.json();
+        document.getElementById('uptime').textContent = uptime.value || '--';
+
+        // Memory files count
+        const memRes = await fetch(`${API_BASE}/memory-data`);
+        const memData = await memRes.json();
+        document.getElementById('memory-files').textContent = memData.files?.length || 0;
+      } catch (err) {
+        console.error('System info load failed:', err);
+      }
+    }
+
+    async function loadCronJobs() {
+      try {
+        const res = await fetch(`${API_BASE}/system/cron-status`);
+        const jobs = await res.json();
+        
+        const container = document.getElementById('cron-jobs');
+        container.innerHTML = '';
+        
+        jobs.forEach(job => {
+          const div = document.createElement('div');
+          div.className = 'cron-job';
+          
+          let statusClass = 'status-pending';
+          let statusText = 'Pending';
+          
+          if (job.status === 'success') {
+            statusClass = 'status-success';
+            statusText = '✅ نجح';
+          } else if (job.status === 'error') {
+            statusClass = 'status-failed';
+            statusText = '❌ فشل';
+          }
+          
+          div.innerHTML = `
+            <div>
+              <div class="cron-name">${job.name}</div>
+              <div style="font-size: 0.85em; opacity: 0.7;">${job.schedule} — آخر تشغيل: ${job.lastRun || 'لم يشتغل بعد'}</div>
+            </div>
+            <div class="cron-status ${statusClass}">${statusText}</div>
+          `;
+          
+          container.appendChild(div);
+        });
+      } catch (err) {
+        document.getElementById('cron-jobs').innerHTML = '<div class="loading">خطأ في التحميل</div>';
+        console.error('Cron jobs load failed:', err);
+      }
+    }
+
+    async function loadBuilds() {
+      try {
+        const res = await fetch(`${API_BASE}/night-builds`);
+        const data = await res.json();
+        
+        const container = document.getElementById('builds-list');
+        container.innerHTML = '';
+        
+        data.runs.slice(0, 10).forEach(build => {
+          const div = document.createElement('div');
+          div.className = 'build-item';
+          
+          // Extract project name from summary
+          let projectName = 'Unknown Build';
+          if (build.summary) {
+            const match = build.summary.match(/\*\*المشروع:\*\*\s*(.+)/);
+            if (match) projectName = match[1].trim();
+          }
+          
+          const statusEmoji = build.status === 'ok' ? '✅' : '❌';
+          
+          div.innerHTML = `
+            <div><strong>${statusEmoji} ${projectName}</strong></div>
+            <div style="font-size: 0.9em; opacity: 0.8;">${build.date} — ${build.model}</div>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {
+        document.getElementById('builds-list').innerHTML = '<div class="loading">خطأ في التحميل</div>';
+        console.error('Builds load failed:', err);
+      }
+    }
+
+    async function loadMemoryFiles() {
+      try {
+        const res = await fetch(`${API_BASE}/memory-data`);
+        const data = await res.json();
+        
+        const container = document.getElementById('memory-list');
+        container.innerHTML = '';
+        
+        data.files.slice(0, 5).forEach(file => {
+          const div = document.createElement('div');
+          div.className = 'build-item';
+          div.innerHTML = `
+            <div><strong>${file.name}</strong></div>
+            <div style="font-size: 0.85em; opacity: 0.7;">${file.size} — آخر تعديل: ${file.modified}</div>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {
+        document.getElementById('memory-list').innerHTML = '<div class="loading">خطأ في التحميل</div>';
+        console.error('Memory files load failed:', err);
+      }
+    }
+
+    async function loadAllData() {
+      await Promise.all([
+        loadCredits(),
+        loadSystemInfo(),
+        loadCronJobs(),
+        loadBuilds(),
+        loadMemoryFiles()
+      ]);
+    }
+
+    // Initial load
+    loadAllData();
+
+    // Auto-refresh every 60 seconds
+    setInterval(loadAllData, 60000);
+  </script>
+</body>
+</html>

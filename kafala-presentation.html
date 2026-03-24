@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامج كفالة السعودي - عرض تقديمي</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/theme/black.css">
+    <style>
+        .reveal { font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .reveal .slides { text-align: right; }
+        .reveal h1 { color: #00d4ff; font-size: 2.2em; }
+        .reveal h2 { color: #00d4ff; font-size: 1.5em; }
+        .reveal h3 { color: #4ecdc4; }
+        .reveal p, .reveal li { font-size: 0.8em; line-height: 1.6; }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(78,205,196,0.1));
+            border: 2px solid #00d4ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .stat-box {
+            display: inline-block;
+            background: rgba(0,212,255,0.15);
+            border-radius: 10px;
+            padding: 15px 25px;
+            margin: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            color: #aaa;
+            font-size: 0.7em;
+        }
+        
+        .metric-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.65em;
+        }
+        
+        .metric-table th, .metric-table td {
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+        
+        .metric-table th { background: rgba(0,212,255,0.3); color: #00d4ff; }
+        .metric-table tr:nth-child(even) { background: rgba(255,255,255,0.05); }
+        
+        .company-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            display: inline-block;
+            width: 45%;
+            vertical-align: top;
+        }
+        
+        .company-card h4 { color: #00d4ff; margin-bottom: 10px; }
+        .company-card .target { color: #4ecdc4; }
+        .company-card .actual { color: #ffe66d; }
+        .company-card .achieved { color: #2ecc71; }
+        .company-card .missed { color: #e74c3c; }
+        
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .arabic-num { font-family: 'Segoe UI', sans-serif; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Slide 1: Title -->
+            <section>
+                <h1>🏦 برنامج كفالة السعودي</h1>
+                <h3>للمنشآت الصغيرة والمتوسطة</h3>
+                <div class="highlight-box">
+                    <p>برنامج حكومي يدعم SMEs بضمانات تمويلية تصل لـ <strong>90%</strong> من قيمة التمويل</p>
+                </div>
+                <p style="margin-top: 30px; color: #aaa;">عرض تقديمي | 2026</p>
+            </section>
+
+            <!-- Slide 2: Overview -->
+            <section>
+                <h2>📋 نظرة عامة على البرنامج</h2>
+                <div class="two-col">
+                    <div>
+                        <h3>أنواع الضمانات</h3>
+                        <ul>
+                            <li>🔹 متناهية الصغر: حتى <strong>2.5 مليون</strong> ريال</li>
+                            <li>🔹 صغيرة: حتى <strong>5 ملايين</strong> ريال</li>
+                            <li>🔹 متوسطة: حتى <strong>15 مليون</strong> ريال</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>نسبة التغطية</h3>
+                        <ul>
+                            <li>✅ حتى <strong>90%</strong> من مخاطر التمويل</li>
+                            <li>💰 حد أقصى للضمان: 15 مليون ريال</li>
+                            <li>📅 مخصص للمنشآت الناشئة والصغيرة</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 3: Statistics -->
+            <section>
+                <h2>📊 إحصائيات البرنامج</h2>
+                <div>
+                    <div class="stat-box">
+                        <div class="stat-number">+71,400</div>
+                        <div class="stat-label">ضمانة مُنحت</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">89.5 <span style="font-size:0.5em">مليار</span></div>
+                        <div class="stat-label">ريال قيمة الضمانات</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">~26,500</div>
+                        <div class="stat-label">SME استفادة</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">Q3 2025</div>
+                        <div class="stat-label">آخر فترة تحديث</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4: Q3 2025 Details -->
+            <section>
+                <h2>📈 تفاصيل الربع الثالث 2025</h2>
+                <table class="metric-table">
+                    <tr>
+                        <th>المؤشر</th>
+                        <th>القيمة</th>
+                    </tr>
+                    <tr>
+                        <td>عدد الضمانات</td>
+                        <td>5,447 ضمانة</td>
+                    </tr>
+                    <tr>
+                        <td>القيمة الإجمالية</td>
+                        <td>14 مليار ريال</td>
+                    </tr>
+                    <tr>
+                        <td>عدد المنشآت المستفيدة</td>
+                        <td>4,384 SME</td>
+                    </tr>
+                    <tr>
+                        <td>نمو سنوي</td>
+                        <td>+8%</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Slide 5: Eligibility -->
+            <section>
+                <h2>✅ شروط الاستحقاق</h2>
+                <div class="highlight-box">
+                    <ul>
+                        <li>🏢 أن يكون النشاط التجاري مسجلاً في المملكة</li>
+                        <li>📋年限 لا تقل عن سنة من تاريخ الترخيص</li>
+                        <li>💵 حجم التمويل المطلوب: 50,000 - 15,000,000 ريال</li>
+                        <li>📊 الالتزام بمعايير التصنيف للمنشآت الصغيرة والمتوسطة</li>
+                        <li>🔍 عدم وجود مخالفات أو قضايا مالية معلقة</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 6: Benefits -->
+            <section>
+                <h2>🎯 مميزات البرنامج</h2>
+                <div class="two-col">
+                    <div class="highlight-box">
+                        <h3>للمستفيدين</h3>
+                        <ul>
+                            <li>💰 الحصول على تمويل بسهولة</li>
+                            <li>🛡️ تقليل المخاطر على الممول</li>
+                            <li>📊 شروط تمويل مرنة</li>
+                            <li>⚡ سرعة في الإجراءات</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box">
+                        <h3>للممولين</h3>
+                        <ul>
+                            <li>📈 ضمان حكومي يغطي 90%</li>
+                            <li>💵 تحفيز نشاط الإقراض</li>
+                            <li>🔒 حماية من التعثر</li>
+                            <li>🏆 دعم المشاريع الوطنية</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: Comparison Example -->
+            <section>
+                <h2>📊 مقارنة أداء الشركات المستفيدة</h2>
+                <div>
+                    <div class="company-card">
+                        <h4>🏭 شركة التصنيع</h4>
+                        <p><span class="target">الهدف:</span> 2,000,000 ريال</p>
+                        <p><span class="actual actual">الفعلي:</span> 2,400,000 ريال</p>
+                        <p class="achieved">✅ تم الإنجاز (120%)</p>
+                    </div>
+                    <div class="company-card">
+                        <h4>🛒 شركة التجزئة</h4>
+                        <p><span class="target">الهدف:</span> 1,500,000 ريال</p>
+                        <p><span class="actual">الفعلي:</span> 1,200,000 ريال</p>
+                        <p class="missed">❌ لم يتم (80%)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 8: Conclusion -->
+            <section>
+                <h2>💡 الخلاصة</h2>
+                <div class="highlight-box">
+                    <ul>
+                        <li>🇸🇦 برنامج حكومي وطني يدعم الاقتصاد</li>
+                        <li>💼 فرصة ذهبية للمنشآت الصغيرة والمتوسطة</li>
+                        <li>📈 ساهم في دعم أكثر من 26,500 منشأة</li>
+                        <li>🎯 تحقيق أهداف رؤية 2030</li>
+                    </ul>
+                </div>
+                <h3 style="margin-top: 30px;">شكراً لتواصلكم 💙</h3>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/notes/notes.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            rtl: true,
+            slideNumber: 'c/t',
+            plugins: [RevealNotes],
+            transition: 'slide',
+            backgroundTransition: 'zoom'
+        });
+    </script>
+</body>
+</html>

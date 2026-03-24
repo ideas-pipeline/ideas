@@ -1,0 +1,161 @@
+{
+  "timestamp": "2026-03-24T02:27:44Z",
+  "system": {
+    "uptimeDays": 0.97,
+    "memUsedGB": 1.361,
+    "memTotalGB": 7.941,
+    "loadAvg": [0, 0.01, 0],
+    "nodeVersion": "v25.8.1"
+  },
+  "services": {
+    "Gateway": {
+      "status": "running",
+      "details": "Service active on port 48100"
+    },
+    "Telegram Bot": {
+      "status": "running",
+      "details": "Bot polling active"
+    },
+    "Ideas API": {
+      "status": "running",
+      "details": "API server active"
+    }
+  },
+  "resources": {
+    "uptime": 83891,
+    "uptimeStr": "up 23 hours, 16 minutes",
+    "memUsed": 1361,
+    "memTotal": 7941,
+    "loadAvg": [0, 0.01, 0],
+    "memPercent": 17,
+    "diskPercent": 0,
+    "nodeVersion": "v25.8.1"
+  },
+  "cronJobs": [
+    {
+      "id": "morning-executive",
+      "name": "التقرير التنفيذي الصباحي",
+      "lastRun": "2026-03-23T04:30:00.012Z",
+      "lastDuration": 140,
+      "lastStatus": "ok",
+      "consecutiveErrors": 0,
+      "error": null,
+      "nextRun": "2026-03-24T04:30:00.000Z"
+    },
+    {
+      "id": "economic-report",
+      "name": "التقرير الاقتصادي",
+      "lastRun": "2026-03-23T05:15:00.010Z",
+      "lastDuration": 23,
+      "lastStatus": "ok",
+      "consecutiveErrors": 0,
+      "error": null,
+      "nextRun": "2026-03-24T05:15:00.000Z"
+    },
+    {
+      "id": "tech-report",
+      "name": "تقرير Moltbook + GitHub",
+      "lastRun": "2026-03-23T09:00:00.016Z",
+      "lastDuration": 6,
+      "lastStatus": "ok",
+      "consecutiveErrors": 0,
+      "error": null,
+      "nextRun": "2026-03-24T09:00:00.000Z"
+    },
+    {
+      "id": "evening-summary",
+      "name": "ملخص نهاية اليوم",
+      "lastRun": "2026-03-23T18:00:00.008Z",
+      "lastDuration": 38,
+      "lastStatus": "ok",
+      "consecutiveErrors": 0,
+      "error": null,
+      "nextRun": "2026-03-24T18:00:00.000Z"
+    },
+    {
+      "id": "dd4121e0-9841-4191-9065-73480fe9e91b",
+      "name": "📈 تحديث الأسهم (صباحي 11:30)",
+      "lastRun": "2026-03-23T08:30:00.008Z",
+      "lastDuration": 517,
+      "lastStatus": "ok",
+      "consecutiveErrors": 0,
+      "error": null,
+      "nextRun": "2026-03-24T08:30:00.000Z"
+    },
+    {
+      "id": "80c04bd1-8be8-4888-b869-7aeface7eed0",
+      "name": "📈 تحديث الأسهم (عصري 3:50)",
+      "lastRun": "2026-03-23T12:50:00.014Z",
+      "lastDuration": 32,
+      "lastStatus": "ok",
+      "consecutiveErrors": 0,
+      "error": null,
+      "nextRun": "2026-03-24T12:50:00.000Z"
+    },
+    {
+      "id": "49363816-65b2-40cb-a932-4eb21e249dd6",
+      "name": "📊 تحديث القوائم المالية (أسبوعي)",
+      "lastRun": "2026-03-23T02:07:32.556Z",
+      "lastDuration": 1,
+      "lastStatus": "error",
+      "consecutiveErrors": 2,
+      "error": "HTTP 401 authentication_error: invalid api key",
+      "nextRun": "2026-03-27T00:00:00.000Z"
+    },
+    {
+      "id": "b6cc8cf9-b03f-47bb-9bdc-6bdd2260098f",
+      "name": "💡 تغذية الاقتراحات",
+      "lastRun": "2026-03-23T03:00:00.010Z",
+      "lastDuration": 2,
+      "lastStatus": "error",
+      "consecutiveErrors": 2,
+      "error": "HTTP 401 authentication_error: invalid api key",
+      "nextRun": "2026-03-24T03:00:00.000Z"
+    },
+    {
+      "id": "vc-weekly-scan",
+      "name": "📊 تحديث سيف للاستثمار الجريء (أسبوعي)",
+      "lastRun": "2026-03-23T14:00:00.016Z",
+      "lastDuration": 104,
+      "lastStatus": "ok",
+      "consecutiveErrors": 0,
+      "error": null,
+      "nextRun": "2026-03-30T14:00:00.000Z"
+    }
+  ],
+  "agents": {
+    "lastUpdated": "2026-03-24T02:27:44Z",
+    "agents": [
+      {
+        "name": "فهد (Mini-Agent)",
+        "model": "MiniMax M2.5",
+        "role": "المساعد الحالي — إصلاح المنصات، تحليل الأخطاء، مهام سريعة",
+        "emoji": "⚡",
+        "status": "busy",
+        "currentTask": "إصلاح Mission Control",
+        "stats": {
+          "totalCost": 11,
+          "costToday": 0.5,
+          "totalRequests": 1423
+        }
+      },
+      {
+        "name": "هادي (OpenClaw)",
+        "model": "Claude Sonnet 4.5",
+        "role": "الوكيل الرئيسي — إدارة + تنسيق + رد على سلطان + Night Build",
+        "emoji": "👑",
+        "status": "active",
+        "currentTask": "إدارة النظام + Night Build",
+        "stats": {
+          "totalCost": 120.5,
+          "costToday": 8.4,
+          "totalRequests": 450
+        }
+      }
+    ]
+  },
+  "totals": {
+    "activeSessions": 0,
+    "totalRequests": 0
+  }
+}

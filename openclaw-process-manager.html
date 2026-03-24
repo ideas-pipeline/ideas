@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Process Manager ⚙️</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 16px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: #58a6ff;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .stat {
+            background: #161b22;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-num { font-size: 1.5rem; font-weight: bold; }
+        .stat-label { font-size: 0.75rem; color: #8b949e; }
+        .stat.active .stat-num { color: #3fb950; }
+        .stat.warning .stat-num { color: #f85149; }
+        .stat.idle .stat-num { color: #8b949e; }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .processes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .process-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            transition: border-color 0.2s;
+        }
+        .process-card:hover { border-color: #58a6ff; }
+        
+        .process-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .process-title {
+            display: flex;
+            flex-direction: column;
+        }
+        .process-name { font-weight: 600; font-size: 1rem; }
+        .process-id { font-family: monospace; font-size: 0.7rem; color: #8b949e; }
+        
+        .process-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .meta-item {
+            background: #0d1117;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .meta-label { font-size: 0.7rem; color: #8b949e; display: block; margin-bottom: 2px; }
+        .meta-value { font-size: 0.85rem; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-badge.running { background: #238636; color: #fff; }
+        .status-badge.idle { background: #484f58; color: #fff; }
+        .status-badge.sleeping { background: #1f6feb; color: #fff; }
+        .status-badge.zombie { background: #f85149; color: #fff; }
+        
+        .process-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        button:hover:not(:disabled) { background: #30363d; border-color: #58a6ff; }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        button.kill-btn { background: #da3633; border-color: #da3633; }
+        button.kill-btn:hover:not(:disabled) { background: #f85149; }
+        button.run-btn { background: #238636; border-color: #238636; }
+        button.run-btn:hover:not(:disabled) { background: #2ea043; }
+        
+        .command-log {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #30363d;
+        }
+        .command-log-title { font-size: 0.75rem; color: #8b949e; margin-bottom: 6px; }
+        .command-text {
+            background: #0d1117;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #79c0ff;
+            word-break: break-all;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f6feb;
+            border-color: #1f6feb;
+            padding: 10px 24px;
+            font-size: 0.9rem;
+        }
+        .refresh-btn:hover:not(:disabled) { background: #388bfd; }
+        
+        .last-updated {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #8b949e;
+            margin-top: 16px;
+        }
+        
+        .error-msg {
+            color: #f85149;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+        
+        .spawn-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .spawn-modal.show { display: flex; }
+        
+        .spawn-form {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: #58a6ff;
+            outline: none;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8b949e;
+        }
+        
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .process-meta { grid-template-columns: 1fr 1fr; }
+            .process-header { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <h1>⚙️ OpenClaw Process Manager</h1>
+    
+    <div class="stats" id="stats"></div>
+    
+    <div class="controls">
+        <button class="run-btn" onclick="openSpawnModal()">➕ تشغيل عملية جديدة</button>
+    </div>
+    
+    <div class="processes-container" id="processes"></div>
+    
+    <button class="refresh-btn" onclick="loadData()">🔄 تحديث</button>
+    <div class="last-updated" id="lastUpdated"></div>
+
+    <div class="spawn-modal" id="spawnModal">
+        <div class="spawn-form">
+            <h2 style="margin-bottom: 16px; color: #58a6ff;">تشغيل عملية جديدة</h2>
+            <div class="form-group">
+                <label class="form-label">الأمر (Command)</label>
+                <input type="text" id="spawnCommand" placeholder="مثال: npm start" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">المسار (Working Directory)</label>
+                <input type="text" id="spawnDir" placeholder="مثال: /data/project" value="/data/.openclaw/workspace" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">البيئة (Environment)</label>
+                <textarea id="spawnEnv" placeholder="KEY=value&#10;KEY2=value2"></textarea>
+            </div>
+            <div class="form-actions">
+                <button onclick="closeSpawnModal()">إلغاء</button>
+                <button class="run-btn" onclick="spawnProcess()">تشغيل</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let processesData = [];
+        
+        async function loadData() {
+            try {
+                // Get process list using OpenClaw CLI
+                const result = await fetch('/api/exec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: 'openclaw process list --json' })
+                });
+                
+                if (!result.ok) {
+                    // Fallback: run via exec
+                    console.log('Fallback to exec');
+                    loadDataFromExec();
+                    return;
+                }
+                
+                const data = await result.json();
+                processesData = data.processes || [];
+                
+                render();
+                document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA');
+            } catch (e) {
+                console.error('Error loading:', e);
+                loadDataFromExec();
+            }
+        }
+        
+        async function loadDataFromExec() {
+            // Fallback: try to parse from local storage or display message
+            try {
+                const response = await executeCommand('openclaw process list --json');
+                if (response) {
+                    processesData = JSON.parse(response).processes || [];
+                    render();
+                }
+            } catch (e) {
+                console.error('Error:', e);
+                showError('لا يمكن الوصول إلى قائمة العمليات. تأكد من تشغيل OpenClaw.');
+            }
+        }
+        
+        async function executeCommand(cmd) {
+            // This would typically communicate with a backend
+            // For now, store processes in sessionStorage for demo
+            return null;
+        }
+        
+        function getStatusClass(state) {
+            const stateStr = (state || '').toUpperCase();
+            if (stateStr.includes('R')) return 'running';
+            if (stateStr.includes('S')) return 'sleeping';
+            if (stateStr.includes('Z')) return 'zombie';
+            if (stateStr.includes('T')) return 'idle';
+            return 'idle';
+        }
+        
+        function formatUptime(seconds) {
+            if (!seconds || seconds < 0) return '-';
+            if (seconds < 60) return Math.floor(seconds) + 's';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm';
+            return Math.floor(seconds / 3600) + 'h ' + Math.floor((seconds % 3600) / 60) + 'm';
+        }
+        
+        function formatMemory(bytes) {
+            if (!bytes) return '-';
+            if (bytes < 1024) return bytes + 'B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+        }
+        
+        function render() {
+            const processes = processesData || [];
+            const running = processes.filter(p => getStatusClass(p.state) === 'running').length;
+            const sleeping = processes.filter(p => getStatusClass(p.state) === 'sleeping').length;
+            const zombie = processes.filter(p => getStatusClass(p.state) === 'zombie').length;
+            
+            document.getElementById('stats').innerHTML = `
+                <div class="stat"><div class="stat-num">${processes.length}</div><div class="stat-label">الإجمالي</div></div>
+                <div class="stat active"><div class="stat-num">${running}</div><div class="stat-label">نشط</div></div>
+                <div class="stat idle"><div class="stat-num">${sleeping}</div><div class="stat-label">نائم</div></div>
+                <div class="stat warning"><div class="stat-num">${zombie}</div><div class="stat-label">زومبي</div></div>
+            `;
+            
+            if (processes.length === 0) {
+                document.getElementById('processes').innerHTML = `
+                    <div class="empty-state">
+                        <p>لا توجد عمليات قيد التشغيل</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            document.getElementById('processes').innerHTML = processes.map(p => {
+                const statusClass = getStatusClass(p.state);
+                const statusText = {
+                    'running': 'قيد التشغيل',
+                    'sleeping': 'نائم',
+                    'zombie': 'زومبي',
+                    'idle': 'معطل'
+                }[statusClass] || p.state;
+                
+                return `
+                <div class="process-card">
+                    <div class="process-header">
+                        <div class="process-title">
+                            <div class="process-name">${p.name || p.command || 'عملية'}</div>
+                            <div class="process-id">PID: ${p.pid}</div>
+                        </div>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="process-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">PID</span>
+                            <div class="meta-value">${p.pid}</div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">المستخدم</span>
+                            <div class="meta-value">${p.user || '-'}</div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">الذاكرة</span>
+                            <div class="meta-value">${formatMemory(p.memory)}</div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">CPU %</span>
+                            <div class="meta-value">${(p.cpu || 0).toFixed(1)}%</div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">زمن التشغيل</span>
+                            <div class="meta-value">${formatUptime(p.uptime)}</div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">الحالة</span>
+                            <div class="meta-value">${p.state || '-'}</div>
+                        </div>
+                    </div>
+                    ${p.command ? `
+                        <div class="command-log">
+                            <div class="command-log-title">الأمر:</div>
+                            <div class="command-text">${escapeHtml(p.command)}</div>
+                        </div>
+                    ` : ''}
+                    <div class="process-actions">
+                        <button class="kill-btn" onclick="killProcess(${p.pid}, '${escapeHtml(p.name || p.command || 'العملية')}')">🛑 إيقاف (kill)</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+        
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        async function killProcess(pid, name) {
+            if (!confirm(`هل تريد إيقاف العملية: ${name} (PID: ${pid})?`)) return;
+            
+            try {
+                const result = await fetch('/api/exec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: `openclaw process kill ${pid}` })
+                });
+                
+                const data = await result.json();
+                if (data.status === 'ok' || data.success) {
+                    alert('✅ تم إيقاف العملية بنجاح');
+                    setTimeout(loadData, 500);
+                } else {
+                    alert('❌ خطأ: ' + (data.message || data.error || 'غير معروف'));
+                }
+            } catch (e) {
+                alert('❌ خطأ في الاتصال: ' + e.message);
+            }
+        }
+        
+        function openSpawnModal() {
+            document.getElementById('spawnModal').classList.add('show');
+        }
+        
+        function closeSpawnModal() {
+            document.getElementById('spawnModal').classList.remove('show');
+            document.getElementById('spawnCommand').value = '';
+            document.getElementById('spawnEnv').value = '';
+        }
+        
+        async function spawnProcess() {
+            const command = document.getElementById('spawnCommand').value.trim();
+            const dir = document.getElementById('spawnDir').value.trim();
+            const env = document.getElementById('spawnEnv').value.trim();
+            
+            if (!command) {
+                alert('❌ يرجى إدخال الأمر');
+                return;
+            }
+            
+            try {
+                const result = await fetch('/api/exec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        command: 'openclaw process spawn',
+                        name: command,
+                        workdir: dir || undefined,
+                        env: env ? Object.fromEntries(env.split('\n').filter(l => l.includes('=')).map(l => l.split('='))) : undefined
+                    })
+                });
+                
+                const data = await result.json();
+                if (data.status === 'ok' || data.pid) {
+                    alert(`✅ تم تشغيل العملية: PID ${data.pid}`);
+                    closeSpawnModal();
+                    setTimeout(loadData, 500);
+                } else {
+                    alert('❌ خطأ: ' + (data.message || data.error || 'غير معروف'));
+                }
+            } catch (e) {
+                alert('❌ خطأ في الاتصال: ' + e.message);
+            }
+        }
+        
+        function showError(msg) {
+            document.getElementById('processes').innerHTML = `<div class="empty-state"><p style="color: #f85149;">${msg}</p></div>`;
+        }
+        
+        // Close modal on background click
+        document.getElementById('spawnModal').addEventListener('click', (e) => {
+            if (e.target.id === 'spawnModal') closeSpawnModal();
+        });
+        
+        // Initial load
+        loadData();
+        
+        // Auto-refresh every 10 seconds
+        setInterval(loadData, 10000);
+    </script>
+</body>
+</html>

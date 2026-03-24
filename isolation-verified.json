@@ -1,0 +1,127 @@
+{
+  "auditInfo": {
+    "date": "2026-03-24",
+    "auditor": "Mini-Agent",
+    "status": "PASSED",
+    "timestamp": "2026-03-24T04:59:00Z"
+  },
+  "scope": {
+    "scriptsChecked": 29,
+    "cronJobsVerified": 8,
+    "criticalPathsAudited": 6
+  },
+  "findings": {
+    "potentialConflicts": 0,
+    "unauthorizedWrites": 0,
+    "legitimateUpdaters": 2
+  },
+  "criticalPaths": {
+    "/data/.openclaw/workspace/ideas-site/": {
+      "status": "ISOLATED",
+      "missionControlFiles": {
+        "mission-control.html": {
+          "status": "PROTECTED",
+          "writes": "NONE (static file)"
+        },
+        "dashboard-data.json": {
+          "status": "PROTECTED",
+          "writes": "update-dashboard.sh (LEGITIMATE)"
+        },
+        "agents-status.json": {
+          "status": "PROTECTED",
+          "writes": "update-agents-status.sh (LEGITIMATE)"
+        },
+        "system-health-dashboard.json": {
+          "status": "PROTECTED",
+          "writes": "NONE (static file)"
+        },
+        "system-health.json": {
+          "status": "PROTECTED",
+          "writes": "NONE (live generated)"
+        }
+      }
+    },
+    "/data/.openclaw/workspace/ideas.json": {
+      "status": "PROTECTED",
+      "writes": [
+        "add-ideas.sh (LEGITIMATE)",
+        "idea-actions.sh (LEGITIMATE)",
+        "ideas-api/server.js (LEGITIMATE)",
+        "explain-watcher.sh (LEGITIMATE, copies from ideas-site)"
+      ],
+      "bypassRisk": "NONE"
+    },
+    "/data/.openclaw/workspace/ideas-api/": {
+      "status": "ISOLATED",
+      "files": {
+        "suggestions.json": "fetch-ideas-sources.sh (ISOLATED)",
+        "server.js": "API server (ISOLATED)"
+      }
+    },
+    "/data/.openclaw/cron/": {
+      "status": "ISOLATED",
+      "note": "NO script writes directly to this path"
+    },
+    "/data/.openclaw/night-builds/": {
+      "status": "ISOLATED",
+      "exists": true,
+      "purpose": "Agent night builds output"
+    },
+    "/data/.openclaw/mission-memory/": {
+      "status": "ISOLATED",
+      "exists": true,
+      "purpose": "Agent memory files"
+    }
+  },
+  "legitimateUpdaters": {
+    "update-dashboard.sh": {
+      "path": "/data/.openclaw/workspace/scripts/update-dashboard.sh",
+      "writes": [
+        "/data/.openclaw/workspace/ideas-site/dashboard-data.json",
+        "/data/.openclaw/workspace/ideas-site/agents-status.json"
+      ],
+      "purpose": "Update Mission Control dashboard data",
+      "authorized": true
+    },
+    "update-agents-status.sh": {
+      "path": "/data/.openclaw/workspace/scripts/update-agents-status.sh",
+      "writes": [
+        "/data/.openclaw/workspace/ideas-site/agents-status.json"
+      ],
+      "purpose": "Update agent status for Mission Control",
+      "authorized": true
+    }
+  },
+  "cronJobsIsolation": {
+    "allUseIsolatedSession": true,
+    "jobsCount": 8,
+    "noneWriteToIdeasSite": true,
+    "noneWriteToMissionControl": true,
+    "jobs": [
+      "morning-executive",
+      "economic-report",
+      "tech-report",
+      "evening-summary",
+      "stocks-morning-update",
+      "stocks-afternoon-update",
+      "vc-weekly-scan",
+      "ai-agent-skills-research"
+    ]
+  },
+  "apiIntegrity": {
+    "status": "VERIFIED",
+    "ideasJsonWritesViaApi": true,
+    "missionControlDataViaApi": true,
+    "authenticationEnforced": true,
+    "isolatedPaths": [
+      "/data/.openclaw/night-builds/",
+      "/data/.openclaw/mission-memory/"
+    ]
+  },
+  "conclusion": {
+    "missionControlFullyIsolated": true,
+    "noBypassRisk": true,
+    "zeroConflicts": true,
+    "recommendation": "APPROVED - Mission Control is properly isolated"
+  }
+}

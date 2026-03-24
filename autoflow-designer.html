@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoFlow Designer 🎯</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+        
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-dim: #8b949e;
+            --accent: #58a6ff;
+            --accent-dim: #1f6feb;
+            --green: #3fb950;
+            --orange: #d29922;
+            --red: #f85149;
+            --purple: #a371f7;
+            --pink: #db61a2;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: gap: 12px;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        button {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: var(--border);
+            border-color: var(--accent);
+        }
+        
+        button.primary {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+        }
+        
+        button.primary:hover {
+            background: var(--accent);
+            color: var(--bg);
+        }
+        
+        button.danger {
+            border-color: var(--red);
+            color: var(--red);
+        }
+        
+        button.danger:hover {
+            background: var(--red);
+            color: white;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr 260px;
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .panel h2 {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .flow-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .flow-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .flow-item:hover {
+            border-color: var(--accent);
+        }
+        
+        .flow-item.active {
+            border-color: var(--accent);
+            background: rgba(88, 166, 255, 0.1);
+        }
+        
+        .flow-item h3 {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        
+        .flow-item .meta {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+        
+        .flow-canvas {
+            min-height: 500px;
+            position: relative;
+            overflow: auto;
+        }
+        
+        .empty-canvas {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            color: var(--text-dim);
+            text-align: center;
+        }
+        
+        .empty-canvas svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .flow-node {
+            position: absolute;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            min-width: 180px;
+            cursor: move;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .flow-node:hover {
+            border-color: var(--accent);
+        }
+        
+        .flow-node.trigger {
+            border-color: var(--green);
+        }
+        
+        .flow-node.action {
+            border-color: var(--purple);
+        }
+        
+        .flow-node.condition {
+            border-color: var(--orange);
+        }
+        
+        .flow-node .node-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .flow-node .node-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        
+        .flow-node.trigger .node-icon {
+            background: rgba(63, 185, 80, 0.2);
+        }
+        
+        .flow-node.action .node-icon {
+            background: rgba(163, 113, 247, 0.2);
+        }
+        
+        .flow-node.condition .node-icon {
+            background: rgba(210, 153, 34, 0.2);
+        }
+        
+        .flow-node .node-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .flow-node .node-body {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+        
+        .flow-node .node-delete {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: var(--red);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .flow-node:hover .node-delete {
+            display: flex;
+        }
+        
+        .connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .connections path {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 2;
+            opacity: 0.5;
+        }
+        
+        .add-node-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .add-node-btns button {
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .templates {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .template-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .template-item:hover {
+            border-color: var(--green);
+        }
+        
+        .template-item h4 {
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+        
+        .template-item p {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+        
+        .node-config {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .node-config.active {
+            display: flex;
+        }
+        
+        .node-config-content {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .node-config-content h3 {
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .config-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--green);
+            color: var(--bg);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transform: translateY(100px);
+            transition: transform 0.3s;
+            z-index: 2000;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+        }
+        
+        .flow-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .stat {
+            background: var(--bg);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+        
+        .help-text {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 8px;
+            padding: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+        }
+        
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            background: var(--card);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        
+        .export-json {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+            font-family: monospace;
+            font-size: 0.7rem;
+            white-space: pre-wrap;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .export-json.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 AutoFlow Designer</h1>
+        <div class="header-actions">
+            <button onclick="exportFlows()">📤 تصدير</button>
+            <button onclick="importFlows()">📥 استيراد</button>
+            <button class="primary" onclick="createNewFlow()">+ تدفق جديد</button>
+        </div>
+    </div>
+    
+    <div class="main-grid">
+        <div class="panel">
+            <h2>التدفقات</h2>
+            <div class="flow-list" id="flowList"></div>
+            
+            <h2 style="margin-top: 24px;">القوالب</h2>
+            <div class="templates">
+                <div class="template-item" onclick="loadTemplate('gmailnotify')">
+                    <h4>📧 Gmail → إشعار</h4>
+                    <p>عندما يوصل إيميل جديد أرسل إشعار</p>
+                </div>
+                <div class="template-item" onclick="loadTemplate('daily')">
+                    <h4>⏰ تذكير يومي</h4>
+                    <p>كل يوم في وقت محدد رحّل تذكير</p>
+                </div>
+                <div class="template-item" onclick="loadTemplate('monitor')">
+                    <h4>📊 مراقبة نظام</h4>
+                    <p>افحص حالة النظام دورياً</p>
+                </div>
+                <div class="template-item" onclick="loadTemplate('backup')">
+                    <h4>💾 نسخة احتياطية</h4>
+                    <p>انسخ الملفات تلقائياً</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel flow-canvas" id="flowCanvas">
+            <div class="empty-canvas" id="emptyCanvas">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <p>اختر تدفق أو أنشئ جديد</p>
+            </div>
+            <svg class="connections" id="connections"></svg>
+            <div id="nodesContainer"></div>
+            
+            <div class="add-node-btns" id="addNodeBtns" style="display: none;">
+                <button onclick="addNode('trigger')">+ محفز</button>
+                <button onclick="addNode('action')">+ إجراء</button>
+                <button onclick="addNode('condition')">+ شرط</button>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>الإعدادات</h2>
+            <div class="flow-stats" id="flowStats">
+                <div class="stat">
+                    <div class="stat-value" id="nodeCount">0</div>
+                    <div class="stat-label">العقد</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="connCount">0</div>
+                    <div class="stat-label">الروابط</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>اسم التدفق</label>
+                <input type="text" id="flowName" onchange="updateFlowName()">
+            </div>
+            
+            <div class="form-group">
+                <label>الوصف</label>
+                <textarea id="flowDesc" onchange="updateFlowDesc()"></textarea>
+            </div>
+            
+            <div class="help-text" id="flowHelp">
+                اسحب العقد لتعديل موقعها<br>
+                اضغط على عقدة لتعديل إعداداتها<br>
+                احذف عقدة بالضغط على ×
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button class="danger" style="width: 100%;" onclick="deleteFlow()">🗑️ حذف التدفق</button>
+            </div>
+            
+            <button style="width: 100%; margin-top: 8px;" onclick="toggleExport()">📋 عرض JSON</button>
+            <div class="export-json" id="exportJson"></div>
+        </div>
+    </div>
+    
+    <div class="node-config" id="nodeConfig">
+        <div class="node-config-content">
+            <h3 id="configTitle">إعدادات العقدة</h3>
+            
+            <div class="form-group">
+                <label>الاسم</label>
+                <input type="text" id="nodeName">
+            </div>
+            
+            <div class="form-group" id="nodeTypeGroup">
+                <label>نوع المحفز</label>
+                <select id="nodeType">
+                    <option value="schedule">⏰ مؤقت (كل ساعة/يوم)</option>
+                    <option value="webhook">🌐 Webhook</option>
+                    <option value="api">🔗 استدعاء API</option>
+                    <option value="manual">👆 يدوي</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="actionTypeGroup" style="display: none;">
+                <label>نوع الإجراء</label>
+                <select id="actionType">
+                    <option value="notification">🔔 إرسال إشعار</option>
+                    <option value="email">📧 إرسال إيميل</option>
+                    <option value="api">🔗 استدعاء API</option>
+                    <option value="log">📝 تسجيل</option>
+                    <option value="telegram">✈️ Telegram</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="conditionTypeGroup" style="display: none;">
+                <label>نوع الشرط</label>
+                <select id="conditionType">
+                    <option value="equals">تساوي (==)</option>
+                    <option value="contains">يحتوي</option>
+                    <option value="greater">أكبر من</option>
+                    <option value="less">أقل من</option>
+                    <option value="regex">تعبير منتظم</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="valueGroup">
+                <label>القيمة / الإعدادات</label>
+                <textarea id="nodeValue" placeholder="URL, JSON, أو نص..."></textarea>
+            </div>
+            
+            <div class="form-group" id="headersGroup">
+                <label>Headers (اختياري)</label>
+                <textarea id="nodeHeaders" placeholder='{"Authorization": "Bearer ..."}'></textarea>
+            </div>
+            
+            <div class="config-actions">
+                <button class="primary" onclick="saveNodeConfig()">حفظ</button>
+                <button onclick="closeNodeConfig()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+    
+    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport(event)">
+    
+    <div class="toast" id="toast">تم الحفظ ✅</div>
+    <div class="keyboard-hint">⌨️ اسحب العقد • اضغط للتعديل</div>
+
+    <script>
+        let flows = [];
+        let currentFlow = null;
+        let editingNode = null;
+        let draggedNode = null;
+        let dragOffset = { x: 0, y: 0 };
+        
+        // تحميل من localStorage
+        function loadFlows() {
+            const saved = localStorage.getItem('autoflows');
+            if (saved) {
+                flows = JSON.parse(saved);
+            } else {
+                flows = [];
+            }
+            renderFlowList();
+        }
+        
+        // حفظ في localStorage
+        function saveFlows() {
+            localStorage.setItem('autoflows', JSON.stringify(flows));
+            showToast();
+        }
+        
+        // عرض قائمة التدفقات
+        function renderFlowList() {
+            const list = document.getElementById('flowList');
+            list.innerHTML = flows.map((f, i) => `
+                <div class="flow-item ${currentFlow === i ? 'active' : ''}" onclick="selectFlow(${i})">
+                    <h3>${f.name}</h3>
+                    <div class="meta">${f.nodes.length} عقد • ${f.connections.length} روابط</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('nodeCount').textContent = currentFlow !== null ? flows[currentFlow]?.nodes.length || 0 : 0;
+            document.getElementById('connCount').textContent = currentFlow !== null ? flows[currentFlow]?.connections.length || 0 : 0;
+        }
+        
+        // اختيار تدفق
+        function selectFlow(index) {
+            currentFlow = index;
+            renderFlowList();
+            renderCanvas();
+        }
+        
+        // إنشاء تدفق جديد
+        function createNewFlow() {
+            flows.push({
+                name: 'تدفق جديد',
+                description: '',
+                nodes: [],
+                connections: []
+            });
+            currentFlow = flows.length - 1;
+            renderFlowList();
+            renderCanvas();
+            document.getElementById('flowName').focus();
+        }
+        
+        // تحديث اسم التدفق
+        function updateFlowName() {
+            if (currentFlow !== null) {
+                flows[currentFlow].name = document.getElementById('flowName').value;
+                saveFlows();
+                renderFlowList();
+            }
+        }
+        
+        // تحديث وصف التدفق
+        function updateFlowDesc() {
+            if (currentFlow !== null) {
+                flows[currentFlow].description = document.getElementById('flowDesc').value;
+                saveFlows();
+            }
+        }
+        
+        // حذف التدفق
+        function deleteFlow() {
+            if (currentFlow !== null && confirm('هل أنت متأكد من حذف هذا التدفق؟')) {
+                flows.splice(currentFlow, 1);
+                currentFlow = null;
+                renderFlowList();
+                renderCanvas();
+            }
+        }
+        
+        // عرض الـ Canvas
+        function renderCanvas() {
+            const empty = document.getElementById('emptyCanvas');
+            const nodesContainer = document.getElementById('nodesContainer');
+            const addBtns = document.getElementById('addNodeBtns');
+            const conns = document.getElementById('connections');
+            
+            if (currentFlow === null) {
+                empty.style.display = 'flex';
+                nodesContainer.innerHTML = '';
+                addBtns.style.display = 'none';
+                document.getElementById('flowName').value = '';
+                document.getElementById('flowDesc').value = '';
+                document.getElementById('flowStats').style.display = 'none';
+                document.getElementById('exportJson').classList.remove('show');
+                return;
+            }
+            
+            document.getElementById('flowStats').style.display = 'grid';
+            empty.style.display = 'none';
+            addBtns.style.display = 'flex';
+            
+            const flow = flows[currentFlow];
+            document.getElementById('flowName').value = flow.name;
+            document.getElementById('flowDesc').value = flow.description || '';
+            
+            // عرض العقد
+            nodesContainer.innerHTML = flow.nodes.map((node, i) => {
+                const icon = node.type === 'trigger' ? '⚡' : node.type === 'action' ? '🔧' : '❓';
+                const label = node.type === 'trigger' ? 'محفز' : node.type === 'action' ? 'إجراء' : 'شرط';
+                return `
+                <div class="flow-node ${node.type}" 
+                     style="left: ${node.x}px; top: ${node.y}px;"
+                     data-index="${i}"
+                     onmousedown="startDrag(event, ${i})"
+                     onclick="editNode(${i}, event)">
+                    <div class="node-delete" onclick="deleteNode(${i}, event)">×</div>
+                    <div class="node-header">
+                        <div class="node-icon">${icon}</div>
+                        <div class="node-title">${node.name}</div>
+                    </div>
+                    <div class="node-body">${node.subtype || node.type}</div>
+                </div>
+            `}).join('');
+            
+            // رسم الروابط
+            drawConnections();
+            
+            // تحديث JSON
+            document.getElementById('exportJson').textContent = JSON.stringify(flow, null, 2);
+        }
+        
+        // رسم الروابط
+        function drawConnections() {
+            const svg = document.getElementById('connections');
+            const flow = flows[currentFlow];
+            
+            let paths = '';
+            flow.connections.forEach(conn => {
+                const from = flow.nodes[conn.from];
+                const to = flow.nodes[conn.to];
+                if (from && to) {
+                    const x1 = from.x + 90;
+                    const y1 = from.y + 40;
+                    const x2 = to.x + 90;
+                    const y2 = to.y + 40;
+                    const cx = (x1 + x2) / 2;
+                    paths += `<path d="M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}" />`;
+                }
+            });
+            
+            svg.innerHTML = paths;
+        }
+        
+        // إضافة عقدة
+        function addNode(type) {
+            const flow = flows[currentFlow];
+            const y = 50 + flow.nodes.length * 80;
+            
+            flow.nodes.push({
+                type: type,
+                name: type === 'trigger' ? 'محفز جديد' : type === 'action' ? 'إجراء جديد' : 'شرط جديد',
+                subtype: type,
+                x: 50,
+                y: y,
+                config: {}
+            });
+            
+            saveFlows();
+            renderCanvas();
+            renderFlowList();
+        }
+        
+        // حذف عقدة
+        function deleteNode(index, event) {
+            event.stopPropagation();
+            const flow = flows[currentFlow];
+            flow.nodes.splice(index, 1);
+            // حذف الروابط المرتبطة
+            flow.connections = flow.connections.filter(c => c.from !== index && c.to !== index);
+            // تحديث مؤشرات الروابط
+            flow.connections = flow.connections.map(c => ({
+                from: c.from > index ? c.from - 1 : c.from,
+                to: c.to > index ? c.to - 1 : c.to
+            }));
+            saveFlows();
+            renderCanvas();
+            renderFlowList();
+        }
+        
+        // تعديل العقدة
+        function editNode(index, event) {
+            event.stopPropagation();
+            editingNode = index;
+            const node = flows[currentFlow].nodes[index];
+            
+            document.getElementById('configTitle').textContent = `تعديل ${node.name}`;
+            document.getElementById('nodeName').value = node.name;
+            document.getElementById('nodeValue').value = node.config?.value || '';
+            document.getElementById('nodeHeaders').value = node.config?.headers || '';
+            
+            // إظهار الحقول المناسبة
+            document.getElementById('nodeTypeGroup').style.display = node.type === 'trigger' ? 'block' : 'none';
+            document.getElementById('actionTypeGroup').style.display = node.type === 'action' ? 'block' : 'none';
+            document.getElementById('conditionTypeGroup').style.display = node.type === 'condition' ? 'block' : 'none';
+            document.getElementById('valueGroup').style.display = 'block';
+            
+            if (node.type === 'trigger') {
+                document.getElementById('nodeType').value = node.subtype || 'schedule';
+            }
+            if (node.type === 'action') {
+                document.getElementById('actionType').value = node.subtype || 'notification';
+            }
+            if (node.type === 'condition') {
+                document.getElementById('conditionType').value = node.subtype || 'equals';
+            }
+            
+            document.getElementById('nodeConfig').classList.add('active');
+        }
+        
+        // حفظ إعدادات العقدة
+        function saveNodeConfig() {
+            const node = flows[currentFlow].nodes[editingNode];
+            node.name = document.getElementById('nodeName').value;
+            
+            if (node.type === 'trigger') {
+                node.subtype = document.getElementById('nodeType').value;
+            } else if (node.type === 'action') {
+                node.subtype = document.getElementById('actionType').value;
+            } else if (node.type === 'condition') {
+                node.subtype = document.getElementById('conditionType').value;
+            }
+            
+            node.config = {
+                value: document.getElementById('nodeValue').value,
+                headers: document.getElementById('nodeHeaders').value
+            };
+            
+            closeNodeConfig();
+            saveFlows();
+            renderCanvas();
+        }
+        
+        // إغلاق نافذة الإعدادات
+        function closeNodeConfig() {
+            document.getElementById('nodeConfig').classList.remove('active');
+            editingNode = null;
+        }
+        
+        // سحب العقد
+        function startDrag(event, index) {
+            if (event.target.classList.contains('node-delete')) return;
+            
+            draggedNode = index;
+            const node = flows[currentFlow].nodes[index];
+            const rect = event.target.getBoundingClientRect();
+            dragOffset.x = event.clientX - rect.left;
+            dragOffset.y = event.clientY - rect.top;
+            
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+        
+        function onDrag(event) {
+            if (draggedNode === null) return;
+            
+            const canvas = document.getElementById('flowCanvas');
+            const rect = canvas.getBoundingClientRect();
+            
+            const x = event.clientX - rect.left - dragOffset.x;
+            const y = event.clientY - rect.top - dragOffset.y;
+            
+            flows[currentFlow].nodes[draggedNode].x = Math.max(0, x);
+            flows[currentFlow].nodes[draggedNode].y = Math.max(0, y);
+            
+            renderCanvas();
+        }
+        
+        function stopDrag() {
+            if (draggedNode !== null) {
+                saveFlows();
+            }
+            draggedNode = null;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+        
+        // تحميل قالب
+        function loadTemplate(type) {
+            const templates = {
+                gmailnotify: {
+                    name: 'Gmail إشعار',
+                    description: 'عندما يوصل إيميل جديد أرسل إشعار',
+                    nodes: [
+                        { type: 'trigger', name: 'إيميل جديد', subtype: 'gmail', x: 50, y: 50, config: { value: 'label:INBOX' } },
+                        { type: 'condition', name: 'فلتر', subtype: 'contains', x: 50, y: 150, config: { value: 'subject:Important' } },
+                        { type: 'action', name: 'إشعار', subtype: 'notification', x: 50, y: 250, config: { value: 'جديد! 📧' } }
+                    ],
+                    connections: [{ from: 0, to: 1 }, { from: 1, to: 2 }]
+                },
+                daily: {
+                    name: 'تذكير يومي',
+                    description: 'تذكير كل يوم',
+                    nodes: [
+                        { type: 'trigger', name: 'كل صباح', subtype: 'schedule', x: 50, y: 50, config: { value: '0 9 * * *' } },
+                        { type: 'action', name: 'إشعار', subtype: 'notification', x: 50, y: 150, config: { value: 'صباح الخير! ☀️' } }
+                    ],
+                    connections: [{ from: 0, to: 1 }]
+                },
+                monitor: {
+                    name: 'مراقبة النظام',
+                    description: 'افحص حالة النظام دورياً',
+                    nodes: [
+                        { type: 'trigger', name: 'كل ساعة', subtype: 'schedule', x: 50, y: 50, config: { value: '0 * * * *' } },
+                        { type: 'action', name: 'فحص API', subtype: 'api', x: 50, y: 150, config: { value: '/health', headers: '' } },
+                        { type: 'action', name: 'تسجيل', subtype: 'log', x: 50, y: 250, config: { value: 'System OK' } }
+                    ],
+                    connections: [{ from: 0, to: 1 }, { from: 1, to: 2 }]
+                },
+                backup: {
+                    name: 'نسخة احتياطية',
+                    description: 'انسخ الملفات تلقائياً',
+                    nodes: [
+                        { type: 'trigger', name: 'كل منتصف', subtype: 'schedule', x: 50, y: 50, config: { value: '0 0 * * *' } },
+                        { type: 'action', name: 'نسخ', subtype: 'api', x: 50, y: 150, config: { value: '/backup', headers: '' } },
+                        { type: 'action', name: 'إشعار', subtype: 'notification', x: 50, y: 250, config: { value: 'تم النسخ! 💾' } }
+                    ],
+                    connections: [{ from: 0, to: 1 }, { from: 1, to: 2 }]
+                }
+            };
+            
+            const template = templates[type];
+            flows.push({
+                name: template.name,
+                description: template.description,
+                nodes: [...template.nodes],
+                connections: [...template.connections]
+            });
+            currentFlow = flows.length - 1;
+            saveFlows();
+            renderFlowList();
+            renderCanvas();
+            showToast('تم تحميل القالب ✅');
+        }
+        
+        // تصدير
+        function exportFlows() {
+            const data = JSON.stringify(flows, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'autoflows.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('تم التصدير ✅');
+        }
+        
+        // استيراد
+        function importFlows() {
+            document.getElementById('importFile').click();
+        }
+        
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    flows = [...flows, ...imported];
+                    saveFlows();
+                    renderFlowList();
+                    showToast('تم الاستيراد ✅');
+                } catch (err) {
+                    alert('خطأ في الملف!');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // عرض/إخفاء JSON
+        function toggleExport() {
+            document.getElementById('exportJson').classList.toggle('show');
+        }
+        
+        // Toast
+        function showToast(msg = 'تم الحفظ ✅') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+        
+        // بدء
+        loadFlows();
+    </script>
+</body>
+</html>

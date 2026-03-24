@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cron Job Manager 🕐</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 16px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: #58a6ff;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .stat {
+            background: #161b22;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-num { font-size: 1.5rem; font-weight: bold; }
+        .stat-label { font-size: 0.75rem; color: #8b949e; }
+        .stat.ok .stat-num { color: #3fb950; }
+        .stat.error .stat-num { color: #f85149; }
+        .stat.disabled .stat-num { color: #8b949e; }
+        
+        .jobs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .job-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            transition: border-color 0.2s;
+        }
+        .job-card:hover { border-color: #58a6ff; }
+        .job-card.disabled { opacity: 0.6; }
+        
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .job-name { font-weight: 600; font-size: 1rem; }
+        .job-id { font-family: monospace; font-size: 0.7rem; color: #8b949e; }
+        
+        .job-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .meta-item {
+            background: #0d1117;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .meta-label { font-size: 0.7rem; color: #8b949e; display: block; margin-bottom: 2px; }
+        .meta-value { font-size: 0.85rem; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-badge.ok { background: #238636; color: #fff; }
+        .status-badge.error { background: #da3633; color: #fff; }
+        .status-badge.running { background: #1f6feb; color: #fff; }
+        .status-badge.disabled { background: #484f58; color: #fff; }
+        
+        .job-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        button:hover { background: #30363d; border-color: #58a6ff; }
+        button.run-btn { background: #238636; border-color: #238636; }
+        button.run-btn:hover { background: #2ea043; }
+        
+        .run-log {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #30363d;
+        }
+        .run-log-title { font-size: 0.75rem; color: #8b949e; margin-bottom: 8px; }
+        .run-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            padding: 4px 0;
+            border-bottom: 1px solid #21262d;
+        }
+        .run-time { color: #8b949e; }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f6feb;
+            border-color: #1f6feb;
+            padding: 10px 24px;
+            font-size: 0.9rem;
+        }
+        .refresh-btn:hover { background: #388bfd; }
+        
+        .last-updated {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #8b949e;
+            margin-top: 16px;
+        }
+        
+        .error-msg {
+            color: #f85149;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+        
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .job-meta { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🕐 Cron Job Manager</h1>
+    
+    <div class="stats" id="stats"></div>
+    <div class="jobs-container" id="jobs"></div>
+    
+    <button class="refresh-btn" onclick="loadData()">🔄 تحديث</button>
+    <div class="last-updated" id="lastUpdated"></div>
+
+    <script>
+        let jobsData = [];
+        let runsData = {};
+        
+        async function loadData() {
+            try {
+                // Load jobs.json and runs from root (not /mc)
+                const jobsRes = await fetch('/jobs.json');
+                jobsData = await jobsRes.json();
+                
+                for (const job of jobsData.jobs || []) {
+                    const runFile = job.id + '.jsonl';
+                    try {
+                        // Try runs/ first, then fallback to cron/runs/
+                        let runRes = await fetch('/runs/' + runFile);
+                        if (!runRes.ok) {
+                            runRes = await fetch('/cron/runs/' + runFile);
+                        }
+                        if (runRes.ok) {
+                            const text = await runRes.text();
+                            const lines = text.trim().split('\n').slice(-5).reverse();
+                            runsData[job.id] = lines.map(l => JSON.parse(l));
+                        }
+                    } catch (e) {}
+                }
+                
+                render();
+                document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA');
+            } catch (e) {
+                console.error('Error loading:', e);
+            }
+        }
+        
+        function getStatus(state) {
+            if (!state) return { text: 'غير معروف', class: 'disabled' };
+            if (state.lastRunStatus === 'running' || state.runningAtMs) return { text: 'قيد التشغيل', class: 'running' };
+            if (state.lastStatus === 'error') return { text: 'خطأ', class: 'error' };
+            if (state.lastStatus === 'ok') return { text: 'نجاح', class: 'ok' };
+            return { text: 'غير معروف', class: 'disabled' };
+        }
+        
+        function formatTime(ms) {
+            if (!ms) return '-';
+            const date = new Date(ms);
+            return date.toLocaleString('ar-SA', { 
+                month: 'short', day: 'numeric', 
+                hour: '2-digit', minute: '2-digit' 
+            });
+        }
+        
+        function formatSchedule(schedule) {
+            if (!schedule) return '-';
+            if (schedule.kind === 'cron') {
+                return schedule.expr + ' (' + (schedule.tz || 'UTC') + ')';
+            }
+            return JSON.stringify(schedule);
+        }
+        
+        function render() {
+            const jobs = jobsData.jobs || [];
+            const enabled = jobs.filter(j => j.enabled).length;
+            const ok = jobs.filter(j => j.state?.lastStatus === 'ok').length;
+            const errors = jobs.filter(j => j.state?.lastStatus === 'error').length;
+            
+            document.getElementById('stats').innerHTML = `
+                <div class="stat"><div class="stat-num">${jobs.length}</div><div class="stat-label">الإجمالي</div></div>
+                <div class="stat ok"><div class="stat-num">${ok}</div><div class="stat-label">ناجح</div></div>
+                <div class="stat error"><div class="stat-num">${errors}</div><div class="stat-label">فشل</div></div>
+                <div class="stat disabled"><div class="stat-num">${jobs.length - enabled}</div><div class="stat-label">معطل</div></div>
+            `;
+            
+            document.getElementById('jobs').innerHTML = jobs.map(job => {
+                const state = job.state || {};
+                const status = getStatus(state);
+                const runs = runsData[job.id] || [];
+                
+                return `
+                <div class="job-card ${job.enabled ? '' : 'disabled'}">
+                    <div class="job-header">
+                        <div>
+                            <div class="job-name">${job.name || 'بدون اسم'}</div>
+                            <div class="job-id">${job.id}</div>
+                        </div>
+                        <span class="status-badge ${status.class}">${status.text}</span>
+                    </div>
+                    <div class="job-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">الجدول</span>
+                            <div class="meta-value">${formatSchedule(job.schedule)}</div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">آخر تشغيل</span>
+                            <div class="meta-value">${formatTime(state.lastRunAtMs)}</div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">المدة</span>
+                            <div class="meta-value">${state.lastDurationMs ? (state.lastDurationMs/1000).toFixed(1) + 's' : '-'}</div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">التالي</span>
+                            <div class="meta-value">${formatTime(state.nextRunAtMs)}</div>
+                        </div>
+                    </div>
+                    ${state.lastError ? `<div class="error-msg">⚠️ ${state.lastError.substring(0, 100)}</div>` : ''}
+                    <div class="job-actions">
+                        <button class="run-btn" onclick="runJob('${job.id}')">▶️ تشغيل الآن</button>
+                        <button onclick="viewRuns('${job.id}')">📋 السجل (${runs.length})</button>
+                    </div>
+                    ${runs.length > 0 ? `
+                        <div class="run-log">
+                            <div class="run-log-title">آخر ${runs.length} تشغيلات</div>
+                            ${runs.slice(0, 3).map(r => `
+                                <div class="run-item">
+                                    <span class="run-time">${formatTime(r.startedAtMs)}</span>
+                                    <span class="status-badge ${r.status === 'ok' ? 'ok' : 'error'}">${r.status}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                `;
+            }).join('');
+        }
+        
+        async function runJob(jobId) {
+            if (!confirm('هل تريد تشغيل هذا الـ Job الآن؟')) return;
+            
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ جاري التشغيل...';
+            
+            try {
+                const res = await fetch('/api/cron/run/' + jobId + '?token=v5eYeag3SABLBgpPpR367fGjCg1zizfO9DZmL5vVD3w', {
+                    method: 'POST'
+                });
+                const data = await res.json();
+                
+                if (data.status === 'ok') {
+                    alert('✅ تم إرسال طلب التشغيل!');
+                    setTimeout(loadData, 3000);
+                } else {
+                    alert('❌ خطأ: ' + (data.message || 'غير معروف'));
+                }
+            } catch (e) {
+                alert('❌ خطأ في الاتصال: ' + e.message);
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '▶️ تشغيل الآن';
+        }
+        
+        function viewRuns(jobId) {
+            const runs = runsData[jobId] || [];
+            let msg = 'سجل التشغيلات:\n\n';
+            runs.forEach((r, i) => {
+                msg += `${i+1}. ${new Date(r.startedAtMs).toLocaleString('ar-SA')} - ${r.status}\n`;
+            });
+            alert(msg);
+        }
+        
+        loadData();
+    </script>
+</body>
+</html>

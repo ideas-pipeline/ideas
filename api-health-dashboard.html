@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 API Health Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .api-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .api-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .api-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .api-card:hover::before {
+            opacity: 1;
+        }
+
+        .api-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .api-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-ok {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+            border: 1px solid rgba(46, 213, 115, 0.3);
+        }
+
+        .status-error {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .status-checking {
+            background: rgba(255, 168, 1, 0.2);
+            color: #ffa801;
+            border: 1px solid rgba(255, 168, 1, 0.3);
+        }
+
+        .status-unknown {
+            background: rgba(128, 128, 128, 0.2);
+            color: #888;
+            border: 1px solid rgba(128, 128, 128, 0.3);
+        }
+
+        .api-details {
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .api-details div {
+            margin-bottom: 8px;
+        }
+
+        .api-details strong {
+            color: #fff;
+        }
+
+        .response-time {
+            font-family: 'Courier New', monospace;
+            color: #4facfe;
+        }
+
+        .error-message {
+            background: rgba(255, 71, 87, 0.1);
+            border-left: 3px solid #ff4757;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #ffaaaa;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .summary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .last-check {
+            margin-top: 15px;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .api-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔗 API Health Dashboard</h1>
+            <p class="subtitle">مراقبة صحة كل الـ APIs في الوقت الفعلي</p>
+        </header>
+
+        <div class="controls">
+            <button onclick="checkAll()">🔄 فحص الكل</button>
+            <button onclick="checkAll(true)">⚡ فحص سريع</button>
+            <button onclick="clearResults()">🗑️ مسح النتائج</button>
+        </div>
+
+        <div class="api-grid" id="apiGrid"></div>
+
+        <div class="summary">
+            <h2>📊 الملخص</h2>
+            <div class="summary-stats">
+                <div class="stat">
+                    <div class="stat-value" id="totalApis">-</div>
+                    <div class="stat-label">إجمالي APIs</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="healthyApis" style="color: #2ed573;">-</div>
+                    <div class="stat-label">✅ تعمل</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="failedApis" style="color: #ff4757;">-</div>
+                    <div class="stat-label">❌ معطلة</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="avgResponseTime" style="color: #4facfe;">-</div>
+                    <div class="stat-label">متوسط الاستجابة</div>
+                </div>
+            </div>
+            <div class="last-check" id="lastCheck">آخر فحص: لم يتم بعد</div>
+        </div>
+    </div>
+
+    <script>
+        const apis = [
+            {
+                name: 'OpenRouter',
+                endpoint: 'https://openrouter.ai/api/v1/models',
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer demo' }, // will fail but shows connection
+                timeout: 10000,
+                checkType: 'status'
+            },
+            {
+                name: 'Maton Gateway (Gmail)',
+                endpoint: 'https://gateway.maton.ai/google-mail/gmail/v1/users/me/profile',
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer demo' },
+                timeout: 10000,
+                checkType: 'status'
+            },
+            {
+                name: 'Maton Gateway (Calendar)',
+                endpoint: 'https://gateway.maton.ai/google-calendar/calendar/v3/users/me/calendarList',
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer demo' },
+                timeout: 10000,
+                checkType: 'status'
+            },
+            {
+                name: 'Moltbook API',
+                endpoint: 'https://moltbook.com/api/v1/home',
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer demo' },
+                timeout: 10000,
+                checkType: 'status'
+            },
+            {
+                name: 'GitHub API',
+                endpoint: 'https://api.github.com/zen',
+                method: 'GET',
+                timeout: 10000,
+                checkType: 'status'
+            },
+            {
+                name: 'OpenAI API',
+                endpoint: 'https://api.openai.com/v1/models',
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer demo' },
+                timeout: 10000,
+                checkType: 'status'
+            },
+            {
+                name: 'Cloudflare DNS',
+                endpoint: 'https://1.1.1.1/dns-query?name=openclaw.ai&type=A',
+                method: 'GET',
+                headers: { 'Accept': 'application/dns-json' },
+                timeout: 5000,
+                checkType: 'status'
+            },
+            {
+                name: 'Google Public DNS',
+                endpoint: 'https://dns.google/resolve?name=openclaw.ai&type=A',
+                method: 'GET',
+                timeout: 5000,
+                checkType: 'status'
+            }
+        ];
+
+        let results = {};
+
+        function renderCards() {
+            const grid = document.getElementById('apiGrid');
+            grid.innerHTML = '';
+
+            apis.forEach((api, index) => {
+                const result = results[api.name] || {};
+                const card = document.createElement('div');
+                card.className = 'api-card';
+                
+                let statusClass = 'status-unknown';
+                let statusText = 'غير محدد';
+                
+                if (result.checking) {
+                    statusClass = 'status-checking';
+                    statusText = 'جارٍ الفحص...';
+                } else if (result.status === 'ok') {
+                    statusClass = 'status-ok';
+                    statusText = 'يعمل';
+                } else if (result.status === 'error') {
+                    statusClass = 'status-error';
+                    statusText = 'خطأ';
+                }
+
+                let detailsHTML = '';
+                if (result.status === 'ok') {
+                    detailsHTML = `
+                        <div><strong>وقت الاستجابة:</strong> <span class="response-time">${result.responseTime}ms</span></div>
+                        <div><strong>الحالة:</strong> ${result.httpStatus || 'متصل'}</div>
+                    `;
+                } else if (result.status === 'error') {
+                    detailsHTML = `
+                        <div class="error-message">${result.error || 'خطأ غير معروف'}</div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="api-header">
+                        <div class="api-name">${api.name}</div>
+                        <div class="status-badge ${statusClass}">${statusText}</div>
+                    </div>
+                    <div class="api-details">
+                        <div><strong>Endpoint:</strong> ${api.endpoint.replace(/^https?:\/\//, '').substring(0, 40)}...</div>
+                        ${detailsHTML}
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            updateSummary();
+        }
+
+        async function checkApi(api, quickCheck = false) {
+            results[api.name] = { checking: true };
+            renderCards();
+
+            const startTime = performance.now();
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), quickCheck ? 3000 : api.timeout);
+
+                const response = await fetch(api.endpoint, {
+                    method: api.method,
+                    headers: api.headers || {},
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                const endTime = performance.now();
+                const responseTime = Math.round(endTime - startTime);
+
+                // Even 401/403 means API is reachable
+                if (response.status < 500) {
+                    results[api.name] = {
+                        status: 'ok',
+                        responseTime,
+                        httpStatus: response.status,
+                        checking: false
+                    };
+                } else {
+                    results[api.name] = {
+                        status: 'error',
+                        error: `HTTP ${response.status}`,
+                        checking: false
+                    };
+                }
+            } catch (error) {
+                const endTime = performance.now();
+                const responseTime = Math.round(endTime - startTime);
+
+                let errorMsg = error.message;
+                if (error.name === 'AbortError') {
+                    errorMsg = 'انتهت مهلة الاتصال (Timeout)';
+                } else if (errorMsg.includes('Failed to fetch')) {
+                    errorMsg = 'فشل الاتصال (CORS/Network)';
+                }
+
+                results[api.name] = {
+                    status: 'error',
+                    error: errorMsg,
+                    responseTime,
+                    checking: false
+                };
+            }
+
+            renderCards();
+        }
+
+        async function checkAll(quickCheck = false) {
+            results = {};
+            renderCards();
+            
+            // Check all APIs in parallel
+            await Promise.all(apis.map(api => checkApi(api, quickCheck)));
+            
+            document.getElementById('lastCheck').textContent = 
+                `آخر فحص: ${new Date().toLocaleString('ar-SA', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit',
+                    day: 'numeric',
+                    month: 'short'
+                })}`;
+        }
+
+        function clearResults() {
+            results = {};
+            renderCards();
+            document.getElementById('lastCheck').textContent = 'آخر فحص: لم يتم بعد';
+        }
+
+        function updateSummary() {
+            const total = apis.length;
+            const healthy = Object.values(results).filter(r => r.status === 'ok').length;
+            const failed = Object.values(results).filter(r => r.status === 'error').length;
+            const responseTimes = Object.values(results)
+                .filter(r => r.status === 'ok' && r.responseTime)
+                .map(r => r.responseTime);
+            
+            const avgResponseTime = responseTimes.length > 0
+                ? Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length)
+                : 0;
+
+            document.getElementById('totalApis').textContent = total;
+            document.getElementById('healthyApis').textContent = healthy || '-';
+            document.getElementById('failedApis').textContent = failed || '-';
+            document.getElementById('avgResponseTime').textContent = 
+                avgResponseTime > 0 ? `${avgResponseTime}ms` : '-';
+        }
+
+        // Initial render
+        renderCards();
+
+        // Auto-check on load after 1 second
+        setTimeout(() => checkAll(true), 1000);
+    </script>
+</body>
+</html>
