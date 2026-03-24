@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎭 Multi-LLM Debate Arena</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2d3748;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .input-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideUp 0.6s;
+        }
+        
+        .prompt-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        .prompt-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        
+        .model-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .model-checkbox:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+        
+        .model-checkbox input {
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .model-checkbox.selected {
+            border-color: #667eea;
+            background: #e6f2ff;
+        }
+        
+        .start-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 1rem;
+        }
+        
+        .start-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .debate-arena {
+            display: none;
+            animation: fadeIn 0.6s;
+        }
+        
+        .debate-arena.active {
+            display: block;
+        }
+        
+        .models-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .model-response {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s;
+        }
+        
+        .model-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .model-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #667eea;
+        }
+        
+        .model-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-thinking {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-streaming {
+            background: #dbeafe;
+            color: #1e40af;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-done {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .response-content {
+            line-height: 1.7;
+            color: #2d3748;
+            min-height: 100px;
+            font-size: 0.95rem;
+        }
+        
+        .response-content code {
+            background: #f7fafc;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .response-content pre {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .judge-section {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+            color: white;
+            display: none;
+        }
+        
+        .judge-section.active {
+            display: block;
+            animation: slideUp 0.6s;
+        }
+        
+        .judge-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .judge-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .judge-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #2d3748;
+            padding: 1.5rem;
+            border-radius: 12px;
+            line-height: 1.7;
+        }
+        
+        .winner-badge {
+            display: inline-block;
+            background: #fbbf24;
+            color: #78350f;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        
+        .history-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .history-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .history-item:hover {
+            background: #f7fafc;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 2px solid #fca5a5;
+        }
+        
+        .reset-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        
+        .reset-btn:hover {
+            background: #dc2626;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .models-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .models-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 Multi-LLM Debate Arena</h1>
+            <p>اختبر نماذج AI مختلفة على نفس السؤال، وخلّي نموذج رابع يحكم بينهم!</p>
+        </div>
+        
+        <div class="input-section">
+            <textarea class="prompt-input" id="promptInput" placeholder="اكتب سؤالك أو موضوع المناظرة هنا...
+
+مثال: ما هي أفضل استراتيجيات تحسين أداء التطبيقات على الجوال؟"></textarea>
+            
+            <div class="models-grid" id="modelsGrid">
+                <!-- سيتم ملؤها ديناميكياً -->
+            </div>
+            
+            <button class="start-btn" id="startBtn" onclick="startDebate()">
+                🚀 ابدأ المناظرة
+            </button>
+        </div>
+        
+        <div class="debate-arena" id="debateArena">
+            <div class="models-container" id="modelsContainer">
+                <!-- سيتم ملؤها ديناميكياً -->
+            </div>
+            
+            <div class="judge-section" id="judgeSection">
+                <div class="judge-header">
+                    <h2>⚖️ حكم المناظرة</h2>
+                    <p>تحليل شامل ومقارنة بين الإجابات</p>
+                </div>
+                <div class="judge-content" id="judgeContent">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </div>
+            </div>
+            
+            <button class="reset-btn" onclick="resetDebate()">
+                🔄 مناظرة جديدة
+            </button>
+        </div>
+        
+        <div class="history-section" id="historySection" style="display: none;">
+            <h3>📜 تاريخ المناظرات</h3>
+            <div id="historyList"></div>
+        </div>
+    </div>
+    
+    <script>
+        // النماذج المتاحة
+        const MODELS = [
+            { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
+            { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'anthropic' },
+            { id: 'gemini-2.0-flash-thinking-exp', name: 'Gemini 2.0 Flash', provider: 'google' },
+            { id: 'deepseek-chat', name: 'DeepSeek V3', provider: 'deepseek' },
+            { id: 'llama-3.3-70b-instruct', name: 'Llama 3.3 70B', provider: 'meta' },
+            { id: 'mistral-large-2411', name: 'Mistral Large', provider: 'mistral' }
+        ];
+        
+        const JUDGE_MODEL = 'claude-3.5-sonnet'; // النموذج الحكم
+        
+        let selectedModels = [];
+        let debateHistory = [];
+        
+        // تحميل التاريخ من localStorage
+        function loadHistory() {
+            const saved = localStorage.getItem('debateHistory');
+            if (saved) {
+                debateHistory = JSON.parse(saved);
+            }
+        }
+        
+        // حفظ التاريخ
+        function saveHistory() {
+            localStorage.setItem('debateHistory', JSON.stringify(debateHistory));
+        }
+        
+        // تهيئة الصفحة
+        function init() {
+            loadHistory();
+            renderModelsGrid();
+            if (debateHistory.length > 0) {
+                document.getElementById('historySection').style.display = 'block';
+                renderHistory();
+            }
+        }
+        
+        // عرض النماذج
+        function renderModelsGrid() {
+            const grid = document.getElementById('modelsGrid');
+            grid.innerHTML = MODELS.map(model => `
+                <label class="model-checkbox" data-model="${model.id}">
+                    <input type="checkbox" value="${model.id}" onchange="toggleModel('${model.id}')">
+                    <span>${model.name}</span>
+                </label>
+            `).join('');
+        }
+        
+        // تبديل اختيار النموذج
+        function toggleModel(modelId) {
+            const checkbox = document.querySelector(`input[value="${modelId}"]`);
+            const label = checkbox.parentElement;
+            
+            if (checkbox.checked) {
+                selectedModels.push(modelId);
+                label.classList.add('selected');
+            } else {
+                selectedModels = selectedModels.filter(m => m !== modelId);
+                label.classList.remove('selected');
+            }
+            
+            document.getElementById('startBtn').disabled = selectedModels.length < 2;
+        }
+        
+        // بدء المناظرة
+        async function startDebate() {
+            const prompt = document.getElementById('promptInput').value.trim();
+            
+            if (!prompt) {
+                alert('الرجاء كتابة سؤال أو موضوع للمناظرة');
+                return;
+            }
+            
+            if (selectedModels.length < 2) {
+                alert('اختر نموذجين على الأقل للمناظرة');
+                return;
+            }
+            
+            // إخفاء قسم الإدخال
+            document.querySelector('.input-section').style.display = 'none';
+            document.getElementById('debateArena').classList.add('active');
+            
+            // تهيئة مساحة عرض النماذج
+            const container = document.getElementById('modelsContainer');
+            container.innerHTML = selectedModels.map(modelId => {
+                const model = MODELS.find(m => m.id === modelId);
+                return `
+                    <div class="model-response" id="model-${modelId}">
+                        <div class="model-header">
+                            <span class="model-name">${model.name}</span>
+                            <span class="model-status status-thinking" id="status-${modelId}">🤔 يفكر...</span>
+                        </div>
+                        <div class="response-content" id="content-${modelId}">
+                            <em>جاري الاتصال بالنموذج...</em>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // إرسال الطلبات لكل النماذج
+            const responses = {};
+            const promises = selectedModels.map(async modelId => {
+                try {
+                    const response = await queryModel(modelId, prompt);
+                    responses[modelId] = response;
+                } catch (error) {
+                    responses[modelId] = { error: error.message };
+                }
+            });
+            
+            await Promise.all(promises);
+            
+            // إظهار قسم الحكم
+            await judgeDebate(prompt, responses);
+            
+            // حفظ في التاريخ
+            debateHistory.unshift({
+                timestamp: Date.now(),
+                prompt,
+                models: selectedModels,
+                responses
+            });
+            saveHistory();
+        }
+        
+        // استعلام نموذج
+        async function queryModel(modelId, prompt) {
+            const statusEl = document.getElementById(`status-${modelId}`);
+            const contentEl = document.getElementById(`content-${modelId}`);
+            
+            try {
+                statusEl.textContent = '🔄 يتصل...';
+                statusEl.className = 'model-status status-streaming';
+                
+                // محاكاة API call (استبدل هذا بـ API حقيقي)
+                const response = await simulateAPICall(modelId, prompt);
+                
+                statusEl.textContent = '✓ انتهى';
+                statusEl.className = 'model-status status-done';
+                contentEl.innerHTML = formatResponse(response);
+                
+                return response;
+            } catch (error) {
+                statusEl.textContent = '✗ خطأ';
+                statusEl.className = 'model-status status-error';
+                contentEl.innerHTML = `<div class="error-message">خطأ: ${error.message}</div>`;
+                throw error;
+            }
+        }
+        
+        // محاكاة API call (للتجربة)
+        async function simulateAPICall(modelId, prompt) {
+            await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+            
+            const model = MODELS.find(m => m.id === modelId);
+            return `هذه إجابة محاكاة من ${model.name} على السؤال: "${prompt}"\n\nفي سياق حقيقي، سيتم استدعاء OpenRouter API أو API مباشر للنموذج.\n\n**النقاط الرئيسية:**\n1. نقطة أولى من المنظور ${model.provider}\n2. نقطة ثانية تعتمد على قدرات النموذج\n3. استنتاج شامل\n\nكود مثالي:\n\`\`\`javascript\nconst response = await fetch('https://api.openrouter.ai/v1/chat/completions', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: '${modelId}', messages: [{role: 'user', content: '${prompt}'}] })\n});\n\`\`\``;
+        }
+        
+        // حكم المناظرة
+        async function judgeDebate(prompt, responses) {
+            const judgeSection = document.getElementById('judgeSection');
+            const judgeContent = document.getElementById('judgeContent');
+            
+            judgeSection.classList.add('active');
+            judgeContent.innerHTML = '<p><em>🤔 الحكم يحلل الإجابات...</em></p>';
+            
+            // بناء prompt للحكم
+            let judgePrompt = `أنت حكم محايد في مناظرة بين نماذج AI مختلفة.\n\nالسؤال المطروح:\n"${prompt}"\n\nإجابات المتنافسين:\n\n`;
+            
+            Object.entries(responses).forEach(([modelId, response]) => {
+                const model = MODELS.find(m => m.id === modelId);
+                judgePrompt += `**${model.name}:**\n${response}\n\n---\n\n`;
+            });
+            
+            judgePrompt += `\nالمطلوب:\n1. تحليل كل إجابة (نقاط القوة والضعف)\n2. مقارنة شاملة\n3. اختيار الإجابة الأفضل مع التعليل\n4. اختتام بنصيحة متى يُستخدم كل نموذج\n\nأجب بالعربية، واجعل التحليل موضوعياً ومفيداً.`;
+            
+            try {
+                // محاكاة حكم (استبدل بـ API حقيقي)
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                const judgment = `## 📊 تحليل شامل\n\n### نقاط القوة والضعف:\n\n**GPT-4o:**\n✅ إجابة منظمة وشاملة\n✅ أمثلة عملية واضحة\n⚠️ أحياناً يميل للإطالة\n\n**Claude 3.5 Sonnet:**\n✅ تحليل عميق ومنطقي\n✅ توازن ممتاز بين النظرية والتطبيق\n⚠️ قد يكون معقداً للمبتدئين\n\n### 🏆 الفائز:\n\n<span class="winner-badge">🥇 Claude 3.5 Sonnet</span>\n\nالسبب: قدّم تحليلاً أعمق مع أمثلة عملية واقعية، وأظهر فهماً شاملاً للموضوع مع تنظيم ممتاز.\n\n### 💡 متى تستخدم كل نموذج:\n\n- **GPT-4o:** مثالي للمحادثات العامة والإجابات السريعة\n- **Claude 3.5 Sonnet:** الأفضل للتحليل العميق والمهام المعقدة\n- **Gemini 2.0 Flash:** سريع ومناسب لمهام بسيطة\n\nهذه محاكاة — في الواقع سيحلل الحكم (${JUDGE_MODEL}) الإجابات الحقيقية.`;
+                
+                judgeContent.innerHTML = formatResponse(judgment);
+            } catch (error) {
+                judgeContent.innerHTML = `<div class="error-message">خطأ في الحكم: ${error.message}</div>`;
+            }
+        }
+        
+        // تنسيق الرد (Markdown بسيط)
+        function formatResponse(text) {
+            if (!text) return '';
+            
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/\n/g, '<br>');
+        }
+        
+        // إعادة تعيين
+        function resetDebate() {
+            document.querySelector('.input-section').style.display = 'block';
+            document.getElementById('debateArena').classList.remove('active');
+            document.getElementById('judgeSection').classList.remove('active');
+            document.getElementById('promptInput').value = '';
+            selectedModels = [];
+            document.querySelectorAll('.model-checkbox').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+            document.getElementById('startBtn').disabled = true;
+        }
+        
+        // عرض التاريخ
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = debateHistory.slice(0, 5).map((item, index) => {
+                const date = new Date(item.timestamp);
+                return `
+                    <div class="history-item" onclick="loadDebate(${index})">
+                        <strong>${item.prompt.substring(0, 60)}${item.prompt.length > 60 ? '...' : ''}</strong><br>
+                        <small>${date.toLocaleString('ar-SA')} • ${item.models.length} نموذج</small>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // تحميل مناظرة من التاريخ
+        function loadDebate(index) {
+            // يمكن إضافة وظيفة لإعادة عرض مناظرة سابقة
+            alert('سيتم إضافة هذه الميزة قريباً');
+        }
+        
+        // تهيئة عند التحميل
+        window.onload = init;
+    </script>
+</body>
+</html>
